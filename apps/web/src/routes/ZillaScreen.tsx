@@ -1,22 +1,29 @@
-import { EmptyState } from '../components/EmptyState.js';
+import { useNavigate } from 'react-router-dom';
+import zilla from '../assets/zilla-frente.png';
 
-/** Área Zilla — cadastro/atualização de pets. Estado inicial: matilha vazia. */
+/**
+ * Sem Monstrinhos — fiel à tela "empty" de `papazilla-prototype`.
+ * Estado inicial da área Pets: matilha vazia, com o Zilla convidando o cadastro.
+ */
 export function ZillaScreen() {
+  const navigate = useNavigate();
+
   return (
-    <section className="pz-screen">
-      <h1>Sua matilha</h1>
-      <EmptyState
-        title="Nenhum Monstrinho por aqui ainda"
-        description="Cadastre seu primeiro cão para começar a anamnese e criar receitas."
+    <div className="empty-state">
+      <div className="empty-state__mascot">
+        <span className="speech-bubble">Au! Quem mora por aí?</span>
+        <img src={zilla} alt="Zilla esperando conhecer seu pet" />
+      </div>
+      <p className="eyebrow">A matilha começa aqui</p>
+      <h1 className="pz-h1">Ainda não conheço seus Monstrinhos</h1>
+      <p>Cadastre seu primeiro aumigo para prepararmos uma receita feita para ele.</p>
+      <button
+        type="button"
+        className="pz-button pz-button--primary wide"
+        onClick={() => navigate('/anamnese')}
       >
-        <button type="button" className="pz-btn" disabled>
-          Cadastrar Monstrinho
-        </button>
-        <p className="pz-note">
-          Fluxo de cadastro + anamnese em 20 seções entra na próxima fatia (precisa de
-          persistência no Supabase).
-        </p>
-      </EmptyState>
-    </section>
+        Cadastrar um aumigo <span aria-hidden="true">＋</span>
+      </button>
+    </div>
   );
 }

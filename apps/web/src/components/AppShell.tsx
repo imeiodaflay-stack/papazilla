@@ -1,23 +1,24 @@
 import { Link, Outlet } from 'react-router-dom';
-import { BottomNav } from './BottomNav.js';
+import { AppNav } from './AppNav.js';
 import wordmark from '../assets/papazilla-wordmark.png';
 
-/** Casca das telas autenticadas: topo com marca + avatar (→ Conta) e navegação inferior. */
+/**
+ * Casca das telas autenticadas (app-view), fiel a `papazilla-prototype`:
+ * header com wordmark + avatar (→ Minha conta) e navegação flutuante inferior.
+ */
 export function AppShell() {
   return (
-    <div className="pz-app">
-      <header className="pz-topbar">
-        <Link to="/zilla" aria-label="Papazilla — início">
-          <img src={wordmark} alt="Papazilla" height={22} style={{ height: 22, width: 'auto' }} />
-        </Link>
-        <Link to="/conta" className="pz-avatar" aria-label="Minha conta">
+    <div className="app-view">
+      <header className="app-header">
+        <img src={wordmark} alt="Papazilla" />
+        <Link to="/conta" className="avatar-button" aria-label="Abrir Minha conta">
           F
         </Link>
       </header>
-      <main className="pz-app__main">
+      <main className="app-view__main">
         <Outlet />
       </main>
-      <BottomNav />
+      <AppNav />
     </div>
   );
 }
