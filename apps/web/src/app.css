@@ -683,7 +683,8 @@
   min-height: 0;
   overflow-x: auto;
   overscroll-behavior-x: contain;
-  scroll-behavior: smooth;
+  /* sem scroll-behavior: smooth — em container com scroll-snap mandatory o
+     Chrome cancela a animação e o scroll programático não sai do lugar. */
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
 }

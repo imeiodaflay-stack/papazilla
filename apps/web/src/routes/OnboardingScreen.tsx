@@ -25,11 +25,13 @@ export function OnboardingScreen() {
 
   useEffect(() => () => window.clearTimeout(settleTimer.current), []);
 
-  function goToSlide(index: number, behavior: ScrollBehavior = 'smooth') {
+  function goToSlide(index: number) {
     const next = Math.max(0, Math.min(LAST, index));
     setActive(next);
     const track = trackRef.current;
-    if (track) track.scrollTo({ left: next * track.clientWidth, behavior });
+    // Escrita direta e instantânea: `scrollTo({behavior:'smooth'})` é cancelado
+    // pelo scroll-snap mandatory neste Chrome. O gesto (swipe) continua nativo.
+    if (track) track.scrollLeft = next * track.clientWidth;
   }
 
   function onScroll() {
@@ -39,7 +41,7 @@ export function OnboardingScreen() {
     settleTimer.current = window.setTimeout(() => {
       const index = Math.round(track.scrollLeft / track.clientWidth);
       setActive((current) => (current === index ? current : index));
-    }, 80);
+    }, 140);
   }
 
   function finish() {
