@@ -5,20 +5,37 @@
  * try/catch (janela privada, storage bloqueado).
  */
 const AUTH_KEY = 'papazilla.authenticated';
+const ONBOARDING_KEY = 'papazilla.seenOnboarding';
 
-export function isAuthenticated(): boolean {
+function read(key: string): boolean {
   try {
-    return localStorage.getItem(AUTH_KEY) === 'true';
+    return localStorage.getItem(key) === 'true';
   } catch {
     return false;
   }
 }
 
-export function setAuthenticated(value: boolean): void {
+function write(key: string, value: boolean): void {
   try {
-    if (value) localStorage.setItem(AUTH_KEY, 'true');
-    else localStorage.removeItem(AUTH_KEY);
+    if (value) localStorage.setItem(key, 'true');
+    else localStorage.removeItem(key);
   } catch {
     /* storage indisponível — segue sem persistir */
   }
+}
+
+export function isAuthenticated(): boolean {
+  return read(AUTH_KEY);
+}
+
+export function setAuthenticated(value: boolean): void {
+  write(AUTH_KEY, value);
+}
+
+export function hasSeenOnboarding(): boolean {
+  return read(ONBOARDING_KEY);
+}
+
+export function setSeenOnboarding(): void {
+  write(ONBOARDING_KEY, true);
 }
