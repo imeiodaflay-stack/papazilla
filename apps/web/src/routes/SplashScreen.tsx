@@ -1,43 +1,33 @@
-import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import lockup from '../assets/papazilla-lockup.png';
 
 /**
- * Splash / apresentação. A entrada animada (logo, tagline, orbs, loader escalonados)
- * do protótipo entra depois; aqui a versão estática, segura para prefers-reduced-motion.
+ * Splash fiel ao protótipo (`papazilla-prototype`): dois orbs de fundo, lockup e
+ * tagline entrando em sequência (splash-rise), loader coral pulsante, e auto-avanço
+ * após 1350 ms. Alternativa estática completa para `prefers-reduced-motion`.
+ *
+ * Fluxo (arquitetura-tecnica.md): Splash → Entrar/criar conta → Onboarding → Papá.
+ * Na Fase 0 não há sessão real, então sempre vai para /entrar. Quando o Supabase
+ * estiver ligado: com sessão + pet → /papa; com sessão → /onboarding; senão → /entrar.
  */
 export function SplashScreen() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navigate('/entrar', { replace: true });
+    }, 1350);
+    return () => clearTimeout(timer);
+  }, [navigate]);
+
   return (
-    <div className="pz-app">
-      <main
-        className="pz-app__main pz-screen"
-        style={{ justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}
-      >
-        <img
-          src={lockup}
-          alt="Papazilla"
-          width={220}
-          height={220}
-          style={{ width: 'min(58vw, 220px)', height: 'auto' }}
-        />
-        <p
-          style={{
-            font: 'var(--pz-text-caption)',
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-          }}
-        >
-          Alimentação natural cozida para cães
-        </p>
-        <h1 style={{ font: 'var(--pz-text-h1)', color: 'var(--pz-chocolate)' }}>
-          Fome de monstro.
-          <br />
-          Porção na medida.
-        </h1>
-        <p>Cadastre seus cães e prepare uma receita completa, confiável e prática para eles.</p>
-        <Link to="/entrar" className="pz-btn">
-          Começar
-        </Link>
-      </main>
+    <div className="pz-splash" aria-label="Abertura">
+      <span className="pz-splash__orb pz-splash__orb--one" aria-hidden="true" />
+      <span className="pz-splash__orb pz-splash__orb--two" aria-hidden="true" />
+      <img className="pz-splash__logo" src={lockup} alt="Papazilla" />
+      <p className="pz-splash__line">Comida de verdade para cada Monstrinho.</p>
+      <span className="pz-splash__loader" aria-hidden="true" />
     </div>
   );
 }

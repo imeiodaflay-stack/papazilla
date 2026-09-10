@@ -134,6 +134,128 @@
   padding: var(--pz-space-3) var(--pz-space-4);
 }
 
+/* --- Splash (fiel ao papazilla-prototype) --- */
+.pz-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2.2rem;
+  background: var(--pz-bg);
+  overflow: hidden;
+}
+
+.pz-splash__logo {
+  position: relative;
+  z-index: 2;
+  width: min(290px, 88%);
+  height: auto;
+  mix-blend-mode: multiply;
+  animation: pz-splash-rise 0.52s var(--pz-ease-enter) both;
+}
+
+.pz-splash__line {
+  position: relative;
+  z-index: 2;
+  margin: 0.6rem 0 0;
+  text-align: center;
+  color: var(--pz-ink-muted);
+  font: 700 1rem / 1.4 var(--pz-font-support);
+  animation: pz-splash-rise 0.36s var(--pz-ease-enter) 0.14s both;
+}
+
+.pz-splash__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(1px);
+  opacity: 0.55;
+  animation: pz-splash-bloom 0.62s var(--pz-ease-enter) both;
+}
+
+.pz-splash__orb--one {
+  top: -70px;
+  left: -90px;
+  width: 220px;
+  height: 220px;
+  background: var(--pz-pessego);
+  animation-delay: 0s;
+}
+
+.pz-splash__orb--two {
+  right: -120px;
+  bottom: -90px;
+  width: 260px;
+  height: 260px;
+  background: var(--pz-verde-hover);
+  animation-delay: 0.08s;
+}
+
+.pz-splash__loader {
+  position: absolute;
+  bottom: 3.25rem;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--pz-coral);
+  animation:
+    pz-splash-fade-in var(--pz-duration-enter) var(--pz-ease-enter) 0.4s both,
+    pz-loader 1s infinite ease-in-out 0.62s;
+}
+
+@keyframes pz-splash-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes pz-splash-bloom {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+}
+
+@keyframes pz-splash-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pz-loader {
+  0%,
+  100% {
+    box-shadow:
+      -14px 0 0 rgb(249 139 105 / 35%),
+      14px 0 0 rgb(249 139 105 / 35%);
+  }
+  50% {
+    box-shadow:
+      -14px 0 0 var(--pz-coral),
+      14px 0 0 var(--pz-coral);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pz-splash__logo,
+  .pz-splash__line,
+  .pz-splash__orb {
+    animation: none;
+  }
+  .pz-splash__loader {
+    animation: none;
+    box-shadow:
+      -14px 0 0 var(--pz-coral),
+      14px 0 0 var(--pz-coral);
+  }
+}
+
 .pz-empty {
   display: flex;
   flex-direction: column;
