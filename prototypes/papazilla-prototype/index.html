@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#fff8f3">
+  <title>Papazilla — Protótipo da experiência</title>
+  <link rel="stylesheet" href="../papazilla-ui/styles/tokens.css">
+  <link rel="stylesheet" href="../papazilla-ui/styles/components.css">
+  <link rel="stylesheet" href="styles/app.css?v=20260909-03">
+</head>
+<body>
+  <main class="prototype-shell">
+    <aside class="review-panel" aria-label="Controles do protótipo">
+      <img class="review-panel__brand" src="../papazilla-design-system/assets/papazilla-lockup-horizontal.png" alt="Papazilla">
+      <p class="pz-small">Protótipo navegável · núcleo da experiência</p>
+      <div class="review-panel__routes" role="group" aria-label="Abrir uma tela">
+        <button class="preview-link" data-preview="splash">Splash</button>
+        <button class="preview-link" data-preview="auth">Login e conta</button>
+        <button class="preview-link" data-preview="onboarding">Onboarding</button>
+        <button class="preview-link" data-preview="empty">Sem Monstrinhos</button>
+        <button class="preview-link" data-preview="profile">Anamnese do pet</button>
+        <button class="preview-link" data-preview="success">Cadastro concluído</button>
+        <button class="preview-link" data-preview="home">Início recorrente</button>
+        <button class="preview-link" data-preview="paywall">Oferta de assinatura</button>
+        <button class="preview-link" data-preview="user-profile">Perfil do usuário</button>
+        <button class="preview-link" data-preview="subscription">Gerenciar assinatura</button>
+        <button class="preview-link" data-preview="pets">Área Pets</button>
+        <button class="preview-link" data-preview="recipe">Wizard da receita</button>
+        <button class="preview-link" data-preview="curiosities">Curiosidades</button>
+        <button class="preview-link" data-preview="saved-recipes">Receitas salvas</button>
+      </div>
+      <button class="pz-button pz-button--outline review-panel__reset" id="reset-demo">Recomeçar experiência</button>
+      <p class="review-panel__note">Os fluxos mostram a arquitetura e as interações. Valores de resultado são ilustrativos.</p>
+    </aside>
+
+    <section class="device" aria-label="Aplicativo Papazilla">
+      <div class="device__screen" id="app" aria-live="polite">
+        <section class="screen splash is-active" data-screen="splash" aria-label="Abertura">
+          <div class="splash__orb splash__orb--one"></div>
+          <div class="splash__orb splash__orb--two"></div>
+          <img class="splash__logo" src="../papazilla-design-system/assets/papazilla-lockup-hero-transparent.png" alt="Papazilla">
+          <p class="splash__line">Comida de verdade para cada Monstrinho.</p>
+          <span class="splash__loader" aria-hidden="true"></span>
+        </section>
+
+        <section class="screen auth-screen" data-screen="auth" aria-label="Entrar ou criar conta">
+          <div class="auth-screen__decoration auth-screen__decoration--one"></div>
+          <div class="auth-screen__decoration auth-screen__decoration--two"></div>
+          <header class="auth-header">
+            <span>Conta segura</span>
+          </header>
+          <div class="auth-body" id="auth-body"></div>
+          <footer class="auth-footer">
+            <p>Ao continuar, você concorda com nossos <button data-legal="termos">Termos de Uso</button> e nossa <button data-legal="privacidade">Política de Privacidade</button>.</p>
+          </footer>
+        </section>
+
+        <section class="screen onboarding" data-screen="onboarding" aria-label="Apresentação do Papazilla">
+          <header class="onboarding__topbar">
+            <span class="onboarding__count" id="slide-count">1 de 4</span>
+            <button class="text-action" id="skip-onboarding">Pular</button>
+          </header>
+
+          <div class="onboarding__track" id="onboarding-track">
+            <article class="onboarding-slide" data-slide="0">
+              <div class="hero-stage hero-stage--hello">
+                <span class="doodle doodle--spark">✦</span>
+                <span class="doodle doodle--heart">♥</span>
+                <img src="../papazilla-design-system/assets/zilla-frente.png" alt="Zilla, o cachorro do Papazilla">
+              </div>
+              <div class="onboarding-slide__copy">
+                <p class="eyebrow">Prazer, eu sou o Zilla</p>
+                <h1 class="pz-h1">Oi, Humano(a)!</h1>
+                <p>Eu ajudo você a preparar comida de verdade, balanceada e feita para o seu Monstrinho.</p>
+              </div>
+            </article>
+
+            <article class="onboarding-slide" data-slide="1">
+              <div class="hero-stage hero-stage--pets">
+                <div class="mini-pet mini-pet--one"><img src="../papazilla-design-system/assets/icons/patinha.png" alt=""><span>Tico</span></div>
+                <div class="mini-pet mini-pet--two"><img src="../papazilla-design-system/assets/icons/zilla.png" alt=""><span>Lola</span></div>
+                <div class="add-pet-bubble"><img src="../papazilla-design-system/assets/icons/adicionar.png" alt=""></div>
+              </div>
+              <div class="onboarding-slide__copy">
+                <p class="eyebrow">Primeiro, as apresentações</p>
+                <h1 class="pz-h1">Conte sobre seus Monstrinhos</h1>
+                <p>Peso, idade, rotina e preferências ajudam a gente a cuidar de cada um do jeitinho certo.</p>
+              </div>
+            </article>
+
+            <article class="onboarding-slide" data-slide="2">
+              <div class="hero-stage hero-stage--recipe">
+                <div class="ingredient ingredient--a">🥕</div>
+                <div class="ingredient ingredient--b">🥦</div>
+                <div class="ingredient ingredient--c">🍗</div>
+                <div class="pot-card"><img src="../papazilla-design-system/assets/icons/potinho.png" alt="Tigela de comida"><span>Receita balanceada</span></div>
+              </div>
+              <div class="onboarding-slide__copy">
+                <p class="eyebrow">Você escolhe os ingredientes</p>
+                <h1 class="pz-h1">Monte a próxima fornalha</h1>
+                <p>Use o que tem em casa e receba recomendações de acordo com o perfil do seu pet.</p>
+              </div>
+            </article>
+
+            <article class="onboarding-slide" data-slide="3">
+              <div class="hero-stage hero-stage--portion">
+                <div class="portion-card">
+                  <img src="../papazilla-design-system/assets/icons/sucesso.png" alt="">
+                  <strong>Porção da Mel</strong>
+                  <span>320 g por dia</span>
+                </div>
+                <div class="saved-chip"><img src="../papazilla-design-system/assets/icons/salvo.png" alt=""> Salva para depois</div>
+                <div class="rating-bubble">♥ ♥ ♥ ♥ ♥</div>
+              </div>
+              <div class="onboarding-slide__copy">
+                <p class="eyebrow">Tudo na medida</p>
+                <h1 class="pz-h1">Pronto para servir</h1>
+                <p>Você recebe as quantidades certinhas, salva a receita e depois conta se a turma aprovou.</p>
+                <p class="onboarding-membership-note"><strong>Conheça primeiro:</strong> cadastrar e cuidar dos perfis dos seus Monstrinhos é gratuito. As receitas personalizadas fazem parte da assinatura.</p>
+              </div>
+            </article>
+          </div>
+
+          <footer class="onboarding__footer">
+            <div class="page-dots" role="tablist" aria-label="Etapas do onboarding">
+              <button class="page-dot is-current" data-go-slide="0" aria-label="Tela 1" aria-selected="true"></button>
+              <button class="page-dot" data-go-slide="1" aria-label="Tela 2" aria-selected="false"></button>
+              <button class="page-dot" data-go-slide="2" aria-label="Tela 3" aria-selected="false"></button>
+              <button class="page-dot" data-go-slide="3" aria-label="Tela 4" aria-selected="false"></button>
+            </div>
+            <button class="pz-button pz-button--primary onboarding__next" id="next-slide">Continuar <span aria-hidden="true">→</span></button>
+          </footer>
+        </section>
+
+        <section class="screen app-view" data-screen="empty" aria-label="Cadastrar primeiro pet">
+          <header class="app-header">
+            <img src="../papazilla-design-system/assets/papazilla-wordmark.png" alt="Papazilla">
+            <button class="avatar-button" data-open-user-profile aria-label="Abrir perfil de Flávia">F</button>
+          </header>
+          <div class="empty-state">
+            <div class="empty-state__mascot">
+              <span class="speech-bubble">Au! Quem mora por aí?</span>
+              <img src="../papazilla-design-system/assets/zilla-frente.png" alt="Zilla esperando conhecer seu pet">
+            </div>
+            <p class="eyebrow">A matilha começa aqui</p>
+            <h1 class="pz-h1">Ainda não conheço seus Monstrinhos</h1>
+            <p>Cadastre seu primeiro aumigo para prepararmos uma receita feita para ele.</p>
+            <button class="pz-button pz-button--primary wide" id="start-pet">Cadastrar um aumigo <span aria-hidden="true">＋</span></button>
+          </div>
+          <nav class="app-nav" aria-label="Navegação principal">
+            <button data-nav="zilla" aria-current="page"><img src="../papazilla-design-system/assets/icons/zilla.png" alt=""><span>Pets</span></button>
+            <button data-nav="papa"><img src="../papazilla-design-system/assets/icons/potinho.png" alt=""><span>Papá</span></button>
+            <button data-nav="curiosidades"><img src="../papazilla-design-system/assets/icons/mensagem.png" alt=""><span>Curiosidades</span></button>
+            <button data-nav="salvas"><img src="../papazilla-design-system/assets/icons/salvo.png" alt=""><span>Salvas</span></button>
+          </nav>
+        </section>
+
+        <section class="screen success-view" data-screen="success" aria-label="Cadastro concluído">
+          <div class="confetti" aria-hidden="true">✦ <span>●</span> ♥ <span>✦</span></div>
+          <div class="success-view__content">
+            <div class="pet-portrait">
+              <img src="../papazilla-design-system/assets/icons/zilla.png" alt="Ilustração da Mel">
+              <span class="success-check">✓</span>
+            </div>
+            <p class="eyebrow">Nova Monstrinha na matilha</p>
+            <h1 class="pz-h1">Agora eu conheço a Mel!</h1>
+            <p>Já guardei tudo o que preciso para ajudar vocês nas próximas fornalhas.</p>
+            <div class="success-summary">
+              <span><strong>10 kg</strong>Peso</span>
+              <span><strong>Adulta</strong>Fase</span>
+              <span><strong>Ativa</strong>Rotina</span>
+            </div>
+          </div>
+          <div class="success-view__actions">
+            <button class="pz-button pz-button--primary wide" id="go-eat">Vamos papá!</button>
+            <button class="pz-button pz-button--text" id="add-another">Cadastrar outro Monstrinho</button>
+          </div>
+        </section>
+
+        <section class="screen flow-screen" data-screen="profile" aria-label="Anamnese do pet">
+          <header class="flow-header">
+            <button class="flow-header__back" id="profile-close" aria-label="Fechar anamnese">←</button>
+            <div><span class="flow-header__eyebrow">Perfil do Monstrinho</span><strong id="profile-step-label">Etapa 1 de 20</strong></div>
+            <span class="flow-header__avatar"><img src="../papazilla-design-system/assets/icons/zilla.png" alt=""></span>
+          </header>
+          <div class="flow-progress"><span id="profile-progress"></span></div>
+          <div class="flow-body" id="profile-body"></div>
+          <footer class="flow-footer">
+            <button class="pz-button pz-button--outline" id="profile-back">Voltar</button>
+            <button class="pz-button pz-button--primary" id="profile-next">Continuar →</button>
+          </footer>
+        </section>
+
+        <section class="screen app-view home-view" data-screen="home" aria-label="Início do Papazilla">
+          <header class="app-header">
+            <img src="../papazilla-design-system/assets/papazilla-wordmark.png" alt="Papazilla">
+            <button class="avatar-button" data-open-user-profile aria-label="Abrir perfil de Flávia">F</button>
+          </header>
+          <div class="home-content">
+            <div class="home-greeting">
+              <p class="eyebrow">Bom te ver de novo</p>
+              <h1 class="pz-h1">E aí, Humano?<br>Que a gente vai papá?</h1>
+            </div>
+            <button class="pet-selector" aria-label="Receita para Mel">
+              <span class="pet-selector__avatar"><img src="../papazilla-design-system/assets/icons/zilla.png" alt=""></span>
+              <span><small>Cozinhando para</small><strong>Mel</strong></span>
+              <span class="pet-selector__chevron">⌄</span>
+            </button>
+            <section class="create-card">
+              <div class="create-card__art">
+                <span class="steam">〰</span>
+                <img src="../papazilla-design-system/assets/icons/potinho.png" alt="Tigela de comida">
+              </div>
+              <div>
+                <span class="pz-badge pz-badge--success">Feita para a Mel</span>
+                <h2>Vamos montar uma receita?</h2>
+                <p>Escolha os ingredientes e a gente calcula as quantidades.</p>
+              </div>
+              <button class="pz-button pz-button--primary wide" id="create-recipe">Criar uma receita <span aria-hidden="true">→</span></button>
+            </section>
+            <section class="tip-card">
+              <img src="../papazilla-design-system/assets/icons/info.png" alt="">
+              <div><strong>Pitada do Zilla</strong><p>Separe os ingredientes antes de começar. A fornalha fica bem mais tranquila.</p></div>
+            </section>
+          </div>
+          <nav class="app-nav" aria-label="Navegação principal">
+            <button data-nav="zilla"><img src="../papazilla-design-system/assets/icons/zilla.png" alt=""><span>Pets</span></button>
+            <button data-nav="papa" aria-current="page"><img src="../papazilla-design-system/assets/icons/potinho.png" alt=""><span>Papá</span></button>
+            <button data-nav="curiosidades"><img src="../papazilla-design-system/assets/icons/mensagem.png" alt=""><span>Curiosidades</span></button>
+            <button data-nav="salvas"><img src="../papazilla-design-system/assets/icons/salvo.png" alt=""><span>Salvas</span></button>
+          </nav>
+        </section>
+
+        <section class="screen paywall-view" data-screen="paywall" aria-label="Escolher assinatura Papazilla">
+          <header class="paywall-header">
+            <button class="flow-header__back" id="paywall-close" aria-label="Voltar">←</button>
+            <span>Assinatura Papazilla</span>
+            <button class="paywall-restore" id="restore-purchase">Restaurar</button>
+          </header>
+          <div class="paywall-content">
+            <div class="paywall-hero">
+              <span class="paywall-hero__art"><img src="../papazilla-design-system/assets/zilla-frente.png" alt="Zilla pronto para cozinhar"></span>
+              <div><p class="eyebrow">A fornalha da Mel começa aqui</p><h1>Receitas na medida para o seu Monstrinho</h1><p>Da escolha dos ingredientes à porção no potinho, o Papazilla calcula tudo para vocês.</p></div>
+            </div>
+
+            <ul class="paywall-benefits" aria-label="Benefícios da assinatura">
+              <li><span>✓</span><p><strong>Quantidades personalizadas</strong><small>Peso, rotina e objetivo entram no cálculo.</small></p></li>
+              <li><span>✓</span><p><strong>Receita pronta para cozinhar</strong><small>Ingredientes, suplemento, finalização e preparo.</small></p></li>
+              <li><span>✓</span><p><strong>Toda a matilha organizada</strong><small>Receitas salvas e histórico de fornalhas.</small></p></li>
+            </ul>
+
+            <div class="paywall-plans" role="radiogroup" aria-label="Escolha um plano">
+              <section class="paywall-plan is-selected" data-plan-card="annual">
+                <button class="paywall-plan__select" data-select-plan="annual" role="radio" aria-checked="true">
+                  <span class="paywall-radio"></span>
+                  <span><small>Melhor escolha</small><strong>Papazilla Anual</strong><em>Economize até 55% comparado ao mensal</em></span>
+                  <b>A partir de<br><strong>R$ 8,99/mês</strong></b>
+                </button>
+                <div class="annual-payment-options" role="radiogroup" aria-label="Forma de pagamento anual">
+                  <button class="annual-payment-option is-selected" data-annual-payment="upfront" role="radio" aria-checked="true"><span></span><p><strong>R$ 107,90 à vista</strong><small>Pagamento antecipado por 12 meses · 10% a menos</small></p></button>
+                  <button class="annual-payment-option" data-annual-payment="installments" role="radio" aria-checked="false"><span></span><p><strong>12 pagamentos de R$ 9,99</strong><small>Total de R$ 119,88</small></p></button>
+                </div>
+                <p class="annual-commitment" id="annual-terms">Pagamento anual antecipado. A assinatura renova por mais 12 meses até você cancelar a renovação.</p>
+              </section>
+
+              <button class="paywall-plan paywall-plan--monthly" data-plan-card="monthly" data-select-plan="monthly" role="radio" aria-checked="false">
+                <span class="paywall-radio"></span>
+                <span><strong>Papazilla Mensal</strong><em>Flexibilidade para cancelar quando quiser</em></span>
+                <b><strong>R$ 19,90</strong><br>por mês</b>
+              </button>
+            </div>
+
+            <button class="pz-button pz-button--primary wide paywall-cta" id="subscribe-now">Assinar anual por R$ 107,90</button>
+            <p class="paywall-disclosure" id="paywall-disclosure">Renovação anual automática. Você pode cancelar a próxima renovação a qualquer momento.</p>
+            <div class="paywall-links"><button data-legal="termos">Termos de Uso</button><span>·</span><button data-legal="privacidade">Privacidade</button></div>
+          </div>
+        </section>
+
+        <section class="screen user-profile-view" data-screen="user-profile" aria-label="Perfil do usuário">
+          <header class="user-profile-header">
+            <button class="flow-header__back" id="user-profile-close" aria-label="Voltar">←</button>
+            <div><p class="eyebrow">Seu espaço</p><h1>Minha conta</h1></div>
+            <span aria-hidden="true"></span>
+          </header>
+          <div class="user-profile-content">
+            <section class="user-identity-card">
+              <button class="user-avatar-large" id="change-user-photo" aria-label="Alterar foto do perfil"><span>F</span><i>＋</i></button>
+              <div><h2>Flávia Coelho</h2><p>flavia@exemplo.com</p><span>Humana da Mel e do Bento</span></div>
+              <button class="user-edit-button" id="edit-user-profile"><img src="../papazilla-design-system/assets/icons/editar.png" alt="">Editar</button>
+            </section>
+
+            <section class="user-plan-card">
+              <div class="user-plan-card__top"><span><img src="../papazilla-design-system/assets/icons/patinha.png" alt=""></span><div><small>Seu plano</small><strong id="user-plan-name">Acesso gratuito</strong></div><b id="user-plan-status">Grátis</b></div>
+              <p id="user-plan-description">Cadastre seus pets e explore os conteúdos. Assine para criar receitas personalizadas.</p>
+              <div class="user-plan-card__bottom"><span><small id="user-plan-value-label">Receitas</small><strong id="user-plan-value">Benefício premium</strong></span><button id="manage-plan">Conhecer planos →</button></div>
+            </section>
+
+            <section class="user-settings-group" aria-labelledby="account-settings-title">
+              <h2 id="account-settings-title">Conta e acesso</h2>
+              <button class="user-settings-row" data-user-action="A edição dos dados pessoais será aberta aqui."><span class="user-settings-row__icon"><img src="../papazilla-design-system/assets/icons/perfil.png" alt=""></span><span><strong>Dados pessoais</strong><small>Nome, foto e e-mail</small></span><b>›</b></button>
+              <button class="user-settings-row" data-user-action="As formas de entrada conectadas serão mostradas aqui."><span class="user-settings-row__icon"><img src="../papazilla-design-system/assets/icons/sucesso.png" alt=""></span><span><strong>Acesso e segurança</strong><small>Google conectado · e-mail verificado</small></span><b>›</b></button>
+            </section>
+
+            <section class="user-settings-group" aria-labelledby="preferences-title">
+              <h2 id="preferences-title">Preferências</h2>
+              <div class="user-settings-row user-settings-row--toggle"><span class="user-settings-row__icon"><img src="../papazilla-design-system/assets/icons/notificacoes.png" alt=""></span><span><strong>Lembretes da matilha</strong><small>Fornalhas, avaliações e novidades</small></span><button class="user-toggle is-on" id="user-notifications" role="switch" aria-checked="true" aria-label="Ativar lembretes"><i></i></button></div>
+              <button class="user-settings-row" data-user-action="A aparência seguirá o tema escolhido no aparelho."><span class="user-settings-row__icon"><img src="../papazilla-design-system/assets/icons/ajustes.png" alt=""></span><span><strong>Aparência</strong><small>Usar o tema do aparelho</small></span><b>›</b></button>
+            </section>
+
+            <section class="user-settings-group" aria-labelledby="support-title">
+              <h2 id="support-title">Ajuda e privacidade</h2>
+              <button class="user-settings-row" data-user-action="A Central de Ajuda será aberta aqui."><span class="user-settings-row__icon"><img src="../papazilla-design-system/assets/icons/mensagem.png" alt=""></span><span><strong>Central de Ajuda</strong><small>Dúvidas e contato</small></span><b>›</b></button>
+              <button class="user-settings-row" data-user-action="Termos de Uso e Política de Privacidade serão abertos aqui."><span class="user-settings-row__icon"><img src="../papazilla-design-system/assets/icons/info.png" alt=""></span><span><strong>Termos e privacidade</strong><small>Como cuidamos dos seus dados</small></span><b>›</b></button>
+              <button class="user-settings-row" data-user-action="As opções para baixar ou excluir os dados terão uma confirmação antes de continuar."><span class="user-settings-row__icon"><img src="../papazilla-design-system/assets/icons/excluir.png" alt=""></span><span><strong>Dados da conta</strong><small>Baixar ou solicitar exclusão</small></span><b>›</b></button>
+            </section>
+
+            <button class="user-signout" id="user-signout">Sair da conta</button>
+            <p class="user-app-version">Papazilla · versão de protótipo</p>
+          </div>
+        </section>
+
+        <section class="screen subscription-view" data-screen="subscription" aria-label="Gerenciar assinatura">
+          <header class="user-profile-header">
+            <button class="flow-header__back" id="subscription-close" aria-label="Voltar para Minha conta">←</button>
+            <div><p class="eyebrow">Seu plano</p><h1>Assinatura</h1></div>
+            <span aria-hidden="true"></span>
+          </header>
+          <div class="subscription-content">
+            <section class="subscription-status-card">
+              <div class="subscription-status-card__heading"><span><img src="../papazilla-design-system/assets/icons/patinha.png" alt=""></span><div><small>Plano atual</small><h2 id="subscription-plan-name">Papazilla Anual</h2></div><b>Ativo</b></div>
+              <p>Receitas personalizadas para toda a matilha, salvas e disponíveis em qualquer aparelho.</p>
+              <div class="subscription-price"><span><small>Forma de pagamento</small><strong id="subscription-payment">R$ 107,90 à vista</strong></span><span><small>Próxima renovação</small><strong>9 de setembro de 2027</strong></span></div>
+            </section>
+            <section class="subscription-details">
+              <h2>Sobre sua assinatura</h2>
+              <div><span>✓</span><p><strong>Acesso liberado</strong><small>Continue criando e salvando receitas até o fim do período contratado.</small></p></div>
+              <div><span>↻</span><p><strong>Renovação automática</strong><small id="subscription-renewal-copy">A próxima cobrança anual acontece na data indicada acima.</small></p></div>
+            </section>
+            <button class="subscription-action" id="change-subscription">Ver outras formas de pagamento <span>›</span></button>
+            <button class="subscription-action" id="restore-from-account">Restaurar compra <span>›</span></button>
+            <button class="subscription-cancel" id="cancel-renewal">Cancelar renovação</button>
+            <p class="subscription-help">O cancelamento evita a próxima renovação. Seu acesso e eventuais pagamentos do período contratado continuam até o final.</p>
+          </div>
+        </section>
+
+        <section class="screen app-view pets-view pets-list-view" data-screen="pets" aria-label="Lista de pets">
+          <header class="app-header pets-header">
+            <div><p class="eyebrow">Pets</p><h1>Sua matilha</h1></div>
+            <button class="avatar-button" data-open-user-profile aria-label="Abrir perfil de Flávia">F</button>
+          </header>
+          <div class="pets-content">
+            <div class="pack-heading"><div><h2>Seus Monstrinhos</h2><p>2 cães cadastrados</p></div><span>2</span></div>
+            <div class="pet-list">
+              <button class="pet-list-card" data-open-pet="mel">
+                <span class="pet-list-card__portrait pet-list-card__portrait--mel"><img src="../papazilla-design-system/assets/icons/zilla.png" alt="Ilustração da Mel"></span>
+                <span class="pet-list-card__content"><strong>Mel</strong><small>SRD · Fêmea · 5 anos</small><span><b>10 kg</b><b>40–60 min</b><b>Qualidade</b></span></span>
+                <span class="pet-list-card__arrow" aria-hidden="true">›</span>
+              </button>
+              <button class="pet-list-card" data-open-pet="bento">
+                <span class="pet-list-card__portrait pet-list-card__portrait--bento"><img src="../papazilla-design-system/assets/icons/zilla.png" alt="Ilustração do Bento"></span>
+                <span class="pet-list-card__content"><strong>Bento</strong><small>Golden Retriever · Macho · 8 anos</small><span><b>29 kg</b><b>20–40 min</b><b>Manutenção</b></span></span>
+                <span class="pet-list-card__arrow" aria-hidden="true">›</span>
+              </button>
+            </div>
+            <button class="pz-button pz-button--primary wide add-monster-button" id="add-pet-from-list"><span aria-hidden="true">＋</span> Cadastrar outro Monstrinho</button>
+            <div class="zilla-note pack-note"><img src="../papazilla-design-system/assets/icons/info.png" alt=""><p><strong>Cada focinho, uma medida</strong>O perfil de cada cão guarda seus próprios dados, respostas e recomendações.</p></div>
+          </div>
+          <nav class="app-nav" aria-label="Navegação principal">
+            <button data-nav="zilla" aria-current="page"><img src="../papazilla-design-system/assets/icons/zilla.png" alt=""><span>Pets</span></button>
+            <button data-nav="papa"><img src="../papazilla-design-system/assets/icons/potinho.png" alt=""><span>Papá</span></button>
+            <button data-nav="curiosidades"><img src="../papazilla-design-system/assets/icons/mensagem.png" alt=""><span>Curiosidades</span></button>
+            <button data-nav="salvas"><img src="../papazilla-design-system/assets/icons/salvo.png" alt=""><span>Salvas</span></button>
+          </nav>
+        </section>
+
+        <section class="screen app-view pets-view pet-detail-view" data-screen="pet-detail" aria-label="Perfil do pet selecionado">
+          <header class="app-header pets-header">
+            <button class="profile-list-back" id="pet-detail-close" aria-label="Voltar para a lista de pets">←</button>
+            <label class="pet-switcher"><span>Visualizando</span><select id="pet-switcher" aria-label="Trocar de pet"><option value="mel">Mel</option><option value="bento">Bento</option></select></label>
+            <button class="avatar-button" aria-label="Perfil do humano">F</button>
+          </header>
+          <div class="pets-content">
+            <section class="pet-hero-card">
+              <div class="pet-hero-card__portrait" data-pet-portrait><img src="../papazilla-design-system/assets/icons/zilla.png" alt=""><span>♥</span></div>
+              <div class="pet-hero-card__identity"><span class="pz-badge pz-badge--success" data-pet-copy="badge">Monstrinha da casa</span><h2 data-pet-copy="name">Mel</h2><p data-pet-copy="identity">Sem raça definida · Fêmea · Castrada</p></div>
+              <button class="pet-more" aria-label="Mais opções para o pet">•••</button>
+            </section>
+
+            <section class="pet-section">
+              <div class="pet-section__heading"><div><p class="eyebrow">De relance</p><h2>Dados principais</h2></div><button id="edit-pet-stats">Editar</button></div>
+              <div class="pet-stats-grid">
+                <article><img src="../papazilla-design-system/assets/icons/calendario.png" alt=""><small>Idade</small><strong data-pet-stat="age">5 anos</strong></article>
+                <article><img src="../papazilla-design-system/assets/icons/grafico-barras.png" alt=""><small>Peso</small><strong data-pet-stat="weight">10 kg</strong></article>
+                <article><img src="../papazilla-design-system/assets/icons/patinha.png" alt=""><small>Atividade</small><strong data-pet-stat="activity">40–60 min</strong></article>
+                <article class="pet-stat--wide"><img src="../papazilla-design-system/assets/icons/sucesso.png" alt=""><small>Objetivo atual</small><strong data-pet-stat="goal">Melhorar a qualidade da alimentação</strong></article>
+              </div>
+            </section>
+
+            <section class="anamnesis-card">
+              <div class="anamnesis-card__icon"><img src="../papazilla-design-system/assets/icons/sheet.png" alt=""></div>
+              <div><span class="pz-badge pz-badge--success">Perfil em dia</span><h2>Perfil e anamnese</h2><p>Saúde, rotina, digestão e preferências de <span data-pet-copy="name">Mel</span>.</p><small data-pet-copy="updated">Atualizada hoje</small></div>
+              <button class="pz-button pz-button--outline wide" id="view-anamnesis">Ver respostas <span aria-hidden="true">→</span></button>
+            </section>
+            <button class="pz-button pz-button--text wide add-pet-inline" id="add-pet-from-detail"><span aria-hidden="true">＋</span> Cadastrar outro Monstrinho</button>
+          </div>
+          <nav class="app-nav" aria-label="Navegação principal">
+            <button data-nav="zilla" aria-current="page"><img src="../papazilla-design-system/assets/icons/zilla.png" alt=""><span>Pets</span></button>
+            <button data-nav="papa"><img src="../papazilla-design-system/assets/icons/potinho.png" alt=""><span>Papá</span></button>
+            <button data-nav="curiosidades"><img src="../papazilla-design-system/assets/icons/mensagem.png" alt=""><span>Curiosidades</span></button>
+            <button data-nav="salvas"><img src="../papazilla-design-system/assets/icons/salvo.png" alt=""><span>Salvas</span></button>
+          </nav>
+        </section>
+
+        <section class="screen flow-screen pet-edit-view" data-screen="pet-edit" aria-label="Editar dados da Mel">
+          <header class="flow-header">
+            <button class="flow-header__back" id="pet-edit-close" aria-label="Voltar para o perfil">←</button>
+            <div><span class="flow-header__eyebrow">Pets</span><strong>Editar dados principais</strong></div>
+            <span class="flow-header__avatar"><img src="../papazilla-design-system/assets/icons/zilla.png" alt=""></span>
+          </header>
+          <div class="flow-progress"><span style="width:100%"></span></div>
+          <div class="flow-body">
+            <div class="flow-intro"><p class="eyebrow">Perfil de <span data-pet-copy="name">Mel</span></p><h1>O que mudou por aí?</h1><p>Mantenha esses dados atualizados para que as próximas receitas usem o perfil certo.</p></div>
+            <button class="pet-photo-editor" type="button"><span><img src="../papazilla-design-system/assets/icons/zilla.png" alt="Mel"></span><strong>Alterar foto</strong><small>Opcional</small></button>
+            <div class="form-grid">
+              <label class="profile-field profile-field--full"><span>Nome do cão</span><input data-pet-input="name" value="Mel"></label>
+              <label class="profile-field profile-field--full"><span>Raça</span><input data-pet-input="breed" value="Sem raça definida"></label>
+              <label class="profile-field"><span>Idade</span><input data-pet-input="age" value="5 anos"></label>
+              <label class="profile-field"><span>Peso atual</span><div class="input-suffix"><input data-pet-input="weight" value="10" inputmode="decimal"><span>kg</span></div></label>
+            </div>
+            <div class="question-block"><h3>Atividade diária</h3><div class="choice-row"><button class="choice-pill">20–40 min</button><button class="choice-pill is-selected">40–60 min</button></div></div>
+            <div class="question-block"><h3>Objetivo atual</h3><button class="select-card is-selected"><span class="select-card__radio"></span><span>Melhorar a qualidade da alimentação</span></button></div>
+          </div>
+          <footer class="flow-footer"><button class="pz-button pz-button--outline" id="pet-edit-cancel">Cancelar</button><button class="pz-button pz-button--primary" id="pet-edit-save">Salvar alterações</button></footer>
+        </section>
+
+        <section class="screen flow-screen anamnesis-detail-view" data-screen="anamnesis-detail" aria-label="Respostas da anamnese da Mel">
+          <header class="flow-header">
+            <button class="flow-header__back" id="anamnesis-close" aria-label="Voltar para o perfil">←</button>
+            <div><span class="flow-header__eyebrow">Perfil de <span data-pet-copy="name">Mel</span></span><strong>Respostas atuais</strong></div>
+            <span class="flow-header__avatar"><img src="../papazilla-design-system/assets/icons/sheet.png" alt=""></span>
+          </header>
+          <div class="flow-progress"><span style="width:100%"></span></div>
+          <div class="flow-body anamnesis-detail-body">
+            <div class="flow-intro"><p class="eyebrow">Perfil em dia</p><h1>Tudo sobre <span data-pet-copy="name">Mel</span></h1><p>Estas respostas ajudam a personalizar a experiência e sinalizar quando é importante conversar com o veterinário.</p></div>
+            <div class="answer-summary"><span><small>Última atualização</small><strong>Hoje</strong></span><span><small>Condição informada</small><strong>Nenhuma</strong></span></div>
+            <div class="answer-groups">
+              <details open><summary><span><img src="../papazilla-design-system/assets/icons/perfil.png" alt="">Corpo e objetivo</span><span>⌄</span></summary><div><p><small>Objetivo</small><strong>Melhorar a qualidade da alimentação</strong></p><p><small>Condição corporal</small><strong>Corpo proporcional, com cintura visível</strong></p><p><small>Mudança de peso</small><strong>Ficou praticamente igual</strong></p></div></details>
+              <details><summary><span><img src="../papazilla-design-system/assets/icons/patinha.png" alt="">Rotina e alimentação</span><span>⌄</span></summary><div><p><small>Atividade</small><strong>40 a 60 minutos por dia</strong></p><p><small>Apetite</small><strong>Come normalmente</strong></p><p><small>Refeições</small><strong>2 por dia</strong></p></div></details>
+              <details><summary><span><img src="../papazilla-design-system/assets/icons/sucesso.png" alt="">Saúde e digestão</span><span>⌄</span></summary><div><p><small>Condições diagnosticadas</small><strong>Nenhuma</strong></p><p><small>Fezes</small><strong>Firmes e bem formadas</strong></p><p><small>Medicamentos contínuos</small><strong>Não</strong></p></div></details>
+              <details><summary><span><img src="../papazilla-design-system/assets/icons/favorito.png" alt="">Preferências</span><span>⌄</span></summary><div><p><small>Proteínas</small><strong>Frango, carne bovina e ovo</strong></p><p><small>Favoritos</small><strong>Cenoura, abóbora e brócolis</strong></p><p><small>Evitar</small><strong>Nenhum alimento informado</strong></p></div></details>
+            </div>
+          </div>
+          <footer class="flow-footer flow-footer--single"><button class="pz-button pz-button--primary wide" id="edit-anamnesis">Editar respostas</button></footer>
+        </section>
+
+        <section class="screen app-view curiosities-view" data-screen="curiosities" aria-label="Curiosidades">
+          <header class="app-header curiosities-header">
+            <div><p class="eyebrow">Descobertas do Zilla</p><h1>Curiosidades</h1></div>
+            <button class="curiosity-search" aria-label="Buscar conteúdos"><img src="../papazilla-design-system/assets/icons/busca.png" alt=""></button>
+          </header>
+          <div class="curiosities-content">
+            <section class="curiosity-welcome">
+              <div><span class="pz-badge pz-badge--success">Para sua matilha</span><h2>Uma pitada de conhecimento por dia</h2><p>Informação confiável para cozinhar e cuidar com mais segurança.</p></div>
+              <img id="curiosity-hero-image" src="assets/curiosities/zilla-01-lendo.png" alt="Zilla lendo e trazendo uma curiosidade" decoding="async">
+            </section>
+            <div class="curiosity-filters" role="group" aria-label="Filtrar curiosidades">
+              <button class="is-selected" data-curiosity-filter="all">Todos</button><button data-curiosity-filter="preparo">Preparo</button><button data-curiosity-filter="seguranca">Segurança</button><button data-curiosity-filter="nutricao">Nutrição</button>
+            </div>
+            <div class="curiosity-list">
+              <button class="curiosity-card curiosity-card--featured" data-curiosity-category="preparo" data-open-curiosity="storage">
+                <span class="curiosity-art curiosity-art--cool"><img src="../papazilla-design-system/assets/icons/potinho.png" alt=""><i></i><i></i><i></i></span>
+                <span class="curiosity-card__copy"><small>PREPARO · USDA</small><strong>Comida pronta na geladeira: até quando?</strong><span>Alimentos cozidos refrigerados devem ser usados em 3 a 4 dias.</span><b>3 min de leitura <em>›</em></b></span>
+              </button>
+              <button class="curiosity-card" data-curiosity-category="seguranca" data-open-curiosity="toxic-foods">
+                <span class="curiosity-art curiosity-art--alert"><img src="../papazilla-design-system/assets/icons/erro.png" alt=""></span>
+                <span class="curiosity-card__copy"><small>SEGURANÇA · ASPCA</small><strong>Cebola, alho e cebolinha não vão para o potinho</strong><span>Vegetais do gênero Allium podem causar irritação gastrointestinal e dano às células vermelhas.</span><b>2 min de leitura <em>›</em></b></span>
+              </button>
+              <button class="curiosity-card" data-curiosity-category="nutricao" data-open-curiosity="body-score">
+                <span class="curiosity-art curiosity-art--body"><img src="../papazilla-design-system/assets/icons/grafico-barras.png" alt=""></span>
+                <span class="curiosity-card__copy"><small>NUTRIÇÃO · WSAVA</small><strong>A balança conta só uma parte da história</strong><span>Escore corporal e massa muscular ajudam a acompanhar mudanças além do peso.</span><b>4 min de leitura <em>›</em></b></span>
+              </button>
+              <button class="curiosity-card" data-curiosity-category="preparo" data-open-curiosity="clean-bowls">
+                <span class="curiosity-art curiosity-art--clean"><img src="../papazilla-design-system/assets/icons/sucesso.png" alt=""></span>
+                <span class="curiosity-card__copy"><small>PREPARO · FDA</small><strong>Potinho limpo também faz parte da receita</strong><span>A FDA orienta lavar e secar tigelas e utensílios de medição após cada uso.</span><b>2 min de leitura <em>›</em></b></span>
+              </button>
+              <button class="curiosity-card" data-curiosity-category="nutricao" data-open-curiosity="balanced-home-food">
+                <span class="curiosity-art curiosity-art--study"><img src="../papazilla-design-system/assets/icons/sheet.png" alt=""></span>
+                <span class="curiosity-card__copy"><small>NUTRIÇÃO · ESTUDO USP</small><strong>Caseira não significa balanceada automaticamente</strong><span>Um estudo brasileiro encontrou deficiências frequentes em dietas preparadas em casa sem formulação adequada.</span><b>5 min de leitura <em>›</em></b></span>
+              </button>
+              <button class="curiosity-card" data-curiosity-category="nutricao" data-open-curiosity="treats">
+                <span class="curiosity-art curiosity-art--portion"><img src="../papazilla-design-system/assets/icons/grafico-pizza.png" alt=""></span>
+                <span class="curiosity-card__copy"><small>NUTRIÇÃO · AAHA</small><strong>Petiscos também entram na conta do dia</strong><span>O histórico alimentar completo deve considerar refeições, petiscos, comida da família e suplementos.</span><b>3 min de leitura <em>›</em></b></span>
+              </button>
+            </div>
+          </div>
+          <nav class="app-nav" aria-label="Navegação principal">
+            <button data-nav="zilla"><img src="../papazilla-design-system/assets/icons/zilla.png" alt=""><span>Pets</span></button>
+            <button data-nav="papa"><img src="../papazilla-design-system/assets/icons/potinho.png" alt=""><span>Papá</span></button>
+            <button data-nav="curiosidades" aria-current="page"><img src="../papazilla-design-system/assets/icons/mensagem.png" alt=""><span>Curiosidades</span></button>
+            <button data-nav="salvas"><img src="../papazilla-design-system/assets/icons/salvo.png" alt=""><span>Salvas</span></button>
+          </nav>
+        </section>
+
+        <section class="screen flow-screen curiosity-detail-view" data-screen="curiosity-detail" aria-label="Conteúdo sobre conservação de alimentos">
+          <header class="flow-header">
+            <button class="flow-header__back" id="curiosity-detail-close" aria-label="Voltar para curiosidades">←</button>
+            <div><span class="flow-header__eyebrow">Preparo seguro</span><strong>3 min de leitura</strong></div>
+            <button class="flow-header__avatar curiosity-bookmark" id="curiosity-bookmark" aria-label="Salvar conteúdo"><img src="../papazilla-design-system/assets/icons/salvar.png" alt=""></button>
+          </header>
+          <div class="flow-body curiosity-article">
+            <div class="curiosity-article-art curiosity-art--cool"><img src="../papazilla-design-system/assets/icons/potinho.png" alt="Potinho de comida pronta"><i></i><i></i><i></i></div>
+            <p class="eyebrow">Preparo · USDA</p>
+            <h1>Comida pronta na geladeira: até quando?</h1>
+            <p class="curiosity-lead">Organizar a fornalha em porções menores ajuda a comida a esfriar mais rápido e facilita a rotina dos próximos dias.</p>
+            <div class="article-fact"><strong>3 a 4 dias</strong><span>é o prazo geral indicado pelo USDA para consumir alimentos cozidos mantidos sob refrigeração.</span></div>
+            <h2>Não deixe a panela esperando</h2>
+            <p>Alimentos perecíveis devem ser refrigerados em até duas horas depois do preparo. Em dias muito quentes, acima de aproximadamente 32&nbsp;°C, esse intervalo cai para uma hora.</p>
+            <h2>Porções menores esfriam melhor</h2>
+            <p>Distribua a comida em recipientes rasos e bem fechados. Uma panela grande demora mais para esfriar e pode permanecer por mais tempo em uma faixa favorável ao crescimento de bactérias.</p>
+            <h2>Identifique cada fornalha</h2>
+            <p>Marque a data do preparo antes de guardar. Se o alimento apresentar odor ou aparência incomum, descarte e não ofereça ao pet.</p>
+            <aside class="article-scope"><img src="../papazilla-design-system/assets/icons/info.png" alt=""><p><strong>Escopo desta curiosidade</strong>Estas são regras gerais de segurança para alimentos cozidos. Uma orientação individual do veterinário pode ser mais restritiva.</p></aside>
+            <a class="article-source" href="https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/food-safety-basics/leftovers-and-food-safety" target="_blank" rel="noopener"><span><small>Fonte consultada</small><strong>USDA Food Safety and Inspection Service</strong><em>Atualizada em 8 set. 2026 no Papazilla</em></span><b>↗</b></a>
+          </div>
+        </section>
+
+        <section class="screen app-view saved-recipes-view" data-screen="saved-recipes" aria-label="Receitas salvas">
+          <header class="app-header saved-header">
+            <div><p class="eyebrow">Sua cozinha</p><h1>Receitas salvas</h1></div>
+            <button class="recipe-search" aria-label="Buscar receitas"><img src="../papazilla-design-system/assets/icons/busca.png" alt=""></button>
+          </header>
+          <div class="saved-content">
+            <div class="recipe-filters" role="group" aria-label="Filtrar receitas por pet">
+              <button class="is-selected" data-recipe-filter="all">Todas</button><button data-recipe-filter="mel">Mel</button><button data-recipe-filter="bento">Bento</button>
+            </div>
+            <p class="saved-count">3 receitas na sua coleção</p>
+            <div class="saved-recipe-list">
+              <button class="saved-recipe-card saved-recipe-card--featured" data-open-recipe="frango" data-recipe-pet="mel">
+                <span class="recipe-photo recipe-photo--frango" role="img" aria-label="Foto da receita de frango com batata-doce"><i>🥕</i><i>🥦</i><i>🍗</i><b>Foto da última fornalha</b></span>
+                <span class="saved-recipe-card__body"><small>Para a Mel · há 6 dias</small><strong>Frango com batata-doce</strong><span class="recipe-card-meta"><b data-recipe-times>Feita 4 vezes</b><b>♥ 5</b></span></span>
+                <span class="saved-recipe-card__arrow">›</span>
+              </button>
+              <button class="saved-recipe-card" data-open-recipe="carne" data-recipe-pet="bento">
+                <span class="recipe-photo recipe-photo--carne" role="img" aria-label="Imagem ilustrativa da receita de carne e abóbora"><i>🥩</i><i>🎃</i><i>🥕</i></span>
+                <span class="saved-recipe-card__body"><small>Para o Bento · há 2 semanas</small><strong>Carne com abóbora</strong><span class="recipe-card-meta"><b>Feita 2 vezes</b><b>♥ 4</b></span></span>
+                <span class="saved-recipe-card__arrow">›</span>
+              </button>
+              <button class="saved-recipe-card" data-open-recipe="peixe" data-recipe-pet="mel">
+                <span class="recipe-photo recipe-photo--empty" role="img" aria-label="Receita ainda sem foto"><img src="../papazilla-design-system/assets/icons/potinho.png" alt=""><em>Sem foto ainda</em></span>
+                <span class="saved-recipe-card__body"><small>Para a Mel · há 1 mês</small><strong>Peixe com arroz e legumes</strong><span class="recipe-card-meta"><b>Feita 1 vez</b><b>Sem avaliação</b></span></span>
+                <span class="saved-recipe-card__arrow">›</span>
+              </button>
+            </div>
+          </div>
+          <nav class="app-nav" aria-label="Navegação principal">
+            <button data-nav="zilla"><img src="../papazilla-design-system/assets/icons/zilla.png" alt=""><span>Pets</span></button>
+            <button data-nav="papa"><img src="../papazilla-design-system/assets/icons/potinho.png" alt=""><span>Papá</span></button>
+            <button data-nav="curiosidades"><img src="../papazilla-design-system/assets/icons/mensagem.png" alt=""><span>Curiosidades</span></button>
+            <button data-nav="salvas" aria-current="page"><img src="../papazilla-design-system/assets/icons/salvo.png" alt=""><span>Salvas</span></button>
+          </nav>
+        </section>
+
+        <section class="screen flow-screen recipe-detail-view" data-screen="recipe-detail" aria-label="Detalhes da receita salva">
+          <header class="flow-header">
+            <button class="flow-header__back" id="recipe-detail-close" aria-label="Voltar para receitas salvas">←</button>
+            <div><span class="flow-header__eyebrow">Receita salva</span><strong>Para a Mel</strong></div>
+            <button class="flow-header__avatar recipe-detail-menu" aria-label="Mais opções">•••</button>
+          </header>
+          <div class="flow-body recipe-detail-body">
+            <div class="recipe-detail-photo recipe-photo recipe-photo--frango"><i>🥕</i><i>🥦</i><i>🍗</i><span class="pz-badge pz-badge--success">Foto da última fornalha</span></div>
+            <div class="recipe-detail-title"><p class="eyebrow">A preferida da Mel</p><h1>Frango com batata-doce</h1><p>Frango, batata-doce, cenoura, brócolis e fígado.</p></div>
+            <div class="times-cooked"><img src="../papazilla-design-system/assets/icons/sucesso.png" alt=""><span><small>Já virou tradição</small><strong>Você preparou esta receita <b id="detail-times">4 vezes</b></strong></span></div>
+            <div class="recipe-quick-stats"><span><small>Rendimento</small><strong>7 dias</strong></span><span><small>Por dia</small><strong>320 g</strong></span><span><small>Avaliação</small><strong>♥ 5,0</strong></span></div>
+            <details class="recipe-detail-section" open><summary>Ingredientes e quantidades <span>⌄</span></summary><div><p><span>Peito de frango</span><strong>980 g cru</strong></p><p><span>Batata-doce</span><strong>915 g crua</strong></p><p><span>Cenoura</span><strong>325 g crua</strong></p><p><span>Brócolis</span><strong>325 g cru</strong></p><p><span>Fígado de frango</span><strong>135 g cru</strong></p></div></details>
+            <details class="recipe-detail-section recipe-supplements" open><summary>Suplementos e finalização <span>⌄</span></summary><div>
+              <p><span><b>Food Dog Adulto</b><small>2,6 g por dia</small></span><strong>≈ 1,3 g/refeição</strong></p>
+              <p><span><b>Óleo vegetal</b><small>Azeite, coco ou linhaça dourada</small></span><strong>1 col. sobremesa/dia</strong></p>
+              <p><span><b>Óleo de peixe ou krill</b><small>Diária ou 3× por semana; dispensável com peixe fresco 2–3×/semana</small></span><strong>1 cápsula de 1 g</strong></p>
+              <p class="recipe-supplements__salt"><span><b>Sal integral</b><small>Usar muito pouco em cada refeição</small></span><strong>Dose individual</strong></p>
+            </div><aside><img src="../papazilla-design-system/assets/icons/info.png" alt=""><span>A fonte não padroniza a quantidade de sal. Defina a dose com orientação veterinária.</span></aside></details>
+            <details class="recipe-detail-section recipe-preparation" open>
+              <summary><span><img src="../papazilla-design-system/assets/icons/receita.png" alt="">Modo de preparo</span><b>⌄</b></summary>
+              <div class="recipe-preparation__body">
+                <p class="recipe-preparation__intro">Passo a passo para esta combinação. Os tempos consideram cortes pequenos e são aproximados.</p>
+                <ol class="prep-steps">
+                  <li><span>1</span><div><strong>Organize uma bancada limpa</strong><p>Lave as mãos por 20 segundos. Separe tábua e faca usadas na carne crua, não lave o frango e pese todos os ingredientes ainda crus.</p></div></li>
+                  <li><span>2</span><div><strong>Faça cortes uniformes</strong><p>Frango em cubos de 2–3 cm; fígado em pedaços de 1,5–2 cm; batata-doce e cenoura em cubos de 1,5–2 cm; brócolis em floretes pequenos.</p></div></li>
+                  <li><span>3</span><div><strong>Cozinhe sem temperos</strong><p>Cozinhe cada grupo separadamente, em água ou no vapor. Não use cebola, alho, molhos ou temperos prontos.</p><div class="prep-times"><span><b>Frango</b>12–18 min*</span><span><b>Fígado</b>8–12 min*</span><span><b>Batata-doce</b>12–18 min</span><span><b>Cenoura</b>8–12 min</span><span><b>Brócolis</b>4–6 min no vapor</span></div></div></li>
+                  <li class="prep-step--temperature"><span><img src="../papazilla-design-system/assets/icons/info.png" alt=""></span><div><strong>Confirme 74&nbsp;°C no frango e no fígado</strong><p>Meça no centro da parte mais espessa. Cor e tempo sozinhos não confirmam um cozimento seguro.</p></div></li>
+                  <li><span>4</span><div><strong>Escorra, espere amornar e misture</strong><p>Desfie ou pique o frango depois de cozido. Misture até os ingredientes ficarem bem distribuídos; não ofereça a comida quente.</p></div></li>
+                  <li><span>5</span><div><strong>Divida a fornalha</strong><p>Monte 7 porções diárias de 320 g ou 14 refeições de 160 g. Use recipientes rasos, limpos e identificados com a data.</p></div></li>
+                  <li><span>6</span><div><strong>Finalize somente na hora de servir</strong><p>Adicione suplemento, óleos e qualquer dose individual indicada à porção já fria ou morna. Não tempere a receita por conta própria.</p></div></li>
+                  <li><span>7</span><div><strong>Guarde com segurança</strong><p>Refrigere em até 2 horas e use as porções refrigeradas em 3–4 dias. Congele o restante e descongele dentro da geladeira.</p></div></li>
+                </ol>
+                <p class="prep-footnote">*Estimativa para cubos de 2–3 cm em fervura suave. Quantidade, panela e fogão alteram o tempo; o termômetro define o ponto seguro.</p>
+                <div class="prep-sources"><span>Segurança alimentar</span><a href="https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/food-safety-basics/safe-temperature-chart" target="_blank" rel="noopener">Temperatura ↗</a><a href="https://ask.fsis.usda.gov/article/Is-it-necessary-to-rinse-soak-or-brine-chicken-to-make-it-safe" target="_blank" rel="noopener">Frango ↗</a><a href="https://www.fda.gov/animal-veterinary/animal-health-literacy/tips-safe-handling-pet-food-and-treats" target="_blank" rel="noopener">Higiene ↗</a></div>
+              </div>
+            </details>
+            <section class="cook-history"><div class="section-row"><div><p class="eyebrow">Histórico</p><h2>Últimas fornalhas</h2></div><button id="see-cook-history">Ver todas</button></div><article><span class="mini-recipe-photo">🥕 🥦 🍗</span><div><strong>2 de setembro</strong><small>Mel adorou · ♥ 5</small></div><span>›</span></article></section>
+          </div>
+          <footer class="flow-footer flow-footer--single"><button class="pz-button pz-button--primary wide" id="cook-again">Preparar novamente</button></footer>
+        </section>
+
+        <section class="screen flow-screen cook-log-view" data-screen="cook-log" aria-label="Registrar preparo da receita">
+          <header class="flow-header">
+            <button class="flow-header__back" id="cook-log-close" aria-label="Voltar para a receita">←</button>
+            <div><span class="flow-header__eyebrow">Frango com batata-doce</span><strong>Registrar fornalha</strong></div>
+            <span class="flow-header__avatar flow-header__avatar--pot"><img src="../papazilla-design-system/assets/icons/potinho.png" alt=""></span>
+          </header>
+          <div class="flow-progress"><span style="width:100%"></span></div>
+          <div class="flow-body cook-log-body">
+            <div class="flow-intro"><p class="eyebrow">Receita preparada</p><h1>Como ficou essa fornalha?</h1><p>Guarde a foto e a reação da matilha. Esse preparo entra no histórico da receita.</p></div>
+            <button class="finished-photo-picker" id="finished-photo-picker"><span><img src="../papazilla-design-system/assets/icons/adicionar.png" alt=""></span><strong>Adicionar foto do prato</strong><small>Tirar foto ou escolher da galeria · opcional</small></button>
+            <div class="question-block cook-pets"><h3>Quem provou?</h3><div><button class="cook-pet is-selected"><span><img src="../papazilla-design-system/assets/icons/zilla.png" alt=""></span>Mel <i>✓</i></button><button class="cook-pet"><span><img src="../papazilla-design-system/assets/icons/zilla.png" alt=""></span>Bento <i>✓</i></button></div></div>
+            <div class="question-block"><h3>Os Monstrinhos curtiram?</h3><div class="recipe-rating" role="group" aria-label="Avaliação da receita"><button class="is-on" aria-label="1 de 5">♥</button><button class="is-on" aria-label="2 de 5">♥</button><button class="is-on" aria-label="3 de 5">♥</button><button class="is-on" aria-label="4 de 5">♥</button><button class="is-on" aria-label="5 de 5">♥</button></div><p class="rating-caption">Amaram! Essa vai voltar para o potinho.</p></div>
+            <label class="cook-note"><span>Uma lembrança deste preparo</span><textarea placeholder="Ex.: a Mel comeu tudo e pediu mais..."></textarea></label>
+          </div>
+          <footer class="flow-footer"><button class="pz-button pz-button--outline" id="cook-log-cancel">Agora não</button><button class="pz-button pz-button--primary" id="save-cook-log">Salvar preparo</button></footer>
+        </section>
+
+        <section class="screen flow-screen recipe-flow" data-screen="recipe" aria-label="Wizard da receita">
+          <header class="flow-header">
+            <button class="flow-header__back" id="recipe-close" aria-label="Fechar receita">←</button>
+            <div><span class="flow-header__eyebrow" id="recipe-pet-context">Receita da Mel</span><strong id="recipe-step-label">Etapa 1 de 8</strong></div>
+            <span class="flow-header__avatar flow-header__avatar--pot"><img src="../papazilla-design-system/assets/icons/potinho.png" alt=""></span>
+          </header>
+          <div class="flow-progress"><span id="recipe-progress"></span></div>
+          <div class="flow-body" id="recipe-body"></div>
+          <footer class="flow-footer">
+            <button class="pz-button pz-button--outline" id="recipe-back">Voltar</button>
+            <button class="pz-button pz-button--primary" id="recipe-next">Continuar →</button>
+          </footer>
+        </section>
+
+        <div class="prototype-toast" id="prototype-toast" role="status"></div>
+      </div>
+      <div class="device__home-indicator" aria-hidden="true"></div>
+    </section>
+  </main>
+  <script src="scripts/app.js?v=20260909-03"></script>
+</body>
+</html>

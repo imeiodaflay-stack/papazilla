@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Papazilla UI — Biblioteca local</title>
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <link rel="stylesheet" href="styles/catalog.css">
+</head>
+<body>
+  <div class="catalog-shell">
+    <header class="catalog-header">
+      <img src="../papazilla-design-system/assets/papazilla-wordmark.png" alt="Papazilla">
+      <nav class="catalog-nav" aria-label="Seções do catálogo">
+        <a href="#fundamentos">Fundamentos</a><a href="#marca">Marca</a><a href="#acoes">Ações</a><a href="#formularios">Formulários</a><a href="#navegacao">Navegação</a><a href="#conteudo">Conteúdo</a><a href="#feedback">Feedback</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="catalog-hero">
+        <div class="catalog-stack">
+          <span class="catalog-eyebrow">Biblioteca local · v1.0</span>
+          <h1 class="pz-display">Fome de monstro.<br>Porção na medida.</h1>
+          <p class="catalog-lead">Fundamentos e componentes reais para desenhar e construir o Papazilla, mesmo sem depender do Figma.</p>
+          <div class="catalog-row"><a class="pz-button pz-button--primary" href="#acoes">Ver componentes</a><a class="pz-button pz-button--outline" href="README.md">Guia técnico</a></div>
+        </div>
+        <div class="catalog-hero__art"><img src="../papazilla-design-system/assets/papazilla-lockup-hero.png" alt="Zilla com o pote de comida sobre a cidade"></div>
+      </section>
+
+      <section class="catalog-section" id="fundamentos">
+        <h2 class="pz-h1">Fundamentos</h2>
+        <p class="catalog-section__intro">A paleta preserva a personalidade da marca e mantém o texto chocolate como base de leitura. Os componentes usam os tokens semânticos definidos em <code>tokens.css</code>.</p>
+        <div class="catalog-grid">
+          <article class="catalog-swatch"><div class="catalog-swatch__color" style="--swatch:var(--pz-coral)"></div><div class="catalog-swatch__meta"><h3 class="pz-h3">Coral Papazilla</h3><p class="pz-caption">#F98B69 · ação principal</p></div></article>
+          <article class="catalog-swatch"><div class="catalog-swatch__color" style="--swatch:var(--pz-pessego)"></div><div class="catalog-swatch__meta"><h3 class="pz-h3">Pêssego</h3><p class="pz-caption">#F7BDA3 · apoio e marca</p></div></article>
+          <article class="catalog-swatch"><div class="catalog-swatch__color" style="--swatch:var(--pz-verde)"></div><div class="catalog-swatch__meta"><h3 class="pz-h3">Verde Papazilla</h3><p class="pz-caption">#ADB047 · ação secundária</p></div></article>
+          <article class="catalog-swatch"><div class="catalog-swatch__color" style="--swatch:var(--pz-oliva)"></div><div class="catalog-swatch__meta"><h3 class="pz-h3">Oliva</h3><p class="pz-caption">#716A11 · tinta sobre verde claro</p></div></article>
+          <article class="catalog-swatch"><div class="catalog-swatch__color" style="--swatch:var(--pz-chocolate)"></div><div class="catalog-swatch__meta"><h3 class="pz-h3">Chocolate</h3><p class="pz-caption">#4A2D22 · texto principal</p></div></article>
+          <article class="catalog-swatch"><div class="catalog-swatch__color" style="--swatch:var(--pz-creme)"></div><div class="catalog-swatch__meta"><h3 class="pz-h3">Creme</h3><p class="pz-caption">#FFF8F3 · fundo</p></div></article>
+        </div>
+        <div class="catalog-grid">
+          <article class="catalog-demo catalog-stack"><span class="pz-caption">Escala tipográfica</span><p class="pz-display">Hero</p><p class="pz-h1">Título principal</p><p class="pz-h2">Título de card</p><p class="pz-h3">Microtítulo</p><p class="pz-body">Corpo para leitura confortável.</p><p class="pz-small">Texto de apoio e explicações.</p><p class="pz-caption">Legenda e metadados</p></article>
+          <article class="catalog-demo catalog-stack"><span class="pz-caption">Espaço, raio e elevação</span><div class="pz-card"><h3 class="pz-h3">Card padrão</h3><p class="pz-small">Raio de 18px e sombra suave.</p></div><div class="pz-card pz-card--soft"><h3 class="pz-h3">Superfície suave</h3><p class="pz-small">Para apoio, agrupamento e estados discretos.</p></div></article>
+        </div>
+      </section>
+
+      <section class="catalog-section" id="marca">
+        <h2 class="pz-h1">Marca e Zilla</h2>
+        <p class="catalog-section__intro">Use os arquivos originais sem recriar o lettering, recolorir ou distorcer o mascote.</p>
+        <div class="catalog-grid">
+          <article class="catalog-demo"><span class="pz-caption">Wordmark</span><img src="../papazilla-design-system/assets/papazilla-wordmark.png" alt="Wordmark Papazilla"></article>
+          <article class="catalog-demo"><span class="pz-caption">Lockup horizontal</span><img src="../papazilla-design-system/assets/papazilla-lockup-horizontal.png" alt="Papazilla com Zilla"></article>
+          <article class="catalog-demo"><span class="pz-caption">Mascote de frente</span><img src="../papazilla-design-system/assets/zilla-frente.png" alt="Zilla de frente" style="max-height:180px;margin:auto"></article>
+          <article class="catalog-demo"><span class="pz-caption">Lockup hero</span><img src="../papazilla-design-system/assets/papazilla-lockup-hero.png" alt="Lockup hero Papazilla" style="max-height:180px;margin:auto"></article>
+        </div>
+        <div class="catalog-icon-grid">
+          <div class="catalog-icon"><img src="../papazilla-design-system/assets/icons/zilla.png" alt="">Zilla</div><div class="catalog-icon"><img src="../papazilla-design-system/assets/icons/potinho.png" alt="">Potinho</div><div class="catalog-icon"><img src="../papazilla-design-system/assets/icons/receita.png" alt="">Receita</div><div class="catalog-icon"><img src="../papazilla-design-system/assets/icons/salvar.png" alt="">Salvar</div><div class="catalog-icon"><img src="../papazilla-design-system/assets/icons/favorito.png" alt="">Favorito</div><div class="catalog-icon"><img src="../papazilla-design-system/assets/icons/adicionar.png" alt="">Adicionar</div><div class="catalog-icon"><img src="../papazilla-design-system/assets/icons/editar.png" alt="">Editar</div><div class="catalog-icon"><img src="../papazilla-design-system/assets/icons/excluir.png" alt="">Excluir</div><div class="catalog-icon"><img src="../papazilla-design-system/assets/icons/busca.png" alt="">Busca</div><div class="catalog-icon"><img src="../papazilla-design-system/assets/icons/filtros.png" alt="">Filtros</div><div class="catalog-icon"><img src="../papazilla-design-system/assets/icons/calendario.png" alt="">Calendário</div><div class="catalog-icon"><img src="../papazilla-design-system/assets/icons/notificacoes.png" alt="">Notificações</div><div class="catalog-icon"><img src="../papazilla-design-system/assets/icons/perfil.png" alt="">Perfil</div><div class="catalog-icon"><img src="../papazilla-design-system/assets/icons/casa.png" alt="">Casa</div><div class="catalog-icon"><img src="../papazilla-design-system/assets/icons/grafico-barras.png" alt="">Gráfico</div><div class="catalog-icon"><img src="../papazilla-design-system/assets/icons/grafico-pizza.png" alt="">Distribuição</div><div class="catalog-icon"><img src="../papazilla-design-system/assets/icons/mensagem.png" alt="">Mensagem</div><div class="catalog-icon"><img src="../papazilla-design-system/assets/icons/info.png" alt="">Informação</div><div class="catalog-icon"><img src="../papazilla-design-system/assets/icons/sucesso.png" alt="">Sucesso</div><div class="catalog-icon"><img src="../papazilla-design-system/assets/icons/erro.png" alt="">Erro</div><div class="catalog-icon"><img src="../papazilla-design-system/assets/icons/ajustes.png" alt="">Ajustes</div><div class="catalog-icon"><img src="../papazilla-design-system/assets/icons/gerar.png" alt="">Gerar</div><div class="catalog-icon"><img src="../papazilla-design-system/assets/icons/salvo.png" alt="">Salvo</div><div class="catalog-icon"><img src="../papazilla-design-system/assets/icons/patinha.png" alt="">Patinha</div><div class="catalog-icon"><img src="../papazilla-design-system/assets/icons/sheet.png" alt="">Sheet</div>
+        </div>
+      </section>
+
+      <section class="catalog-section" id="acoes">
+        <h2 class="pz-h1">Ações</h2><p class="catalog-section__intro">Um CTA coral por tela. Todas as ações têm alvo mínimo de 44px, foco visível e resposta ao toque.</p>
+        <div class="catalog-row"><button class="pz-button pz-button--primary">Criar uma receita</button><button class="pz-button pz-button--secondary">Ver plano alimentar</button><button class="pz-button pz-button--outline">Saber mais</button><button class="pz-button pz-button--text">Ver todas →</button><button class="pz-button pz-button--danger">Excluir</button><button class="pz-button" disabled>Indisponível</button><button class="pz-icon-button" aria-label="Salvar receita"><img src="../papazilla-design-system/assets/icons/salvar.png" alt=""></button></div>
+      </section>
+
+      <section class="catalog-section" id="formularios">
+        <h2 class="pz-h1">Formulários e escolhas</h2><p class="catalog-section__intro">Campos claros, estados explícitos e controles nativos. Essa base pode receber todas as perguntas do cadastro sem mudar a linguagem visual.</p>
+        <div class="catalog-grid">
+          <label class="pz-field"><span class="pz-field__label">Nome do cão</span><input class="pz-input" value="Mel"><span class="pz-field__hint">Como chamamos seu monstrinho?</span></label>
+          <label class="pz-field pz-field--success"><span class="pz-field__label">Peso atual (kg)</span><input class="pz-input" value="12,5"><span class="pz-field__hint">Peso registrado</span></label>
+          <label class="pz-field pz-field--error"><span class="pz-field__label">E-mail</span><input class="pz-input" value="mel@arroba" aria-invalid="true"><span class="pz-field__hint">Digite um e-mail válido</span></label>
+          <label class="pz-field"><span class="pz-field__label">Objetivo</span><select class="pz-select"><option>Manter o peso atual</option><option>Emagrecer</option><option>Ganhar peso</option></select><span class="pz-field__hint">Escolha uma opção</span></label>
+          <label class="pz-field"><span class="pz-field__label">Recomendação</span><input class="pz-input" value="Calculado pelo Papazilla" disabled><span class="pz-field__hint">Definido a partir do perfil</span></label>
+          <label class="pz-field"><span class="pz-field__label">Observações</span><textarea class="pz-textarea" placeholder="Algo importante sobre seu cão?"></textarea><span class="pz-field__hint">0/240 caracteres</span></label>
+        </div>
+        <div class="catalog-row">
+          <label class="pz-switch"><input type="checkbox" checked><span class="pz-switch__track"><span class="pz-switch__thumb"></span></span>Notificações</label>
+          <label class="pz-control pz-control--check"><input type="checkbox" checked><span class="pz-control__mark"></span>Frango</label>
+          <label class="pz-control pz-control--check"><input type="checkbox"><span class="pz-control__mark"></span>Peixe</label>
+          <label class="pz-control pz-control--radio"><input type="radio" name="peso" checked><span class="pz-control__mark"></span>Prontos</label>
+          <label class="pz-control pz-control--radio"><input type="radio" name="peso"><span class="pz-control__mark"></span>Crus</label>
+        </div>
+        <div class="catalog-row"><button class="pz-chip" aria-pressed="true">Frango</button><button class="pz-chip" aria-pressed="false">Carne bovina</button><button class="pz-chip" aria-pressed="false">Peixe</button><span class="pz-badge pz-badge--success">✓ Saudável</span><span class="pz-badge pz-badge--accent">Plano pronto</span><span class="pz-badge pz-badge--warning">Atenção</span></div>
+      </section>
+
+      <section class="catalog-section" id="navegacao">
+        <h2 class="pz-h1">Navegação e progresso</h2>
+        <div class="catalog-grid">
+          <article class="catalog-demo catalog-stack"><span class="pz-caption">Abas</span><div class="pz-tabs" role="tablist"><button class="pz-tab" role="tab" aria-selected="true">Receitas</button><button class="pz-tab" role="tab" aria-selected="false">Plano</button><button class="pz-tab" role="tab" aria-selected="false">Evolução</button></div></article>
+          <article class="catalog-demo catalog-stack"><span class="pz-caption">Passo a passo</span><div class="pz-stepper"><div class="pz-step pz-step--done"><span class="pz-step__dot">✓</span></div><div class="pz-step pz-step--active"><span class="pz-step__dot">2</span></div><div class="pz-step"><span class="pz-step__dot">3</span></div><div class="pz-step"><span class="pz-step__dot">4</span></div></div><div><p class="pz-h3">Perfil do Monstrinho</p><p class="pz-small">Passo 2 de 4</p></div><div class="pz-progress" aria-label="78% concluído"><div class="pz-progress__value" style="--value:78%"></div></div></article>
+        </div>
+        <div class="catalog-demo" style="margin-top:1rem"><span class="pz-caption">Navegação principal aprovada</span><nav class="pz-bottom-nav" aria-label="Navegação do app"><button class="pz-bottom-nav__item" aria-current="page"><img src="../papazilla-design-system/assets/icons/zilla.png" alt="">Zilla</button><button class="pz-bottom-nav__item"><img src="../papazilla-design-system/assets/icons/potinho.png" alt="">Papá</button><button class="pz-bottom-nav__item"><img src="../papazilla-design-system/assets/icons/mensagem.png" alt="">Curiosidades</button><button class="pz-bottom-nav__item"><img src="../papazilla-design-system/assets/icons/salvo.png" alt="">Receitas salvas</button></nav></div>
+      </section>
+
+      <section class="catalog-section" id="conteudo">
+        <h2 class="pz-h1">Cards, listas e estados</h2>
+        <div class="catalog-grid">
+          <article class="pz-card pz-pet-card"><img class="pz-avatar" src="../papazilla-design-system/assets/zilla-frente.png" alt="Foto ilustrativa da Mel"><div><h3 class="pz-h2">Mel</h3><p class="pz-small">12,5 kg · adulta · castrada</p></div><button class="pz-button pz-button--outline">Editar</button></article>
+          <article class="pz-card pz-recipe-card"><div class="pz-recipe-card__image"><img src="../papazilla-design-system/assets/papazilla-lockup-hero.png" alt=""></div><div class="pz-card__header"><div><span class="pz-badge pz-badge--success">100% natural</span><h3 class="pz-h2" style="margin-top:.5rem">Frango com abóbora</h3><p class="pz-small">Para Mel · 360 g/dia</p></div><button class="pz-icon-button" aria-label="Favoritar"><img src="../papazilla-design-system/assets/icons/favorito.png" alt=""></button></div></article>
+          <article class="pz-card"><h3 class="pz-h2">Ingredientes</h3><div class="pz-ingredient"><img src="../papazilla-design-system/assets/icons/potinho.png" alt=""><div><strong>Peito de frango</strong><p class="pz-caption">Proteína</p></div><strong>126 g</strong></div><div class="pz-ingredient"><img src="../papazilla-design-system/assets/icons/patinha.png" alt=""><div><strong>Abóbora</strong><p class="pz-caption">Vegetal</p></div><strong>90 g</strong></div></article>
+          <article class="pz-card pz-empty"><img src="../papazilla-design-system/assets/zilla-frente.png" alt="Zilla"><h3 class="pz-h2">Nenhuma receita salva ainda</h3><p class="pz-small">Quando uma receita fizer sucesso, guarde para a próxima fornalha.</p><button class="pz-button pz-button--primary" style="margin-top:1rem">Criar receita</button></article>
+        </div>
+      </section>
+
+      <section class="catalog-section" id="feedback">
+        <h2 class="pz-h1">Feedback e confirmação</h2>
+        <div class="catalog-grid">
+          <div class="pz-alert pz-alert--success"><img src="../papazilla-design-system/assets/icons/sucesso.png" alt=""><div><strong>Plano salvo</strong><p class="pz-small">Tudo certo para a próxima refeição.</p></div></div>
+          <div class="pz-alert pz-alert--warning"><img src="../papazilla-design-system/assets/icons/info.png" alt=""><div><strong>Atenção</strong><p class="pz-small">Revise esta receita com o veterinário.</p></div></div>
+          <div class="pz-alert pz-alert--danger"><img src="../papazilla-design-system/assets/icons/erro.png" alt=""><div><strong>Não foi possível salvar</strong><p class="pz-small">Confira a conexão e tente novamente.</p></div></div>
+          <div class="pz-alert pz-alert--info"><img src="../papazilla-design-system/assets/icons/info.png" alt=""><div><strong>Lembrete</strong><p class="pz-small">Mantenha água sempre disponível.</p></div></div>
+        </div>
+        <div class="catalog-row"><button class="pz-button pz-button--secondary" data-toast>Testar toast</button><button class="pz-button pz-button--outline" data-open-sheet>Abrir confirmação</button></div>
+        <p class="catalog-note"><strong>Nota:</strong> os exemplos demonstram hierarquia e tom de voz. Eles não acrescentam regras ao motor nutricional.</p>
+      </section>
+    </main>
+  </div>
+
+  <div class="pz-toast-region" aria-live="polite"></div>
+  <div class="pz-backdrop" data-open="false">
+    <section class="pz-sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+      <h2 class="pz-h2" id="sheet-title">Excluir esta receita?</h2>
+      <p class="pz-small">Frango com abóbora será removida das receitas salvas.</p>
+      <div class="pz-sheet__actions"><button class="pz-button pz-button--outline" data-close-sheet>Cancelar</button><button class="pz-button pz-button--danger" data-close-sheet>Excluir</button></div>
+    </section>
+  </div>
+  <script src="scripts/catalog.js"></script>
+</body>
+</html>

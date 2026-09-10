@@ -1,0 +1,1324 @@
+<meta charset="utf-8">
+<title>Calculadora AN Cozida</title>
+<meta name="description" content="Calculadora de porções e suplementação para a dieta caseira AN Cozida de cães, baseada na metodologia publicada pela Dra. Sylvia Angélico (cachorroverde.com.br).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    color-scheme: light;
+    --bg: #f5f6ee;
+    --surface: #ffffff;
+    --surface-2: #ecefe3;
+    --ink: #16201a;
+    --ink-secondary: #565f52;
+    --ink-muted: #8a8f7d;
+    --border: rgba(22,32,26,0.13);
+    --border-strong: rgba(22,32,26,0.22);
+    --primary: #1f4d3a;
+    --primary-strong: #163b2c;
+    --primary-ink-on: #f6f8f1;
+    --accent: #b9791f;
+    --accent-ink-on: #241600;
+    --status-warning: #b3760a;
+    --status-warning-bg: rgba(250,178,25,0.16);
+    --status-warning-border: rgba(179,118,10,0.35);
+    --cat-carnes: #d1571f;
+    --cat-visceras: #2a78d6;
+    --cat-carbo: #c17f00;
+    --cat-vegetais: #1a9668;
+    --shadow: 0 1px 2px rgba(22,32,26,0.06), 0 8px 24px -12px rgba(22,32,26,0.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme: dark;
+      --bg: #10140d;
+      --surface: #1a2016;
+      --surface-2: #222a1c;
+      --ink: #edf1e6;
+      --ink-secondary: #b4bba8;
+      --ink-muted: #83886f;
+      --border: rgba(237,241,230,0.12);
+      --border-strong: rgba(237,241,230,0.22);
+      --primary: #6ab68e;
+      --primary-strong: #86caa5;
+      --primary-ink-on: #0b140e;
+      --accent: #e2a940;
+      --accent-ink-on: #241600;
+      --status-warning: #fab219;
+      --status-warning-bg: rgba(250,178,25,0.14);
+      --status-warning-border: rgba(250,178,25,0.4);
+      --cat-carnes: #e0703a;
+      --cat-visceras: #5c9bec;
+      --cat-carbo: #d99a1f;
+      --cat-vegetais: #35b189;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 28px -12px rgba(0,0,0,0.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --bg: #10140d;
+    --surface: #1a2016;
+    --surface-2: #222a1c;
+    --ink: #edf1e6;
+    --ink-secondary: #b4bba8;
+    --ink-muted: #83886f;
+    --border: rgba(237,241,230,0.12);
+    --border-strong: rgba(237,241,230,0.22);
+    --primary: #6ab68e;
+    --primary-strong: #86caa5;
+    --primary-ink-on: #0b140e;
+    --accent: #e2a940;
+    --accent-ink-on: #241600;
+    --status-warning: #fab219;
+    --status-warning-bg: rgba(250,178,25,0.14);
+    --status-warning-border: rgba(250,178,25,0.4);
+    --cat-carnes: #e0703a;
+    --cat-visceras: #5c9bec;
+    --cat-carbo: #d99a1f;
+    --cat-vegetais: #35b189;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 28px -12px rgba(0,0,0,0.6);
+  }
+
+  *{box-sizing:border-box;}
+  [hidden]{display:none !important;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Work Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:"Fraunces", Georgia, "Times New Roman", serif;
+    font-weight:600;
+    line-height:1.15;
+    text-wrap:balance;
+    margin:0;
+    color:var(--ink);
+  }
+  .num{
+    font-family:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  a{color:var(--primary);}
+  button{font:inherit;}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
+  }
+
+  .page{max-width:1180px; margin:0 auto; padding:40px 24px 80px;}
+
+  header.hero{
+    display:flex; flex-direction:column; gap:10px;
+    padding-bottom:28px; margin-bottom:32px;
+    border-bottom:1px solid var(--border);
+  }
+  .eyebrow{
+    font-size:12.5px; font-weight:600; letter-spacing:0.09em; text-transform:uppercase;
+    color:var(--primary);
+  }
+  header.hero h1{font-size:clamp(28px,4vw,40px);}
+  header.hero p{margin:0; max-width:62ch; color:var(--ink-secondary); font-size:15.5px;}
+  .theme-toggle{
+    align-self:flex-start;
+    margin-top:6px;
+    display:inline-flex; gap:6px; padding:3px;
+    background:var(--surface-2); border:1px solid var(--border); border-radius:999px;
+  }
+  .theme-toggle button{
+    border:none; background:transparent; color:var(--ink-secondary);
+    padding:6px 12px; border-radius:999px; font-size:12.5px; font-weight:600; cursor:pointer;
+  }
+  .theme-toggle button[aria-pressed="true"]{background:var(--surface); color:var(--ink); box-shadow:var(--shadow);}
+
+  .layout{
+    display:grid;
+    grid-template-columns: minmax(300px,380px) 1fr;
+    gap:28px;
+    align-items:start;
+  }
+  @media (max-width:860px){
+    .layout{grid-template-columns:1fr;}
+  }
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:22px;
+    box-shadow:var(--shadow);
+  }
+  fieldset{border:none; margin:0; padding:0;}
+  legend{
+    font-family:"Fraunces", serif; font-weight:600; font-size:16px;
+    padding:0 0 12px; color:var(--ink);
+    width:100%;
+  }
+  form.card{display:flex; flex-direction:column; gap:26px;}
+  .field{display:flex; flex-direction:column; gap:6px; margin-bottom:14px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{font-size:13px; font-weight:600; color:var(--ink-secondary);}
+  .hint{font-size:12px; color:var(--ink-muted);}
+  input[type="number"], select{
+    font:inherit; font-size:14.5px;
+    padding:9px 11px;
+    border-radius:8px; border:1px solid var(--border-strong);
+    background:var(--surface); color:var(--ink);
+    width:100%;
+  }
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;}
+  .checkline{display:flex; align-items:center; gap:8px; font-size:13.5px; color:var(--ink);}
+  .checkline input{width:16px; height:16px;}
+  .divider{height:1px; background:var(--border); border:none; margin:2px 0;}
+
+  .presets{display:grid; gap:8px;}
+  .preset{
+    position:relative;
+    display:flex; flex-direction:column; gap:7px;
+    padding:10px 12px;
+    border:1px solid var(--border-strong); border-radius:10px;
+    cursor:pointer;
+  }
+  .preset input{position:absolute; opacity:0; inset:0; margin:0; cursor:pointer;}
+  .preset:has(input:checked){border-color:var(--primary); background:color-mix(in srgb, var(--primary) 8%, var(--surface));}
+  .preset:has(input:focus-visible){outline:2px solid var(--accent); outline-offset:2px;}
+  .preset-top{display:flex; justify-content:space-between; align-items:baseline; font-size:13px; font-weight:600;}
+  .preset-bar{display:flex; height:8px; border-radius:5px; overflow:hidden;}
+  .preset-legend{display:flex; flex-wrap:wrap; gap-column:10px; gap-row:2px; font-size:11px; color:var(--ink-muted);}
+  .preset-legend span{margin-right:10px;}
+
+  .radio-cards{display:flex; gap:8px;}
+  .radio-cards label{
+    flex:1; text-align:center; font-size:13px; font-weight:600;
+    padding:9px 6px; border:1px solid var(--border-strong); border-radius:8px; cursor:pointer;
+    position:relative; color:var(--ink-secondary);
+  }
+  .radio-cards input{position:absolute; opacity:0; inset:0; margin:0; cursor:pointer;}
+  .radio-cards label:has(input:checked){border-color:var(--primary); color:var(--primary); background:color-mix(in srgb, var(--primary) 8%, var(--surface));}
+
+  .results{display:flex; flex-direction:column; gap:18px;}
+  .example-note{font-size:12.5px; color:var(--ink-muted); margin:-6px 0 0;}
+
+  .hero-card{display:flex; flex-wrap:wrap; gap:24px; justify-content:space-between; align-items:flex-end;}
+  .hero-figure .label{font-size:12.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.07em; color:var(--ink-muted);}
+  .hero-figure .value{font-size:44px; font-weight:600; line-height:1;}
+  .hero-figure .value small{font-size:18px; font-weight:500; color:var(--ink-secondary);}
+  .hero-side{display:flex; gap:22px;}
+  .hero-side .mini .label{font-size:11.5px; color:var(--ink-muted); text-transform:uppercase; letter-spacing:0.06em;}
+  .hero-side .mini .value{font-size:19px; font-weight:600;}
+
+  .stackbar{display:flex; height:34px; border-radius:9px; overflow:hidden; border:1px solid var(--border);}
+  .stackbar .seg{display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:600; color:#fff; min-width:0; white-space:nowrap; overflow:hidden;}
+  .legend-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px 16px; margin-top:14px;}
+  .legend-item{display:flex; align-items:center; gap:8px; font-size:13px;}
+  .swatch{width:11px; height:11px; border-radius:3px; flex:none;}
+  .legend-item .amt{margin-left:auto; font-size:13px; color:var(--ink-secondary);}
+
+  .card h2{font-size:16px; margin-bottom:4px;}
+  .card .subtle{font-size:12.5px; color:var(--ink-muted); margin:0 0 14px;}
+
+  .supp-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px;}
+  .supp{border:1px solid var(--border); border-radius:10px; padding:13px 14px; background:var(--surface-2);}
+  .supp .t{font-size:12.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color:var(--ink-muted); margin-bottom:4px;}
+  .supp .d{font-size:15px; font-weight:600;}
+  .supp .n{font-size:12.5px; color:var(--ink-secondary); margin-top:3px;}
+
+  .info-strip{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px;}
+  .info-strip .item{border-left:2px solid var(--border-strong); padding-left:12px;}
+  .info-strip .item .k{font-size:11.5px; color:var(--ink-muted); text-transform:uppercase; letter-spacing:0.05em;}
+  .info-strip .item .v{font-size:15px; font-weight:600; margin-top:2px;}
+
+  .warning{
+    border:1px solid var(--status-warning-border);
+    background:var(--status-warning-bg);
+    border-radius:12px; padding:16px 18px;
+  }
+  .warning h2{font-size:15px; display:flex; align-items:center; gap:8px; color:var(--ink);}
+  .warning h2 .dot{width:9px; height:9px; border-radius:50%; background:var(--status-warning); flex:none;}
+  .warning ul{margin:10px 0 0; padding-left:20px; font-size:13.5px; color:var(--ink-secondary); columns:2; column-gap:24px;}
+  .warning li{margin-bottom:4px; break-inside:avoid;}
+  .warning p{font-size:13px; color:var(--ink-secondary); margin:10px 0 0;}
+  @media (max-width:520px){.warning ul{columns:1;}}
+
+  footer{
+    margin-top:40px; padding-top:20px; border-top:1px solid var(--border);
+    font-size:12.5px; color:var(--ink-muted); display:flex; flex-direction:column; gap:6px;
+  }
+  footer a{color:var(--ink-secondary);}
+
+  .btn{
+    font:inherit; font-size:13.5px; font-weight:600;
+    padding:10px 18px; border-radius:999px; cursor:pointer;
+    border:1px solid transparent;
+  }
+  .btn-primary{background:var(--primary); color:var(--primary-ink-on); border-color:var(--primary);}
+  .btn-primary:hover{background:var(--primary-strong); border-color:var(--primary-strong);}
+  .btn-primary:disabled{opacity:0.4; cursor:not-allowed;}
+  .btn-ghost{background:transparent; color:var(--ink-secondary); border-color:var(--border-strong);}
+  .btn-ghost:disabled{opacity:0.4; cursor:not-allowed;}
+
+  .recipe-cta{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+  .recipe-cta-text h2{margin-bottom:4px;}
+  .recipe-cta-text p{margin:0;}
+
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(10,14,8,0.55);
+    display:flex; align-items:center; justify-content:center;
+    padding:20px; z-index:1000;
+  }
+  .modal-overlay[hidden]{display:none;}
+  .modal{
+    max-width:600px; width:100%; max-height:88vh; overflow-y:auto;
+  }
+  .modal-head{display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:2px;}
+  .modal-close{
+    background:none; border:none; color:var(--ink-muted); cursor:pointer;
+    font-size:19px; line-height:1; padding:4px; flex:none;
+  }
+  .modal-steps{display:flex; gap:6px; margin:16px 0 22px;}
+  .modal-step-dot{flex:1; height:4px; border-radius:2px; background:var(--surface-2);}
+  .modal-step-dot.active{background:var(--primary);}
+  .modal-step-dot.done{background:var(--primary); opacity:0.45;}
+  .modal-step-title{font-family:"Fraunces", serif; font-size:16px; font-weight:600; margin:0 0 4px;}
+  .skip-note{font-size:12px; color:var(--ink-muted); margin:8px 0 0;}
+
+  .muscular-note{
+    margin-top:12px; padding:12px 14px;
+    border:1px solid var(--status-warning-border);
+    background:var(--status-warning-bg);
+    border-radius:10px;
+    font-size:12.5px; line-height:1.5; color:var(--ink-secondary);
+  }
+  .muscular-note strong{color:var(--ink);}
+  .muscular-note + .muscular-note{margin-top:8px;}
+
+  .ing-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:8px; margin:16px 0 4px;}
+  .ing-chip{
+    display:flex; align-items:center; gap:9px; padding:10px 12px;
+    border:1px solid var(--border-strong); border-radius:10px; cursor:pointer;
+    font-size:13.5px; position:relative;
+  }
+  .ing-chip input{width:16px; height:16px; flex:none; accent-color:var(--primary);}
+  .ing-chip:has(input:checked){border-color:var(--primary); background:color-mix(in srgb, var(--primary) 8%, var(--surface));}
+
+  .modal-actions{display:flex; justify-content:space-between; gap:10px; margin-top:20px;}
+
+  .recipe-result-group{margin-bottom:16px;}
+  .recipe-result-group h3{
+    font-size:12.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em;
+    color:var(--ink-muted); margin:0 0 6px; font-family:"Work Sans", sans-serif;
+  }
+  .recipe-result-item{padding:8px 0; border-bottom:1px solid var(--border); font-size:14px;}
+  .recipe-result-item:last-child{border-bottom:none;}
+  .recipe-result-item-row{display:flex; justify-content:space-between; gap:12px;}
+  .recipe-result-item-raw{font-size:12px; color:var(--ink-muted); margin-top:2px;}
+  .recipe-result-total{
+    display:flex; justify-content:space-between; align-items:baseline; font-weight:600;
+    padding-top:12px; margin-top:8px; border-top:1px solid var(--border-strong);
+  }
+  .recipe-result-total .raw-total{font-size:12px; font-weight:400; color:var(--ink-muted); margin-left:8px;}
+  .recipe-yield-note{
+    font-size:12px; color:var(--ink-secondary); background:var(--surface-2);
+    border:1px solid var(--border); border-radius:10px; padding:10px 12px; margin:2px 0 14px;
+  }
+  @media (max-width:520px){.recipe-cta{flex-direction:column; align-items:flex-start;}}
+</style>
+
+<div class="page">
+
+  <header class="hero">
+    <span class="eyebrow">Alimentação Natural · Cães · Dieta Cozida</span>
+    <h1>Calculadora AN Cozida</h1>
+    <p>Calcula as porções diárias e a suplementação da dieta caseira cozida (AN) a partir do peso e do perfil do cão, seguindo a metodologia publicada por Dra. Sylvia Angélico em cachorroverde.com.br. Ferramenta independente para uso pessoal — não substitui consulta com veterinário nutrólogo.</p>
+    <div class="theme-toggle" role="group" aria-label="Tema">
+      <button type="button" data-theme-choice="light" aria-pressed="false">Claro</button>
+      <button type="button" data-theme-choice="dark" aria-pressed="false">Escuro</button>
+      <button type="button" data-theme-choice="system" aria-pressed="true">Sistema</button>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <form class="card" id="form" autocomplete="off">
+
+      <fieldset>
+        <legend>Sobre o cão</legend>
+        <div class="field">
+          <label for="peso">Peso atual (kg)</label>
+          <input type="number" id="peso" min="0.5" max="90" step="0.1" value="12">
+          <span class="hint">Informe o peso medido atualmente.</span>
+        </div>
+
+        <div class="field">
+          <label for="objetivo">Objetivo da alimentação</label>
+          <select id="objetivo">
+            <option value="manter">Manter o peso atual</option>
+            <option value="emagrecer">Emagrecer</option>
+            <option value="ganhar">Ganhar peso</option>
+            <option value="qualidade" selected>Melhorar a qualidade da alimentação</option>
+            <option value="idade">Ajudar a preservar músculos e disposição com a idade</option>
+            <option value="saude">Apoiar uma condição de saúde</option>
+          </select>
+        </div>
+
+        <div class="field" id="pesoIdealField" hidden>
+          <label for="pesoIdeal">Peso ideal (kg)</label>
+          <input type="number" id="pesoIdeal" min="0.5" max="90" step="0.1" inputmode="decimal">
+          <span class="hint">Obrigatório para emagrecimento. A quantidade de comida será calculada com este peso.</span>
+        </div>
+
+        <div class="field">
+          <label for="fase">Fase de vida</label>
+          <select id="fase">
+            <option value="adulto" selected>Adulto</option>
+            <option value="filhote">Filhote</option>
+          </select>
+        </div>
+
+        <div id="filhoteFields">
+          <div class="field">
+            <label for="faixaIdade">Idade do filhote</label>
+            <select id="faixaIdade">
+              <option value="2-4">2 a 4 meses</option>
+              <option value="4-6">4 a 6 meses</option>
+              <option value="6-8">6 a 8 meses</option>
+              <option value="8-10">8 a 10 meses</option>
+              <option value="10-18">10 a 18 meses</option>
+              <option value="18+">18 meses ou mais</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="porteAdulto">Porte adulto esperado</label>
+            <select id="porteAdulto">
+              <option value="pequeno">Pequeno (adulto 5–10kg)</option>
+              <option value="medio" selected>Médio (adulto 10–25kg)</option>
+              <option value="grande">Grande (adulto 25–35kg)</option>
+              <option value="gigante">Gigante (adulto 35kg+)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Tendência de peso / atividade</label>
+          <select id="tendencia">
+            <option value="min">Tendência a engordar (raças como Beagle, Labrador, Pug)</option>
+            <option value="mid" selected>Normal</option>
+            <option value="max">Magro / muito ativo (raças como Boxer, Border Collie)</option>
+          </select>
+        </div>
+
+        <div id="adultoFields" class="row2">
+          <label class="checkline"><input type="checkbox" id="castrado"> Castrado(a)</label>
+          <label class="checkline"><input type="checkbox" id="idoso"> Idoso(a)</label>
+        </div>
+
+        <div class="field">
+          <label for="estacao">Estação atual</label>
+          <select id="estacao">
+            <option value="neutro" selected>Ameno / não se aplica</option>
+            <option value="verao">Verão (calor)</option>
+            <option value="inverno">Inverno (frio)</option>
+          </select>
+        </div>
+      </fieldset>
+
+      <hr class="divider">
+
+      <fieldset>
+        <legend>Formulação (grupos de alimentos)</legend>
+        <div class="presets" id="presets"></div>
+      </fieldset>
+
+      <hr class="divider">
+
+      <fieldset>
+        <legend>Suplemento vitamínico-mineral</legend>
+        <div class="radio-cards" id="suppChoice">
+          <label><input type="radio" name="supp" value="foodDog" checked> Food Dog</label>
+          <label><input type="radio" name="supp" value="nutroplus"> Nutroplus</label>
+        </div>
+        <p class="hint" style="margin-top:8px;">Introduza gradualmente: 1/4 da dose a cada 3 dias, até atingir a dose cheia em 12 dias.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Proteína predominante na dieta</legend>
+        <select id="proteina">
+          <option value="frangoPorco" selected>Frango e/ou porco</option>
+          <option value="boiPeixeMagro">Só boi e/ou peixes magros (ex. tilápia)</option>
+        </select>
+        <p class="hint" style="margin-top:6px;">Define qual óleo vegetal é indicado para equilibrar ômega-6/ômega-3.</p>
+      </fieldset>
+
+    </form>
+
+    <div class="results">
+
+      <p class="example-note" id="exampleNote">Valores de exemplo (12kg, adulto) — ajuste os campos ao lado para o seu cão.</p>
+      <p class="example-note" id="calculationWeightNote" hidden></p>
+
+      <div class="card hero-card">
+        <div class="hero-figure">
+          <div class="label">Total de AN por dia</div>
+          <div class="value num" id="outTotal">480 <small>g</small></div>
+        </div>
+        <div class="hero-side">
+          <div class="mini">
+            <div class="label">% do peso</div>
+            <div class="value num" id="outPct">4,0%</div>
+          </div>
+          <div class="mini">
+            <div class="label">Refeições/dia</div>
+            <div class="value num" id="outRefeicoes">2</div>
+          </div>
+          <div class="mini">
+            <div class="label">Petiscos (máx.)</div>
+            <div class="value num" id="outPetiscos">48–72 g</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Distribuição por grupo</h2>
+        <p class="subtle">Gramas por dia em cada grupo de alimentos, conforme a formulação escolhida.</p>
+        <div class="stackbar" id="stackbar"></div>
+        <div class="legend-grid" id="legendGrid"></div>
+      </div>
+
+      <div class="card recipe-cta">
+        <div class="recipe-cta-text">
+          <h2>Receita de hoje</h2>
+          <p class="subtle">Escolha os ingredientes e a gente calcula as gramas certinhas com base no resultado acima.</p>
+        </div>
+        <button type="button" class="btn btn-primary" id="openRecipeBtn">🍳 O que vamos fazer hoje?</button>
+      </div>
+
+      <div class="card">
+        <h2>Suplementação obrigatória</h2>
+        <p class="subtle">Doses calculadas a partir do total diário de AN.</p>
+        <div class="supp-grid">
+          <div class="supp">
+            <div class="t">Vitamínico-mineral</div>
+            <div class="d num" id="suppDoseOut">3,8 g/dia</div>
+            <div class="n" id="suppNameOut">Food Dog Adulto</div>
+          </div>
+          <div class="supp">
+            <div class="t">Óleo vegetal</div>
+            <div class="d" id="oilVegOut">1 colher de sobremesa, 1x/dia</div>
+            <div class="n" id="oilVegNoteOut">Azeite de oliva extra virgem, óleo de côco ou linhaça dourada</div>
+          </div>
+          <div class="supp">
+            <div class="t">Óleo de peixe / krill</div>
+            <div class="d" id="oilFishOut">1 cápsula de 1g, diária ou 3x/semana</div>
+            <div class="n">Dispensável se houver peixe fresco (sardinha etc.) 2–3x/semana</div>
+          </div>
+          <div class="supp">
+            <div class="t">Sal integral</div>
+            <div class="d">Incluir a cada refeição</div>
+            <div class="n">Dose não padronizada pela fonte — siga a embalagem do produto escolhido ou orientação veterinária</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="warning">
+        <h2><span class="dot"></span>Antes de começar</h2>
+        <p>Esta dieta é indicada apenas para cães comprovadamente saudáveis. Não inicie sem avaliação veterinária se o seu cão tiver qualquer uma destas condições:</p>
+        <ul>
+          <li>Diabetes</li>
+          <li>Doença hepática (inclui shunt portossistêmico)</li>
+          <li>Doença renal aguda ou crônica</li>
+          <li>Cálculos urinários</li>
+          <li>Doença cardíaca</li>
+          <li>Gastrite ou vômitos crônicos</li>
+          <li>Enterite ou colite</li>
+          <li>Pancreatite ou insuficiência pancreática</li>
+        </ul>
+        <p>Também não é indicado iniciar a transição se o cão estiver muito debilitado, por qualquer motivo. Entre uma dieta caseira grosseiramente desbalanceada e uma ração de qualidade, prefira sempre a ração — adote a AN com responsabilidade ou nem comece.</p>
+        <p>Esta calculadora foi desenvolvida apenas para dietas à base de proteína animal. Não trabalhamos com estimativas de porções nem suplementação para dietas vegetarianas ou veganas de cães — esse tipo de dieta tem riscos nutricionais próprios e exige acompanhamento veterinário especializado que está fora do escopo desta ferramenta.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="recipeModal" hidden>
+    <div class="modal card" role="dialog" aria-modal="true" aria-labelledby="recipeModalTitle">
+      <div class="modal-head">
+        <h2 id="recipeModalTitle">Vamos cozinhar?</h2>
+        <button type="button" class="modal-close" id="recipeModalClose" aria-label="Fechar">✕</button>
+      </div>
+      <div class="modal-steps" id="recipeSteps"></div>
+      <div id="recipeStepBody"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="recipeBackBtn">Voltar</button>
+        <button type="button" class="btn btn-primary" id="recipeNextBtn">Continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>Cálculo baseado no conteúdo público de <a href="https://cachorroverde.com.br/caes/dieta-cozida-para-caes/" target="_blank" rel="noopener">cachorroverde.com.br/caes/dieta-cozida-para-caes</a> (Dra. Sylvia Angélico, CRMV-SP 29943). Ferramenta independente, sem vínculo com o Cachorro Verde.</span>
+    <span>Reajuste a porcentagem em 0,5–1% a cada 2–4 semanas conforme a resposta do cão (escore de condição corporal). Isto é uma estimativa educacional, não uma prescrição veterinária.</span>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- data ----------
+  var ADULT_PORTE = [
+    {max:3,  min:7, max_:10},
+    {max:5,  min:5, max_:6},
+    {max:10, min:4, max_:6},
+    {max:25, min:4, max_:5},
+    {max:35, min:4, max_:5},
+    {max:42, min:3, max_:4},
+    {max:Infinity, min:3, max_:4}
+  ];
+
+  var PUPPY = {
+    "2-4":  {pequeno:[10,10], medio:[10,10], grande:[8,8], gigante:[8,8]},
+    "4-6":  {pequeno:[8,8],   medio:[8,8],   grande:[7,7], gigante:[7,7]},
+    "6-8":  {pequeno:[6,7],   medio:[6,7],   grande:[6,7], gigante:[6,6]},
+    "8-10": {pequeno:[5,6],   medio:[5,6],   grande:[5,6], gigante:[5,5]},
+    "10-18":{pequeno:[4,6],   medio:[4,6],   grande:[4,5], gigante:[4,5]},
+    "18+":  {pequeno:[4,6],   medio:[4,5],   grande:[4,4.5], gigante:[3,4]}
+  };
+
+  var PRESETS = [
+    {id:"padrao", nome:"Padrão", carnes:35, visceras:5, carbo:35, vegetais:25},
+    {id:"p2",     nome:"Mais proteína", carnes:45, visceras:5, carbo:25, vegetais:25},
+    {id:"p3",     nome:"Intermediária", carnes:40, visceras:5, carbo:30, vegetais:25},
+    {id:"p4",     nome:"Mais vísceras", carnes:40, visceras:10, carbo:25, vegetais:25}
+  ];
+
+  var CATS = [
+    {key:"carnes",   label:"Carnes desossadas", varName:"--cat-carnes"},
+    {key:"visceras", label:"Vísceras",          varName:"--cat-visceras"},
+    {key:"carbo",    label:"Carboidratos",      varName:"--cat-carbo"},
+    {key:"vegetais", label:"Vegetais",          varName:"--cat-vegetais"}
+  ];
+
+  // ---------- receita de hoje: catálogo de ingredientes ----------
+  var CARNES_ITEMS = [
+    {id:"frango_peito",   label:"Peito de frango",                        common:true, rawGroup:"carne"},
+    {id:"frango_coxa",    label:"Coxa/sobrecoxa de frango (desossada)",   common:true, rawGroup:"carne"},
+    {id:"frango_moela",   label:"Moela de frango",                        common:true, viscMuscular:true, rawGroup:"carne"},
+    {id:"frango_coracao", label:"Coração de frango",                      common:true, viscMuscular:true, rawGroup:"carne"},
+    {id:"boi_musculo",    label:"Músculo bovino",                         common:true, rawGroup:"carne"},
+    {id:"boi_lagarto",    label:"Lagarto bovino",                         common:true, rawGroup:"carne"},
+    {id:"boi_patinho",    label:"Patinho bovino",                         common:true, rawGroup:"carne"},
+    {id:"boi_coxao",      label:"Coxão (mole ou duro) bovino",            common:true, rawGroup:"carne"},
+    {id:"boi_pulmao",     label:"Pulmão bovino",                          common:true, viscMuscular:true, rawGroup:"carne"},
+    {id:"boi_coracao",    label:"Coração bovino",                         common:true, viscMuscular:true, rawGroup:"carne"},
+    {id:"boi_bucho",      label:"Bucho bovino (dobradinha)",              common:true, viscMuscular:true, rawGroup:"carne"},
+    {id:"boi_lingua",     label:"Língua bovina",                          common:true, viscMuscular:true, highFat:true, rawGroup:"carne"},
+    {id:"porco_lombo",    label:"Lombo suíno",                            common:true, rawGroup:"carne"},
+    {id:"porco_file",     label:"Filé mignon suíno",                      common:true, rawGroup:"carne"},
+    {id:"porco_pulmao",   label:"Pulmão suíno",                           common:true, viscMuscular:true, rawGroup:"carne"},
+    {id:"porco_coracao",  label:"Coração suíno",                          common:true, viscMuscular:true, rawGroup:"carne"},
+    {id:"peixe",          label:"Peixe pequeno com espinha (ex. sardinha)", common:true, rawGroup:"carne"},
+    {id:"ovo",            label:"Ovo cozido",                             common:false, rawGroup:"ovo"},
+    {id:"coelho",         label:"Coelho",                                 common:false, rawGroup:"carne"},
+    {id:"cordeiro",       label:"Cordeiro",                               common:false, rawGroup:"carne"},
+    {id:"peru",           label:"Peru",                                   common:false, rawGroup:"carne"}
+  ];
+
+  var VISCERAS_ITEMS = [
+    {id:"figado",  label:"Fígado (frango, boi ou porco)", rawGroup:"viscera"},
+    {id:"rim",     label:"Rim (boi ou porco)",             rawGroup:"viscera"},
+    {id:"baco",    label:"Baço (boi)",                      rawGroup:"viscera"},
+    {id:"cerebro", label:"Cérebro (boi ou porco)",          rawGroup:"viscera"}
+  ];
+
+  var CARBO_ITEMS = [
+    {id:"batata_doce",  label:"Batata-doce",     rawGroup:"tuberculo"},
+    {id:"mandioquinha", label:"Mandioquinha (batata-baroa)", rawGroup:"tuberculo"},
+    {id:"inhame",       label:"Inhame",          rawGroup:"tuberculo"},
+    {id:"cara",         label:"Cará",            rawGroup:"tuberculo"},
+    {id:"mandioca",     label:"Mandioca",        rawGroup:"tuberculo"},
+    {id:"arroz_integral", label:"Arroz integral", rawGroup:"grao"},
+    {id:"arroz_branco",   label:"Arroz branco",   rawGroup:"grao"},
+    {id:"aveia",        label:"Aveia",           rawGroup:"grao"},
+    {id:"quinoa",       label:"Quinoa",          rawGroup:"grao"},
+    {id:"lentilha",     label:"Lentilha",        rawGroup:"grao"}
+  ];
+
+  var VEG_ITEMS = [
+    {id:"espinafre",  label:"Espinafre",   icon:"⚠️", iconTitle:"Cuidado: veja a nota abaixo", noteType:"alert", rawGroup:"folhosa"},
+    {id:"repolho",    label:"Repolho",     rawGroup:"folhosa"},
+    {id:"aipo",       label:"Aipo (talo do salsão)", rawGroup:"legume"},
+    {id:"ervilha",    label:"Ervilha",     rawGroup:"legume"},
+    {id:"cenoura",    label:"Cenoura",     rawGroup:"legume"},
+    {id:"abobora",    label:"Abóbora",     icon:"💩", iconTitle:"Máx. 5% dos vegetais: solta o intestino", noteType:"poop", rawGroup:"legume"},
+    {id:"pepino",     label:"Pepino",      rawGroup:"legume"},
+    {id:"abobrinha",  label:"Abobrinha",   rawGroup:"legume"},
+    {id:"chuchu",     label:"Chuchu",      rawGroup:"legume"},
+    {id:"berinjela",  label:"Berinjela",   icon:"💩", iconTitle:"Máx. 5% dos vegetais: solta o intestino", noteType:"poop", rawGroup:"legume"},
+    {id:"brocolis",   label:"Brócolis",    rawGroup:"legume"},
+    {id:"couveflor",  label:"Couve-flor",  rawGroup:"legume"},
+    {id:"vagem",      label:"Vagem",       rawGroup:"legume"},
+    {id:"quiabo",     label:"Quiabo",      icon:"💩", iconTitle:"Máx. 5% dos vegetais: solta o intestino", noteType:"poop", rawGroup:"legume"},
+    {id:"jilo",       label:"Jiló",        icon:"💩", iconTitle:"Máx. 5% dos vegetais: solta o intestino", noteType:"poop", rawGroup:"legume"}
+  ];
+
+  var HERB_ITEMS = [
+    {id:"salsinha",  label:"Salsinha",                     sourced:true},
+    {id:"alecrim",   label:"Alecrim",                      sourced:true},
+    {id:"tomilho",   label:"Tomilho",                       sourced:true},
+    {id:"oregano",   label:"Orégano",                       sourced:true},
+    {id:"dill",      label:"Dill / Endro",                  sourced:true},
+    {id:"manjericao",label:"Manjericão",                    sourced:true},
+    {id:"salvia",    label:"Sálvia",                        sourced:true},
+    {id:"hortela",   label:"Hortelã",                       sourced:true},
+    {id:"canela",    label:"Canela",                        sourced:false},
+    {id:"acafrao",   label:"Açafrão-da-terra (cúrcuma)",    sourced:false},
+    {id:"gengibre",  label:"Gengibre fresco ralado",        sourced:false}
+  ];
+
+  var RECIPE_STEPS = [
+    {key:"carnes",   title:"Escolha a proteína",       subtitle:"Primeiro a proteína: é o que mais importa para alergias e digestão. Pode escolher mais de uma; a gente divide em partes iguais.", items:CARNES_ITEMS,   allowNone:false},
+    {key:"visceras", title:"Escolha as vísceras",       subtitle:"Pode pular esta etapa. Se não usar vísceras hoje, o valor delas é somado à proteína escolhida.",                                    items:VISCERAS_ITEMS, allowNone:true},
+    {key:"carbo",    title:"Escolha os carboidratos",   subtitle:"Pode escolher mais de um; a gente divide em partes iguais.",                                                                        items:CARBO_ITEMS,    allowNone:false},
+    {key:"vegetais", title:"Escolha os vegetais",       subtitle:"Pode escolher mais de um; a gente divide em partes iguais.",                                                                        items:VEG_ITEMS,      allowNone:false},
+    {key:"ervas",    title:"Ervas e especiarias (100% opcional)", subtitle:"Este passo é totalmente opcional, pode pular sem marcar nada. Elas não entram no cálculo de peso da dieta; são só um extra de tempero, em pequena quantidade, misturado à refeição.", items:HERB_ITEMS, allowNone:true}
+  ];
+
+  var recipeState = { stepIndex:0, selections:{carnes:[],visceras:[],carbo:[],vegetais:[],ervas:[]}, expanded:{}, days:1 };
+
+  function isDaysStage(){ return recipeState.stepIndex === RECIPE_STEPS.length; }
+  function isResultStage(){ return recipeState.stepIndex > RECIPE_STEPS.length; }
+
+  function findIngredient(items, id){
+    for (var i=0;i<items.length;i++){ if (items[i].id===id) return items[i]; }
+    return null;
+  }
+
+  function resetRecipeWizard(){
+    recipeState.stepIndex = 0;
+    recipeState.selections = {carnes:[],visceras:[],carbo:[],vegetais:[],ervas:[]};
+    recipeState.expanded = {};
+    recipeState.days = 1;
+  }
+
+  function renderRecipeSteps(){
+    var dots = $("recipeSteps");
+    dots.innerHTML = "";
+    RECIPE_STEPS.forEach(function(s,i){
+      var cls = "modal-step-dot";
+      if (recipeState.stepIndex >= RECIPE_STEPS.length) cls += " done";
+      else if (i === recipeState.stepIndex) cls += " active";
+      else if (i < recipeState.stepIndex) cls += " done";
+      var d = document.createElement("div");
+      d.className = cls;
+      dots.appendChild(d);
+    });
+  }
+
+  function ingGridHtml(items, selectedIds){
+    return '<div class="ing-grid">' + items.map(function(it){
+      var checked = selectedIds.indexOf(it.id) > -1;
+      var iconHtml = it.icon ? ' <span title="'+(it.iconTitle||'')+'">'+it.icon+'</span>' : '';
+      return '<label class="ing-chip"><input type="checkbox" data-ing="'+it.id+'" '+(checked?'checked':'')+'><span>'+it.label+iconHtml+'</span></label>';
+    }).join("") + '</div>';
+  }
+
+  function wireIngInputs(body, stepKey){
+    body.querySelectorAll('input[data-ing]').forEach(function(cb){
+      cb.addEventListener("change", function(){
+        var arr = recipeState.selections[stepKey];
+        var id = cb.getAttribute("data-ing");
+        var idx = arr.indexOf(id);
+        if (cb.checked && idx===-1) arr.push(id);
+        if (!cb.checked && idx>-1) arr.splice(idx,1);
+        updateRecipeNav();
+        if (stepKey === "carnes") updateMuscularNote();
+        if (stepKey === "vegetais") updateVegNote();
+      });
+    });
+  }
+
+  function updateMuscularNote(){
+    var wrap = $("muscularNoteWrap");
+    if (!wrap) return;
+    var selected = recipeState.selections.carnes
+      .map(function(id){ return findIngredient(CARNES_ITEMS, id); })
+      .filter(Boolean);
+    var hasMuscular = selected.some(function(it){ return it.viscMuscular; });
+    var hasHighFat  = selected.some(function(it){ return it.highFat; });
+
+    var html = "";
+    if (hasMuscular){
+      html += '<div class="muscular-note"><strong>Vísceras musculares na receita.</strong> Moela, coração, pulmão e bucho enriquecem a dieta e a maioria dos cães adora. Uma referência boa é até 1/3 da porção diária de carne nelas, servidas 3x por semana ou até diariamente se o seu cão tolerar bem. Dá pra chegar a 100% da carne em vísceras musculares, mas aumente aos poucos e observe as fezes e possíveis vômitos, porque nem todo cão tolera bem doses grandes.</div>';
+    }
+    if (hasHighFat){
+      html += '<div class="muscular-note"><strong>Atenção com a língua.</strong> Ela também é víscera muscular, mas tem teor de gordura muito alto. Mesmo que seu cão tolere bem, não ultrapasse 1/3 do total de carne da dieta com língua, e sirva com pouca frequência: ela é bem calórica.</div>';
+    }
+    wrap.innerHTML = html;
+  }
+
+  function updateVegNote(){
+    var wrap = $("vegNoteWrap");
+    if (!wrap) return;
+    var selected = recipeState.selections.vegetais
+      .map(function(id){ return findIngredient(VEG_ITEMS, id); })
+      .filter(Boolean);
+    var hasAlert = selected.some(function(it){ return it.noteType === "alert"; });
+    var hasPoop  = selected.some(function(it){ return it.noteType === "poop"; });
+
+    var html = "";
+    if (hasAlert){
+      html += '<div class="muscular-note">⚠️ <strong>Espinafre.</strong> Ofereça até 2x por semana, cortado bem fininho (picado ou triturado) e cozido em água, com a panela destampada, para evitar a formação de cristais e cálculos ("pedras") de ácido oxálico em cães com predisposição.</div>';
+    }
+    if (hasPoop){
+      html += '<div class="muscular-note">💩 <strong>De olho no intestino.</strong> Abóbora, quiabo, berinjela e jiló ajudam a soltar o intestino: use no máximo 5% da porção diária de vegetais com esses itens.</div>';
+    }
+    wrap.innerHTML = html;
+  }
+
+  function renderRecipeStepBody(){
+    var body = $("recipeStepBody");
+
+    if (isResultStage()){
+      renderRecipeResult(body);
+      return;
+    }
+
+    if (isDaysStage()){
+      renderRecipeDaysStep(body);
+      return;
+    }
+
+    var step = RECIPE_STEPS[recipeState.stepIndex];
+    var hasExtras = step.items.some(function(it){ return it.common === false; });
+
+    var html = '<h3 class="modal-step-title">'+step.title+'</h3>' +
+      '<p class="subtle">'+step.subtitle+'</p>';
+    if (step.allowNone){
+      html += '<p class="skip-note">Tudo bem não marcar nada aqui hoje.</p>';
+    }
+
+    if (!hasExtras){
+      html += ingGridHtml(step.items, recipeState.selections[step.key]);
+      if (step.key === "carnes") html += '<div id="muscularNoteWrap"></div>';
+      if (step.key === "vegetais") html += '<div id="vegNoteWrap"></div>';
+      body.innerHTML = html;
+      wireIngInputs(body, step.key);
+      if (step.key === "carnes") updateMuscularNote();
+      if (step.key === "vegetais") updateVegNote();
+      return;
+    }
+
+    var commonItems = step.items.filter(function(it){ return it.common !== false; });
+    var extraItems  = step.items.filter(function(it){ return it.common === false; });
+    var expanded = !!recipeState.expanded[step.key];
+
+    html += ingGridHtml(commonItems, recipeState.selections[step.key]);
+    html += '<div id="recipeExtraWrap">';
+    if (expanded){
+      html += ingGridHtml(extraItems, recipeState.selections[step.key]);
+    } else {
+      html += '<button type="button" class="btn btn-ghost" id="recipeMoreOptionsBtn" style="margin-top:8px;">+ Mais opções (coelho, cordeiro, peru, ovo…)</button>';
+    }
+    html += '</div>';
+    if (step.key === "carnes") html += '<div id="muscularNoteWrap"></div>';
+
+    body.innerHTML = html;
+    wireIngInputs(body, step.key);
+    if (step.key === "carnes") updateMuscularNote();
+
+    var moreBtn = $("recipeMoreOptionsBtn");
+    if (moreBtn){
+      moreBtn.addEventListener("click", function(){
+        recipeState.expanded[step.key] = true;
+        renderRecipeStepBody();
+      });
+    }
+  }
+
+  // Regra de dose de ervas: até 1 colher de chá (5g) desidratada ou 3 colheres de
+  // sopa (~15g) fresca picada, para cada 500g-1kg de alimento pronto (fonte:
+  // cachorroverde.com.br/ervas/). Escalado aqui para o total diário de AN do cão,
+  // usando 750g (meio da faixa 500g-1kg) como referência.
+  function herbDoseNote(totalG){
+    var ratio = totalG / 750;
+    var dried = 5 * ratio;
+    var fresh = 15 * ratio;
+    return "até " + fmt1(dried) + "g desidratada ou " + fmt1(fresh) + "g fresca picada";
+  }
+
+  // Fatores de rendimento culinário (cozido → cru), pra saber quanto pesar de cada
+  // ingrediente CRU e chegar na quantidade PRONTA que a calculadora recomenda.
+  // raw = cooked * fator. Regras práticas trazidas por Flay:
+  //   carne (carnes/vísceras musculares/peixe/alternativas): perde ~25% cozinhando -> cru = pronto ÷ 0,75
+  //   ovo cozido: praticamente não muda de peso -> fator 1
+  //   víscera glandular (fígado, rim, baço, cérebro): perde ~23% -> cru = pronto ÷ 0,77
+  //   tubérculo (batata-doce, mandioquinha, cará, mandioca, inhame): varia pouco -> cru = pronto × 0,95
+  //   grão que incha (arroz, aveia, quinoa, lentilha): cru = pronto ÷ 2,85 (arroz confirmado pela fonte;
+  //     aveia/quinoa/lentilha por analogia, não vieram da mesma fonte)
+  //   legume (a maioria dos vegetais do catálogo): cru = pronto × 1,10
+  //   folhosa (espinafre, repolho): reduz bastante -> cru = pronto × 1,40
+  var RAW_FACTOR = {
+    carne:     1/0.75,
+    ovo:       1,
+    viscera:   1/0.77,
+    tuberculo: 0.95,
+    grao:      1/2.85,
+    legume:    1.10,
+    folhosa:   1.40
+  };
+
+  function rawFromCooked(cookedG, rawGroup){
+    var f = RAW_FACTOR[rawGroup];
+    return f ? cookedG * f : cookedG;
+  }
+
+  var RECIPE_DAYS_PRESETS = [1,3,7];
+
+  function renderRecipeDaysStep(body){
+    var html = '<h3 class="modal-step-title">Para quantos dias é a receita?</h3>' +
+      '<p class="subtle">Quanto você vai preparar de uma vez? Se cozinha porções para a semana toda, por exemplo, escolha 7 dias — a gente multiplica as quantidades pra você.</p>' +
+      '<div class="ing-grid" id="recipeDaysPresets">' +
+      RECIPE_DAYS_PRESETS.map(function(d){
+        var checked = recipeState.days === d;
+        var label = d === 1 ? "1 dia" : d + " dias";
+        return '<label class="ing-chip"><input type="radio" name="recipeDaysPreset" value="'+d+'" '+(checked?'checked':'')+'><span>'+label+'</span></label>';
+      }).join("") +
+      '</div>' +
+      '<div style="margin-top:14px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">' +
+      '<label class="subtle" for="recipeDaysCustom">Ou outro número de dias:</label>' +
+      '<input type="number" id="recipeDaysCustom" min="1" max="30" step="1" value="'+recipeState.days+'" style="width:72px;">' +
+      '</div>';
+    body.innerHTML = html;
+
+    function syncPresets(v){
+      body.querySelectorAll('input[name="recipeDaysPreset"]').forEach(function(r){
+        r.checked = (parseInt(r.value,10) === v);
+      });
+    }
+
+    body.querySelectorAll('input[name="recipeDaysPreset"]').forEach(function(r){
+      r.addEventListener("change", function(){
+        recipeState.days = parseInt(r.value,10);
+        $("recipeDaysCustom").value = recipeState.days;
+        updateRecipeNav();
+      });
+    });
+
+    $("recipeDaysCustom").addEventListener("input", function(e){
+      var v = parseInt(e.target.value,10);
+      if (v && v>0){
+        recipeState.days = v;
+        syncPresets(v);
+      }
+      updateRecipeNav();
+    });
+  }
+
+  function computeRecipeResult(){
+    var r = calc();
+    var sel = recipeState.selections;
+    var days = recipeState.days || 1;
+    var proteinPool = r.groups.carnes + (sel.visceras.length===0 ? r.groups.visceras : 0);
+
+    var groupsOut = [];
+
+    var proteinEach = proteinPool / sel.carnes.length;
+    groupsOut.push({
+      title: "Proteína" + (sel.visceras.length===0 ? " (inclui vísceras de hoje)" : ""),
+      rows: sel.carnes.map(function(id){
+        var it = findIngredient(CARNES_ITEMS,id);
+        var g = proteinEach * days;
+        return {label: it.label, grams: g, raw: rawFromCooked(g, it.rawGroup)};
+      })
+    });
+
+    if (sel.visceras.length){
+      var vEach = r.groups.visceras / sel.visceras.length;
+      groupsOut.push({title:"Vísceras", rows: sel.visceras.map(function(id){
+        var it = findIngredient(VISCERAS_ITEMS,id);
+        var g = vEach * days;
+        return {label: it.label, grams:g, raw: rawFromCooked(g, it.rawGroup)};
+      })});
+    }
+
+    var cEach = r.groups.carbo / sel.carbo.length;
+    groupsOut.push({title:"Carboidratos", rows: sel.carbo.map(function(id){
+      var it = findIngredient(CARBO_ITEMS,id);
+      var g = cEach * days;
+      return {label: it.label, grams:g, raw: rawFromCooked(g, it.rawGroup)};
+    })});
+
+    var gEach = r.groups.vegetais / sel.vegetais.length;
+    groupsOut.push({title:"Vegetais", rows: sel.vegetais.map(function(id){
+      var it = findIngredient(VEG_ITEMS,id);
+      var g = gEach * days;
+      return {label: it.label, grams:g, raw: rawFromCooked(g, it.rawGroup)};
+    })});
+
+    if (sel.ervas.length){
+      groupsOut.push({
+        title: "Ervas e especiarias (100% opcional)",
+        subtitle: "Passo opcional: pode não usar nenhuma erva e a receita continua completa. Não entram no total de gramas da dieta nem são multiplicadas pelos dias da receita: é uma dose por dia de comida, pra temperar a porção na hora de servir. Segundo cachorroverde.com.br/ervas: até 1 colher de chá (5g) seca ou 3 colheres de sopa (~15g) fresca por 500g-1kg de alimento, já ajustada abaixo para o total de um dia.",
+        rows: sel.ervas.map(function(id){
+          var it = findIngredient(HERB_ITEMS, id);
+          var note = it.sourced
+            ? herbDoseNote(r.totalG)
+            : "sem dose definida nessa fonte; use só uma pitada pequena, com moderação";
+          return {label: it.label, note: note};
+        })
+      });
+    }
+
+    var rawTotal = groupsOut.reduce(function(sum, g){
+      return sum + g.rows.reduce(function(s, row){ return s + (row.raw || 0); }, 0);
+    }, 0);
+
+    return {groups: groupsOut, total: r.totalG*days, totalPerDay: r.totalG, rawTotal: rawTotal, refeicoes: r.refeicoes, days: days};
+  }
+
+  function renderRecipeResult(body){
+    var res = computeRecipeResult();
+    var daysLabel = res.days === 1 ? "1 dia" : res.days + " dias";
+
+    var subtitle = "Divida essas quantidades em "+res.refeicoes+" refeições ao longo do dia.";
+    if (res.days > 1){
+      subtitle = "Receita para "+daysLabel+" ("+fmt0(res.totalPerDay)+" g pronto por dia). Guarde em potes por dia e divida a porção de cada dia em "+res.refeicoes+" refeições.";
+    }
+
+    var html = '<h3 class="modal-step-title">Receita de hoje</h3>' +
+      '<p class="subtle">'+subtitle+'</p>' +
+      '<div class="recipe-yield-note">⚖️ <strong>Peso pronto × peso cru.</strong> Cada ingrediente já vem com uma estimativa de quanto pesar CRU para render a quantidade PRONTA da receita. É uma estimativa de rendimento culinário (varia por corte, marca e método de cozimento) — para máxima precisão, pese um lote antes e depois de cozinhar do seu jeito e ajuste.</div>' +
+      '<div class="recipe-yield-note">🧂 <strong>Sal.</strong> Pode entrar na receita, mas em quantidade bem pequena: excesso de sódio faz mal para o cão. A dose certa varia de cão para cão (peso, idade, doenças renais ou cardíacas, etc.), então procure orientação de um médico veterinário antes de definir quanto usar.</div>';
+
+    res.groups.forEach(function(g){
+      html += '<div class="recipe-result-group"><h3>'+g.title+'</h3>';
+      if (g.subtitle) html += '<p class="skip-note" style="margin:-2px 0 8px;">'+g.subtitle+'</p>';
+      g.rows.forEach(function(row){
+        if (row.grams !== undefined){
+          var perDayHint = res.days > 1 ? ' · '+fmt0(row.grams/res.days)+' g pronto/dia' : '';
+          html += '<div class="recipe-result-item">' +
+            '<div class="recipe-result-item-row"><span>'+row.label+'</span><span class="num">'+fmt0(row.grams)+' g pronto</span></div>' +
+            '<div class="recipe-result-item-raw">pesar ≈'+fmt0(row.raw)+' g cru'+perDayHint+'</div>' +
+            '</div>';
+        } else {
+          html += '<div class="recipe-result-item"><div class="recipe-result-item-row"><span>'+row.label+'</span><span class="num">'+row.note+'</span></div></div>';
+        }
+      });
+      html += '</div>';
+    });
+
+    var totalLabel = res.days > 1 ? "Total da receita ("+daysLabel+")" : "Total do dia";
+    html += '<div class="recipe-result-total"><span>'+totalLabel+'</span><span class="num">'+fmt0(res.total)+' g pronto<span class="raw-total">(≈'+fmt0(res.rawTotal)+' g cru)</span></span></div>';
+    if (res.days > 1){
+      html += '<p class="skip-note" style="margin-top:6px;">Isso equivale a '+fmt0(res.totalPerDay)+' g prontos por dia, pra você conferir na hora de porcionar.</p>';
+    }
+    body.innerHTML = html;
+  }
+
+  function updateRecipeNav(){
+    var backBtn = $("recipeBackBtn");
+    var nextBtn = $("recipeNextBtn");
+
+    if (isResultStage()){
+      backBtn.textContent = "Recomeçar";
+      backBtn.disabled = false;
+      nextBtn.textContent = "Concluir";
+      nextBtn.disabled = false;
+      return;
+    }
+
+    if (isDaysStage()){
+      backBtn.textContent = "Voltar";
+      backBtn.disabled = false;
+      nextBtn.textContent = "Ver receita";
+      nextBtn.disabled = !(recipeState.days > 0);
+      return;
+    }
+
+    backBtn.textContent = "Voltar";
+    backBtn.disabled = recipeState.stepIndex === 0;
+
+    var step = RECIPE_STEPS[recipeState.stepIndex];
+    nextBtn.textContent = "Continuar";
+    var count = recipeState.selections[step.key].length;
+    nextBtn.disabled = !step.allowNone && count === 0;
+  }
+
+  function renderRecipeModal(){
+    renderRecipeSteps();
+    renderRecipeStepBody();
+    updateRecipeNav();
+  }
+
+  function openRecipeModal(){
+    resetRecipeWizard();
+    renderRecipeModal();
+    $("recipeModal").hidden = false;
+  }
+
+  function closeRecipeModal(){
+    $("recipeModal").hidden = true;
+  }
+
+  // ---------- helpers ----------
+  function $(id){ return document.getElementById(id); }
+  function fmt1(n){ return n.toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1}); }
+  function fmt0(n){ return Math.round(n).toLocaleString("pt-BR"); }
+  function clamp(n,a,b){ return Math.max(a, Math.min(b,n)); }
+
+  function getPorteAdulto(peso){
+    for (var i=0;i<ADULT_PORTE.length;i++){ if (peso <= ADULT_PORTE[i].max) return ADULT_PORTE[i]; }
+    return ADULT_PORTE[ADULT_PORTE.length-1];
+  }
+
+  function tendenciaFactor(range, key){
+    var min = range[0], max = range[1];
+    if (key === "min") return min;
+    if (key === "max") return max;
+    return (min+max)/2;
+  }
+
+  // ---------- presets UI ----------
+  function buildPresets(){
+    var wrap = $("presets");
+    wrap.innerHTML = "";
+    PRESETS.forEach(function(p, i){
+      var id = "preset_" + p.id;
+      var el = document.createElement("label");
+      el.className = "preset";
+      el.innerHTML =
+        '<input type="radio" name="preset" value="'+p.id+'" '+(i===0?'checked':'')+'>' +
+        '<div class="preset-top"><span>'+p.nome+'</span><span class="num" style="font-weight:400;color:var(--ink-muted);">'+p.carnes+'/'+p.visceras+'/'+p.carbo+'/'+p.vegetais+'</span></div>' +
+        '<div class="preset-bar">' + CATS.map(function(c){
+          return '<div style="width:'+p[c.key]+'%;background:var('+c.varName+');"></div>';
+        }).join("") + '</div>';
+      wrap.appendChild(el);
+    });
+  }
+
+  function getSelectedPreset(){
+    var v = document.querySelector('input[name="preset"]:checked').value;
+    for (var i=0;i<PRESETS.length;i++){ if (PRESETS[i].id===v) return PRESETS[i]; }
+    return PRESETS[0];
+  }
+
+  // ---------- fase toggle ----------
+  function syncFaseVisibility(){
+    var fase = $("fase").value;
+    $("filhoteFields").style.display = fase === "filhote" ? "" : "none";
+    $("adultoFields").style.display = fase === "filhote" ? "none" : "";
+  }
+
+  function syncObjetivoVisibility(){
+    var emagrecer = $("objetivo").value === "emagrecer";
+    $("pesoIdealField").hidden = !emagrecer;
+    $("pesoIdeal").required = emagrecer;
+  }
+
+  // ---------- calculation ----------
+  function calc(){
+    var pesoAtual = clamp(parseFloat($("peso").value) || 0, 0.5, 90);
+    var objetivo = $("objetivo").value;
+    var pesoIdealInformado = parseFloat($("pesoIdeal").value);
+    var pesoIdealValido = Number.isFinite(pesoIdealInformado) && pesoIdealInformado >= 0.5 && pesoIdealInformado <= 90;
+    if (objetivo === "emagrecer" && !pesoIdealValido){
+      return { valid: false, pesoAtual: pesoAtual, objetivo: objetivo };
+    }
+    var pesoCalculo = objetivo === "emagrecer" ? pesoIdealInformado : pesoAtual;
+    var fase = $("fase").value;
+    var tendKey = $("tendencia").value;
+    var estacao = $("estacao").value;
+
+    var pct, refeicoes;
+
+    if (fase === "filhote"){
+      var faixa = $("faixaIdade").value;
+      var porte = $("porteAdulto").value;
+      var range = PUPPY[faixa][porte];
+      pct = tendenciaFactor(range, tendKey);
+      refeicoes = (faixa === "2-4") ? "3–4" : (faixa === "4-6") ? "3" : "2";
+    } else {
+      var porteInfo = getPorteAdulto(pesoCalculo);
+      pct = tendenciaFactor([porteInfo.min, porteInfo.max_], tendKey);
+      if ($("castrado").checked) pct -= 0.5;
+      if ($("idoso").checked) pct += 0.5;
+      refeicoes = "2";
+    }
+
+    if (estacao === "verao") pct -= 0.25;
+    if (estacao === "inverno") pct += 0.25;
+    pct = clamp(pct, 2, 12);
+
+    var totalG = pesoCalculo * (pct/100) * 1000;
+    totalG = Math.round(totalG/5)*5;
+
+    var preset = getSelectedPreset();
+    var groups = {};
+    CATS.forEach(function(c){ groups[c.key] = totalG * preset[c.key] / 100; });
+
+    var petiscoMin = totalG * 0.10;
+    var petiscoMax = totalG * 0.15;
+
+    var suppKey = document.querySelector('input[name="supp"]:checked').value;
+    var suppFactor, suppName;
+    if (suppKey === "foodDog"){
+      suppFactor = (fase === "filhote") ? 2.5 : 0.8;
+      suppName = "Food Dog " + (fase === "filhote" ? "Filhotes" : "Adulto");
+    } else {
+      suppFactor = (fase === "filhote") ? 2 : 0.6;
+      suppName = "Nutroplus " + (fase === "filhote" ? "Crescimento" : "Manutenção");
+    }
+    var suppDose = (totalG/100) * suppFactor;
+
+    var oilVeg;
+    if (pesoAtual <= 2) oilVeg = "1 colherinha de café, 1x ao dia";
+    else if (pesoAtual <= 7) oilVeg = "1/2 colher de chá, 2x ao dia";
+    else if (pesoAtual <= 15) oilVeg = "1 colher de sobremesa, 1x ao dia";
+    else if (pesoAtual <= 25) oilVeg = "1 colher de sopa, 1x ao dia";
+    else oilVeg = "1 colher de sopa, 2x ao dia";
+
+    var oilVegNote = $("proteina").value === "boiPeixeMagro"
+      ? "Óleo de girassol ou de gergelim (dieta já é pobre em ômega-6)"
+      : "Azeite de oliva extra virgem, óleo de côco ou linhaça dourada";
+
+    var oilFish;
+    if (pesoAtual <= 5) oilFish = "1 cápsula de 500mg, diária ou 3x/semana";
+    else if (pesoAtual <= 20) oilFish = "1 cápsula de 1g, diária ou 3x/semana";
+    else oilFish = "2 cápsulas de 1g (2g no total), diária ou 3x/semana";
+
+    return {
+      valid: true, peso: pesoCalculo, pesoAtual: pesoAtual, pesoCalculo: pesoCalculo, objetivo: objetivo,
+      pct: pct, totalG: totalG, groups: groups, preset: preset,
+      refeicoes: refeicoes, petiscoMin: petiscoMin, petiscoMax: petiscoMax,
+      suppDose: suppDose, suppName: suppName,
+      oilVeg: oilVeg, oilVegNote: oilVegNote, oilFish: oilFish
+    };
+  }
+
+  // ---------- render ----------
+  function render(r){
+    var weightNote = $("calculationWeightNote");
+    if (!r.valid){
+      weightNote.hidden = false;
+      weightNote.textContent = "Informe o peso ideal para calcular a quantidade de comida do plano de emagrecimento.";
+      $("outTotal").innerHTML = "— <small>g</small>";
+      $("outPct").textContent = "—";
+      $("outRefeicoes").textContent = "—";
+      $("outPetiscos").textContent = "—";
+      $("stackbar").innerHTML = "";
+      $("legendGrid").innerHTML = "";
+      $("suppDoseOut").textContent = "—";
+      $("oilVegOut").textContent = "—";
+      $("oilFishOut").textContent = "—";
+      $("openRecipeBtn").disabled = true;
+      return;
+    }
+    weightNote.hidden = r.objetivo !== "emagrecer";
+    weightNote.textContent = r.objetivo === "emagrecer"
+      ? "Plano de emagrecimento: porção calculada com o peso ideal de " + fmt1(r.pesoCalculo) + " kg. Peso atual: " + fmt1(r.pesoAtual) + " kg."
+      : "";
+    $("openRecipeBtn").disabled = false;
+    $("outTotal").innerHTML = fmt0(r.totalG) + " <small>g</small>";
+    $("outPct").textContent = fmt1(r.pct) + "%";
+    $("outRefeicoes").textContent = r.refeicoes;
+    $("outPetiscos").textContent = fmt0(r.petiscoMin) + "–" + fmt0(r.petiscoMax) + " g";
+
+    var stackbar = $("stackbar");
+    stackbar.innerHTML = "";
+    var legend = $("legendGrid");
+    legend.innerHTML = "";
+    CATS.forEach(function(c){
+      var pctVal = r.preset[c.key];
+      var grams = r.groups[c.key];
+      var seg = document.createElement("div");
+      seg.className = "seg";
+      seg.style.width = pctVal + "%";
+      seg.style.background = "var(" + c.varName + ")";
+      seg.textContent = pctVal >= 12 ? pctVal + "%" : "";
+      seg.title = c.label + ": " + fmt0(grams) + " g (" + pctVal + "%)";
+      stackbar.appendChild(seg);
+
+      var item = document.createElement("div");
+      item.className = "legend-item";
+      item.innerHTML = '<span class="swatch" style="background:var('+c.varName+')"></span>' +
+        '<span>' + c.label + '</span>' +
+        '<span class="amt num">' + fmt0(grams) + ' g</span>';
+      legend.appendChild(item);
+    });
+
+    $("suppDoseOut").textContent = fmt1(r.suppDose) + " g/dia";
+    $("suppNameOut").textContent = r.suppName;
+    $("oilVegOut").textContent = r.oilVeg;
+    $("oilVegNoteOut").textContent = r.oilVegNote;
+    $("oilFishOut").textContent = r.oilFish;
+  }
+
+  function recalc(){
+    syncFaseVisibility();
+    syncObjetivoVisibility();
+    render(calc());
+  }
+
+  // ---------- theme toggle ----------
+  function applyThemeChoice(choice){
+    var root = document.documentElement;
+    if (choice === "light") root.setAttribute("data-theme","light");
+    else if (choice === "dark") root.setAttribute("data-theme","dark");
+    else root.removeAttribute("data-theme");
+    document.querySelectorAll(".theme-toggle button").forEach(function(b){
+      b.setAttribute("aria-pressed", b.getAttribute("data-theme-choice") === choice ? "true" : "false");
+    });
+    try { localStorage.setItem("an-theme", choice); } catch(e){}
+  }
+
+  // ---------- init ----------
+  buildPresets();
+  syncFaseVisibility();
+  syncObjetivoVisibility();
+
+  document.getElementById("form").addEventListener("input", recalc);
+  document.getElementById("form").addEventListener("change", recalc);
+
+  document.querySelectorAll(".theme-toggle button").forEach(function(b){
+    b.addEventListener("click", function(){ applyThemeChoice(b.getAttribute("data-theme-choice")); });
+  });
+  try {
+    var saved = localStorage.getItem("an-theme");
+    if (saved) applyThemeChoice(saved);
+  } catch(e){}
+
+  $("openRecipeBtn").addEventListener("click", openRecipeModal);
+  $("recipeModalClose").addEventListener("click", closeRecipeModal);
+  $("recipeModal").addEventListener("click", function(e){
+    if (e.target.id === "recipeModal") closeRecipeModal();
+  });
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && !$("recipeModal").hidden) closeRecipeModal();
+  });
+  $("recipeNextBtn").addEventListener("click", function(){
+    if (isResultStage()){
+      closeRecipeModal();
+      return;
+    }
+    recipeState.stepIndex++;
+    renderRecipeModal();
+  });
+  $("recipeBackBtn").addEventListener("click", function(){
+    if (isResultStage()){
+      resetRecipeWizard();
+      renderRecipeModal();
+      return;
+    }
+    if (recipeState.stepIndex > 0){
+      recipeState.stepIndex--;
+      renderRecipeModal();
+    }
+  });
+
+  recalc();
+})();
+</script>

@@ -1,0 +1,33 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# build output
+dist/
+build/
+*.tsbuildinfo
+
+# env — nunca comitar valores reais (ver .env.example)
+.env
+.env.*
+!.env.example
+
+# vercel
+.vercel/
+
+# supabase (CLI local)
+supabase/.branches/
+supabase/.temp/
+supabase/.env
+
+# editor / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.log
+npm-debug.log*
+
+# test / coverage
+coverage/

@@ -1,0 +1,100 @@
+/**
+ * Papazilla — tokens de design.
+ * Port de `papazilla-ui/styles/tokens.css` + `Claude outputs/design-system-papazilla.md`.
+ *
+ * MVP usa apenas o tema visual oficial (claro). Sem tema escuro / seletor de tema
+ * (adiado — ver escopo-mvp.md).
+ *
+ * Fontes: Fredoka nos títulos; "Papazilla Display" fica reservada ao logo (não há
+ * fonte web dela). Nunito para apoio, Inter para corpo/UI.
+ */
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  color-scheme: light;
+
+  /* Marca */
+  --pz-coral: #f98b69;
+  --pz-coral-strong: #e9744f;
+  --pz-coral-hover: #fba184;
+  --pz-pessego: #f7bda3;
+  --pz-verde: #adb047;
+  --pz-verde-strong: #8c9038;
+  --pz-verde-hover: #c3c765;
+  --pz-oliva: #716a11;
+  --pz-chocolate: #4a2d22;
+  --pz-creme: #fff8f3;
+
+  /* Semântica */
+  --pz-bg: var(--pz-creme);
+  --pz-surface: #fff;
+  --pz-surface-soft: #fcede4;
+  --pz-surface-sunken: #f6e9df;
+  --pz-ink: var(--pz-chocolate);
+  --pz-ink-muted: #7a5c50;
+  --pz-ink-label: #8a6a5e;
+  --pz-accent: var(--pz-coral);
+  --pz-accent-hover: var(--pz-coral-hover);
+  /* Texto/links em coral usam este tom (contraste 5,0:1). Coral puro é só preenchimento. */
+  --pz-accent-ink: #b84726;
+  --pz-secondary: var(--pz-verde);
+  --pz-secondary-hover: var(--pz-verde-hover);
+  --pz-secondary-ink: var(--pz-oliva);
+  --pz-border: rgb(74 45 34 / 14%);
+  --pz-border-strong: rgb(74 45 34 / 28%);
+  --pz-focus: #b84726;
+  --pz-success-bg: #eaf0d4;
+  --pz-success-ink: #4c5a16;
+  --pz-warning-bg: #fdecc8;
+  --pz-warning-ink: #7a4e0b;
+  --pz-danger: #c24634;
+  --pz-danger-hover: #a73a2a;
+  --pz-danger-bg: #fbe2dd;
+  --pz-danger-ink: #b0392a;
+  --pz-info-bg: #dceaf5;
+  --pz-info-ink: #28556f;
+
+  /* Tipografia */
+  --pz-font-display: 'Fredoka', ui-rounded, system-ui, sans-serif;
+  --pz-font-support: 'Nunito', system-ui, sans-serif;
+  --pz-font-body: 'Inter', system-ui, sans-serif;
+  --pz-text-hero: 600 clamp(2.5rem, 7vw, 3.5rem) / 1.05 var(--pz-font-display);
+  --pz-text-h1: 600 clamp(2rem, 5vw, 2.5rem) / 1.12 var(--pz-font-display);
+  --pz-text-h2: 800 1.375rem / 1.27 var(--pz-font-support);
+  --pz-text-h3: 700 1.0625rem / 1.4 var(--pz-font-support);
+  --pz-text-body: 400 1rem / 1.5 var(--pz-font-body);
+  --pz-text-small: 400 0.875rem / 1.43 var(--pz-font-body);
+  --pz-text-caption: 500 0.75rem / 1.33 var(--pz-font-body);
+  --pz-text-button: 600 1rem / 1 var(--pz-font-body);
+
+  /* Layout */
+  --pz-space-1: 0.25rem;
+  --pz-space-2: 0.5rem;
+  --pz-space-3: 0.75rem;
+  --pz-space-4: 1rem;
+  --pz-space-5: 1.5rem;
+  --pz-space-6: 2rem;
+  --pz-space-7: 3rem;
+  --pz-radius-sm: 0.75rem;
+  --pz-radius-md: 1.125rem;
+  --pz-radius-lg: 1.75rem;
+  --pz-radius-pill: 999px;
+  --pz-touch-min: 44px;
+  --pz-control-height: 48px;
+  --pz-content-max: 1180px;
+  --pz-shadow-card: 0 1px 2px rgb(74 45 34 / 6%), 0 8px 24px -12px rgb(74 45 34 / 18%);
+  --pz-shadow-pop: 0 2px 4px rgb(74 45 34 / 8%), 0 16px 32px -16px rgb(74 45 34 / 28%);
+  --pz-ease-enter: cubic-bezier(0.22, 1, 0.36, 1);
+  --pz-duration-tap: 120ms;
+  --pz-duration-enter: 220ms;
+  --pz-duration-celebrate: 320ms;
+}
+
+/* prefers-reduced-motion é obrigatório em toda a experiência (correção P0). */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --pz-duration-tap: 0ms;
+    --pz-duration-enter: 0ms;
+    --pz-duration-celebrate: 0ms;
+  }
+}

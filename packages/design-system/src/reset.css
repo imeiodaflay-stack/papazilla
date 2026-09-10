@@ -1,0 +1,71 @@
+/* Reset enxuto — base para o app Papazilla. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100dvh;
+  background: var(--pz-bg);
+  color: var(--pz-ink);
+  font: var(--pz-text-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--pz-font-support);
+  line-height: 1.2;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+img,
+picture,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: var(--pz-accent-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--pz-focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

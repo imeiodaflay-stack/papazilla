@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "types": ["vite/client"],
+    "noEmit": true,
+    "paths": {
+      "@papazilla/nutrition-engine": ["../../packages/nutrition-engine/src/index.ts"],
+      "@papazilla/domain": ["../../packages/domain/src/index.ts"],
+      "@papazilla/design-system": ["../../packages/design-system/src/index.ts"],
+      "@papazilla/validation": ["../../packages/validation/src/index.ts"]
+    }
+  },
+  "include": ["src", "vite.config.ts"]
+}
