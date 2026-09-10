@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import lockup from '../assets/papazilla-lockup.png';
+import { isAuthenticated } from '../lib/session.js';
 
 /**
  * Splash fiel ao protótipo (`papazilla-prototype`): dois orbs de fundo, lockup e
@@ -16,7 +17,7 @@ export function SplashScreen() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigate('/entrar', { replace: true });
+      navigate(isAuthenticated() ? '/onboarding' : '/entrar', { replace: true });
     }, 1350);
     return () => clearTimeout(timer);
   }, [navigate]);
