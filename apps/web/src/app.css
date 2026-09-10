@@ -133,3 +133,26 @@
   border-radius: var(--pz-radius-sm);
   padding: var(--pz-space-3) var(--pz-space-4);
 }
+
+.pz-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--pz-space-3);
+  text-align: center;
+}
+
+.pz-empty__art {
+  width: 140px;
+  height: auto;
+  margin-bottom: var(--pz-space-1);
+}
+
+.pz-empty__title {
+  font: var(--pz-text-h3);
+  color: var(--pz-chocolate);
+}
+
+.pz-empty .pz-btn {
+  margin-top: var(--pz-space-2);
+}
