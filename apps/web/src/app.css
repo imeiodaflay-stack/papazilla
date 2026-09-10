@@ -327,7 +327,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 100dvh;
+  height: 100dvh;
   max-width: 480px;
   margin-inline: auto;
   padding: 0 1.35rem;
@@ -1014,9 +1014,12 @@
 .flow-screen {
   display: flex;
   flex-direction: column;
-  min-height: 100dvh;
+  /* altura fixa (não min-height): força o .flow-body a ser a área restante e
+     rolar por dentro, com header/progresso/footer sempre visíveis. */
+  height: 100dvh;
   max-width: 480px;
   margin-inline: auto;
+  overflow: hidden;
   background: var(--pz-bg);
 }
 
