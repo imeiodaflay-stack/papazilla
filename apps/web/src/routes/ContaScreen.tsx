@@ -20,8 +20,11 @@ export function ContaScreen() {
       </div>
 
       <div className="pz-card pz-screen">
-        <h2 style={{ font: 'var(--pz-text-h3)' }}>Acesso e privacidade</h2>
-        <p>Métodos de acesso, documentos legais, canal de contato e exclusão da conta.</p>
+        <h2 style={{ font: 'var(--pz-text-h3)' }}>Ajuda e privacidade</h2>
+        <p>Dúvidas, documentos legais, canal de contato e exclusão da conta.</p>
+        <Link to="/ajuda" className="pz-btn pz-btn--ghost">
+          Central de Ajuda
+        </Link>
         <button type="button" className="pz-btn pz-btn--ghost" disabled>
           Sair da conta
         </button>

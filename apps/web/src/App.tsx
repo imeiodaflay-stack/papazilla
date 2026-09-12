@@ -10,6 +10,7 @@ import { PapaRoute } from './routes/PapaRoute.js';
 import { CuriosidadesScreen } from './routes/CuriosidadesScreen.js';
 import { ReceitasScreen } from './routes/ReceitasScreen.js';
 import { ContaScreen } from './routes/ContaScreen.js';
+import { AjudaScreen } from './routes/AjudaScreen.js';
 import { AnamneseScreen } from './routes/AnamneseScreen.js';
 import { SucessoScreen } from './routes/SucessoScreen.js';
 
@@ -27,6 +28,7 @@ export const router = createBrowserRouter([
   { path: '/anamnese', element: <AnamneseScreen /> },
   { path: '/sucesso', element: <SucessoScreen /> },
   { path: '/conta', element: <ContaScreen /> },
+  { path: '/ajuda', element: <AjudaScreen /> },
   { path: '/zilla', element: <ZillaRoute /> },
   { path: '/zilla/:petId', element: <PetDetailScreen /> },
   { path: '/zilla/:petId/respostas', element: <AnamnesisDetailScreen /> },
