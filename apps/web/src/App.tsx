@@ -4,7 +4,7 @@ import { SplashScreen } from './routes/SplashScreen.js';
 import { AuthScreen } from './routes/AuthScreen.js';
 import { OnboardingScreen } from './routes/OnboardingScreen.js';
 import { ZillaScreen } from './routes/ZillaScreen.js';
-import { PapaScreen } from './routes/PapaScreen.js';
+import { PapaRoute } from './routes/PapaRoute.js';
 import { CuriosidadesScreen } from './routes/CuriosidadesScreen.js';
 import { ReceitasScreen } from './routes/ReceitasScreen.js';
 import { ContaScreen } from './routes/ContaScreen.js';
@@ -28,7 +28,7 @@ export const router = createBrowserRouter([
     element: <AppShell />,
     children: [
       { path: '/zilla', element: <ZillaScreen /> },
-      { path: '/papa', element: <PapaScreen /> },
+      { path: '/papa', element: <PapaRoute /> },
       { path: '/curiosidades', element: <CuriosidadesScreen /> },
       { path: '/receitas', element: <ReceitasScreen /> },
     ],

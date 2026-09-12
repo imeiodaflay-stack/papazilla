@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import zillaIcon from '../assets/icons/zilla.png';
 import { setHasPet } from '../lib/session.js';
+import { describePet } from '../lib/petLabel.js';
 
 /**
  * Cadastro concluído — fiel à tela "success" de `papazilla-prototype`.
@@ -20,11 +21,7 @@ export function SucessoScreen() {
   const navigate = useNavigate();
   const location = useLocation();
   const state = (location.state as SuccessState | null) ?? {};
-
-  const isFemale = state.sex === 'Fêmea';
-  const noun = isFemale ? 'Monstrinha' : 'Monstrinho';
-  const article = isFemale ? 'a' : 'o';
-  const displayName = state.name || noun;
+  const { isFemale, noun, article, displayName } = describePet(state);
 
   function goEat() {
     setHasPet();

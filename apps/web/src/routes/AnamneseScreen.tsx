@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import zillaIcon from '../assets/icons/zilla.png';
 import addIcon from '../assets/icons/adicionar.png';
 import infoIcon from '../assets/icons/info.png';
+import { setCurrentPet } from '../lib/session.js';
 
 /**
  * Anamnese do Monstrinho — fiel à tela "profile" de `papazilla-prototype`.
@@ -970,11 +971,14 @@ export function AnamneseScreen() {
   function onNext() {
     if (step < LAST) goToStep(adjacent(1));
     else {
+      const name = inputs.name?.trim() || '';
+      const sex = singles.sex ?? '';
+      setCurrentPet({ name, sex });
       navigate('/sucesso', {
         replace: true,
         state: {
-          name: inputs.name?.trim() || '',
-          sex: singles.sex,
+          name,
+          sex,
           weight: inputs.weight?.trim() || '',
           goal: singles.goal,
           activityTime: singles.activityTime,
