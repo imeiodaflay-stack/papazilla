@@ -2303,7 +2303,7 @@
 .paywall-benefits {
   display: grid;
   gap: 0.5rem;
-  margin: 0.8rem 0;
+  margin: 1.35rem 0 1.5rem;
   padding: 0 0.15rem;
   list-style: none;
 }
