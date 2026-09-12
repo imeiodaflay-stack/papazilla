@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import zillaIcon from '../assets/icons/zilla.png';
 import addIcon from '../assets/icons/adicionar.png';
 import infoIcon from '../assets/icons/info.png';
-import { setCurrentPet } from '../lib/session.js';
+import { addPet } from '../lib/petsStore.js';
 
 /**
  * Anamnese do Monstrinho — fiel à tela "profile" de `papazilla-prototype`.
@@ -973,14 +973,47 @@ export function AnamneseScreen() {
     else {
       const name = inputs.name?.trim() || '';
       const sex = singles.sex ?? '';
-      setCurrentPet({ name, sex });
+      const goal = singles.goal ?? '';
+      const healthConditions = [...(multi.health ?? [])]
+        .filter((c) => c !== 'Nenhuma')
+        .map((c) => (c === 'Outra' && inputs.otherHealth?.trim() ? inputs.otherHealth.trim() : c));
+
+      addPet({
+        name,
+        sex,
+        neutered: singles.neutered ?? '',
+        breed: inputs.breed?.trim() || '',
+        age: inputs.age?.trim() || '',
+        weight: inputs.weight?.trim() || '',
+        goal,
+        idealWeight: goal === 'Emagrecer' ? inputs.idealWeight?.trim() || '' : '',
+        bodyTop: singles.bodyTop ?? '',
+        weightChange: singles.weightChange ?? '',
+        activityTime: singles.activityTime ?? '',
+        activityType: singles.activityType ?? '',
+        appetite: singles.appetite ?? '',
+        currentMeals: singles.currentMeals ?? '',
+        stool: singles.stool ?? '',
+        healthConditions,
+        medication: singles.medication ?? '',
+        medicationName: singles.medication === 'Sim' ? inputs.medicationName?.trim() || '' : '',
+        proteins: [...(multi.proteins ?? [])],
+        vegetableFavorites: [...(multi.vegetableFavorites ?? [])],
+        avoidProteinName: singles.avoidProtein === 'Sim' ? inputs.avoidProteinName?.trim() || '' : '',
+        avoidVegetableName:
+          singles.avoidVegetable === 'Sim' ? inputs.avoidVegetableName?.trim() || '' : '',
+        intoleranceName: singles.intolerance === 'Sim' ? inputs.intoleranceName?.trim() || '' : '',
+        cookingMethod: singles.cookingMethod ?? '',
+        recipeFormat: singles.recipeFormat ?? '',
+      });
+
       navigate('/sucesso', {
         replace: true,
         state: {
           name,
           sex,
           weight: inputs.weight?.trim() || '',
-          goal: singles.goal,
+          goal,
           activityTime: singles.activityTime,
         },
       });

@@ -1,8 +1,9 @@
 import { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import zillaIcon from '../assets/icons/zilla.png';
 import potinhoIcon from '../assets/icons/potinho.png';
 import infoIcon from '../assets/icons/info.png';
-import { getCurrentPet } from '../lib/session.js';
+import { getActivePet } from '../lib/petsStore.js';
 import { describePet } from '../lib/petLabel.js';
 
 /**
@@ -10,12 +11,14 @@ import { describePet } from '../lib/petLabel.js';
  * seletor do pet ativo, card de criar receita e a dica do Zilla. Mostrada em
  * `/papa` quando já existe um Monstrinho cadastrado (ver `PapaRoute`).
  *
- * Fase 0: um só pet "registrado" localmente (`getCurrentPet`); troca de pet,
- * wizard de receita e paywall entram nas próximas fatias — os botões
- * correspondentes avisam por toast em vez de simular um fluxo que não existe.
+ * Diferença do protótipo: lá o seletor de pet não tem ação; aqui, como a área
+ * Pets já existe, ele abre o perfil do pet ativo. Trocar de pet por aqui e o
+ * wizard de receita/assinatura entram nas próximas fatias (toast).
  */
 export function HomeScreen() {
-  const { displayName, article } = describePet(getCurrentPet());
+  const navigate = useNavigate();
+  const activePet = getActivePet();
+  const { displayName, article } = describePet(activePet);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<number>();
 
@@ -23,6 +26,11 @@ export function HomeScreen() {
     window.clearTimeout(toastTimer.current);
     setToastMsg(message);
     toastTimer.current = window.setTimeout(() => setToastMsg(null), 2600);
+  }
+
+  function openActivePet() {
+    if (activePet) navigate(`/zilla/${activePet.id}`);
+    else toast('Cadastre um Monstrinho para ver o perfil dele aqui.');
   }
 
   return (
@@ -39,8 +47,8 @@ export function HomeScreen() {
       <button
         type="button"
         className="pet-selector"
-        aria-label={`Receita para ${displayName}`}
-        onClick={() => toast('Troca de pet e mais de um Monstrinho entram nas próximas fatias.')}
+        aria-label={`Ver perfil de ${displayName}`}
+        onClick={openActivePet}
       >
         <span className="pet-selector__avatar">
           <img src={zillaIcon} alt="" />

@@ -3,7 +3,9 @@ import { AppShell } from './components/AppShell.js';
 import { SplashScreen } from './routes/SplashScreen.js';
 import { AuthScreen } from './routes/AuthScreen.js';
 import { OnboardingScreen } from './routes/OnboardingScreen.js';
-import { ZillaScreen } from './routes/ZillaScreen.js';
+import { ZillaRoute } from './routes/ZillaRoute.js';
+import { PetDetailScreen } from './routes/PetDetailScreen.js';
+import { AnamnesisDetailScreen } from './routes/AnamnesisDetailScreen.js';
 import { PapaRoute } from './routes/PapaRoute.js';
 import { CuriosidadesScreen } from './routes/CuriosidadesScreen.js';
 import { ReceitasScreen } from './routes/ReceitasScreen.js';
@@ -15,7 +17,8 @@ import { SucessoScreen } from './routes/SucessoScreen.js';
  * Rotas do MVP. Fluxo confirmado (arquitetura-tecnica.md):
  * Splash → Entrar/criar conta → Onboarding → Cadastro do 1º Monstrinho → Papá.
  * Navegação inferior (app-view): Pets / Papá / Curiosidades / Salvas.
- * Minha conta e a anamnese abrem como telas cheias, sem navegação inferior.
+ * Minha conta, a anamnese e as telas da área Pets (lista/perfil/respostas) têm
+ * cabeçalho próprio — não usam a casca genérica `AppShell` (ver `ZillaRoute`).
  */
 export const router = createBrowserRouter([
   { path: '/', element: <SplashScreen /> },
@@ -24,10 +27,12 @@ export const router = createBrowserRouter([
   { path: '/anamnese', element: <AnamneseScreen /> },
   { path: '/sucesso', element: <SucessoScreen /> },
   { path: '/conta', element: <ContaScreen /> },
+  { path: '/zilla', element: <ZillaRoute /> },
+  { path: '/zilla/:petId', element: <PetDetailScreen /> },
+  { path: '/zilla/:petId/respostas', element: <AnamnesisDetailScreen /> },
   {
     element: <AppShell />,
     children: [
-      { path: '/zilla', element: <ZillaScreen /> },
       { path: '/papa', element: <PapaRoute /> },
       { path: '/curiosidades', element: <CuriosidadesScreen /> },
       { path: '/receitas', element: <ReceitasScreen /> },
