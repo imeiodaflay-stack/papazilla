@@ -2213,3 +2213,287 @@
 .answer-groups details strong {
   font: 700 0.72rem / 1.3 var(--pz-font-support);
 }
+
+/* ============================================================
+   Oferta de assinatura (paywall) — fiel ao protótipo
+   ============================================================ */
+.paywall-view {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-width: 480px;
+  margin-inline: auto;
+  padding: 0 1.25rem calc(1rem + max(12px, env(safe-area-inset-bottom)));
+  overflow: hidden;
+  background: var(--pz-bg);
+}
+.paywall-header {
+  display: grid;
+  flex: 0 0 72px;
+  grid-template-columns: 72px 1fr 72px;
+  align-items: center;
+  padding-top: 0.9rem;
+}
+.paywall-header > span {
+  font: 800 0.68rem / 1 var(--pz-font-support);
+  text-align: center;
+}
+.paywall-restore {
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--pz-accent-ink);
+  font: 800 0.61rem / 1 var(--pz-font-support);
+  text-align: right;
+}
+
+.paywall-content {
+  flex: 1;
+  min-height: 0;
+  padding: 0.15rem 0 1.35rem;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.paywall-content::-webkit-scrollbar {
+  display: none;
+}
+
+.paywall-hero {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 0.7rem;
+  align-items: center;
+  overflow: hidden;
+  padding: 0.85rem 0.9rem 0.85rem 0;
+  border-radius: 24px;
+  background: linear-gradient(145deg, #fce6db, var(--pz-pessego));
+}
+.paywall-hero__art {
+  position: relative;
+  align-self: stretch;
+  min-height: 126px;
+  overflow: hidden;
+}
+.paywall-hero__art img {
+  position: absolute;
+  bottom: -10px;
+  left: -13px;
+  width: 118px;
+  height: 132px;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+.paywall-hero h1 {
+  margin: 0.28rem 0 0.4rem;
+  font: 600 1.43rem / 1.05 var(--pz-font-display);
+  letter-spacing: -0.02em;
+  color: var(--pz-chocolate);
+}
+.paywall-hero > div > p:last-child {
+  margin: 0;
+  color: var(--pz-ink-muted);
+  font-size: 0.67rem;
+  line-height: 1.4;
+}
+.paywall-hero .eyebrow {
+  font-size: 0.56rem;
+}
+
+.paywall-benefits {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0.8rem 0;
+  padding: 0 0.15rem;
+  list-style: none;
+}
+.paywall-benefits li {
+  display: grid;
+  grid-template-columns: 27px 1fr;
+  gap: 0.55rem;
+  align-items: center;
+}
+.paywall-benefits li > span {
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: var(--pz-success-bg);
+  color: var(--pz-secondary-ink);
+  font: 900 0.63rem / 1 var(--pz-font-support);
+}
+.paywall-benefits p {
+  display: grid;
+  gap: 0.08rem;
+  margin: 0;
+}
+.paywall-benefits strong {
+  font: 800 0.67rem / 1.2 var(--pz-font-support);
+}
+.paywall-benefits small {
+  color: var(--pz-ink-label);
+  font-size: 0.56rem;
+  line-height: 1.25;
+}
+
+.paywall-plans {
+  display: grid;
+  gap: 0.55rem;
+}
+.paywall-plan {
+  overflow: hidden;
+  border: 1.5px solid var(--pz-border);
+  border-radius: 20px;
+  background: #fff;
+  color: var(--pz-ink);
+}
+.paywall-plan.is-selected {
+  border-color: var(--pz-verde-strong);
+  box-shadow: 0 0 0 2px rgb(113 106 17 / 8%);
+}
+.paywall-plan__select,
+.paywall-plan--monthly {
+  display: grid;
+  grid-template-columns: 20px 1fr auto;
+  gap: 0.55rem;
+  align-items: center;
+  width: 100%;
+  min-height: 72px;
+  padding: 0.65rem 0.7rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+.paywall-radio {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--pz-border-strong);
+  border-radius: 50%;
+}
+.is-selected > .paywall-plan__select .paywall-radio,
+.paywall-plan--monthly.is-selected > .paywall-radio {
+  border: 5px solid var(--pz-verde-strong);
+}
+.paywall-plan__select > span:nth-child(2),
+.paywall-plan--monthly > span:nth-child(2) {
+  display: grid;
+  gap: 0.12rem;
+}
+.paywall-plan__select small {
+  color: var(--pz-accent-ink);
+  font: 900 0.5rem / 1 var(--pz-font-support);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.paywall-plan__select strong,
+.paywall-plan--monthly > span strong {
+  font: 900 0.72rem / 1.2 var(--pz-font-support);
+}
+.paywall-plan__select em,
+.paywall-plan--monthly em {
+  color: var(--pz-ink-label);
+  font: 600 0.53rem / 1.25 var(--pz-font-body);
+  font-style: normal;
+}
+.paywall-plan__select > b,
+.paywall-plan--monthly > b {
+  color: var(--pz-ink-label);
+  font: 600 0.5rem / 1.25 var(--pz-font-body);
+  font-style: normal;
+  text-align: right;
+}
+.paywall-plan__select > b strong,
+.paywall-plan--monthly > b strong {
+  color: var(--pz-ink);
+  font: 900 0.65rem / 1.2 var(--pz-font-support);
+}
+
+.annual-payment-options {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.55rem 0.65rem 0.1rem 2.95rem;
+  border-top: 1px solid var(--pz-border);
+}
+.paywall-plan:not(.is-selected) .annual-payment-options,
+.paywall-plan:not(.is-selected) .annual-commitment {
+  display: none;
+}
+.annual-payment-option {
+  display: grid;
+  grid-template-columns: 15px 1fr;
+  gap: 0.45rem;
+  align-items: center;
+  width: 100%;
+  min-height: 45px;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: var(--pz-bg);
+  color: var(--pz-ink);
+  text-align: left;
+}
+.annual-payment-option > span {
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--pz-border-strong);
+  border-radius: 50%;
+}
+.annual-payment-option.is-selected {
+  border-color: var(--pz-verde);
+  background: var(--pz-success-bg);
+}
+.annual-payment-option.is-selected > span {
+  border: 4px solid var(--pz-verde-strong);
+}
+.annual-payment-option p {
+  display: grid;
+  gap: 0.08rem;
+  margin: 0;
+}
+.annual-payment-option strong {
+  font: 800 0.6rem / 1.2 var(--pz-font-support);
+}
+.annual-payment-option small {
+  color: var(--pz-ink-label);
+  font-size: 0.5rem;
+  line-height: 1.25;
+}
+.annual-commitment {
+  margin: 0.4rem 0.75rem 0.65rem 2.95rem;
+  color: var(--pz-ink-label);
+  font-size: 0.5rem;
+  line-height: 1.35;
+}
+
+.paywall-cta {
+  margin-top: 0.75rem;
+}
+.paywall-disclosure {
+  max-width: 310px;
+  margin: 0.45rem auto;
+  color: var(--pz-ink-label);
+  font-size: 0.52rem;
+  line-height: 1.4;
+  text-align: center;
+}
+.paywall-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+.paywall-links button {
+  padding: 0.35rem 0.15rem;
+  border: 0;
+  background: transparent;
+  color: var(--pz-accent-ink);
+  font: 700 0.54rem / 1 var(--pz-font-body);
+  text-decoration: underline;
+}
+.paywall-links span {
+  color: var(--pz-ink-label);
+}

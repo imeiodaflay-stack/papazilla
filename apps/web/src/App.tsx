@@ -11,6 +11,7 @@ import { CuriosidadesScreen } from './routes/CuriosidadesScreen.js';
 import { ReceitasScreen } from './routes/ReceitasScreen.js';
 import { ContaScreen } from './routes/ContaScreen.js';
 import { AjudaScreen } from './routes/AjudaScreen.js';
+import { AssinaturaScreen } from './routes/AssinaturaScreen.js';
 import { AnamneseScreen } from './routes/AnamneseScreen.js';
 import { SucessoScreen } from './routes/SucessoScreen.js';
 
@@ -29,6 +30,7 @@ export const router = createBrowserRouter([
   { path: '/sucesso', element: <SucessoScreen /> },
   { path: '/conta', element: <ContaScreen /> },
   { path: '/ajuda', element: <AjudaScreen /> },
+  { path: '/assinatura', element: <AssinaturaScreen /> },
   { path: '/zilla', element: <ZillaRoute /> },
   { path: '/zilla/:petId', element: <PetDetailScreen /> },
   { path: '/zilla/:petId/respostas', element: <AnamnesisDetailScreen /> },

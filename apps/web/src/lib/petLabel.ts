@@ -8,8 +8,9 @@ export function describePet(pet: PetLike | null | undefined) {
   const isFemale = pet?.sex === 'Fêmea';
   const noun = isFemale ? 'Monstrinha' : 'Monstrinho';
   const article = isFemale ? 'a' : 'o';
+  const preposition = isFemale ? 'da' : 'do';
   const displayName = pet?.name || noun;
-  return { isFemale, noun, article, displayName };
+  return { isFemale, noun, article, preposition, displayName };
 }
 
 /** "Castrada"/"Castrado" (ou a negativa) concordando com o sexo informado. */

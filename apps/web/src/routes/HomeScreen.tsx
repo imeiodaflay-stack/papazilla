@@ -5,6 +5,7 @@ import potinhoIcon from '../assets/icons/potinho.png';
 import infoIcon from '../assets/icons/info.png';
 import { getActivePet } from '../lib/petsStore.js';
 import { describePet } from '../lib/petLabel.js';
+import { getSubscription } from '../lib/subscription.js';
 
 /**
  * Início recorrente — fiel à tela "home" de `papazilla-prototype`: saudação,
@@ -12,8 +13,9 @@ import { describePet } from '../lib/petLabel.js';
  * `/papa` quando já existe um Monstrinho cadastrado (ver `PapaRoute`).
  *
  * Diferença do protótipo: lá o seletor de pet não tem ação; aqui, como a área
- * Pets já existe, ele abre o perfil do pet ativo. Trocar de pet por aqui e o
- * wizard de receita/assinatura entram nas próximas fatias (toast).
+ * Pets já existe, ele abre o perfil do pet ativo. Trocar de pet ainda avisa
+ * por toast. "Criar uma receita" segue a regra do protótipo — sem assinatura
+ * ativa, abre a oferta; com assinatura, o wizard em si ainda não existe.
  */
 export function HomeScreen() {
   const navigate = useNavigate();
@@ -31,6 +33,11 @@ export function HomeScreen() {
   function openActivePet() {
     if (activePet) navigate(`/zilla/${activePet.id}`);
     else toast('Cadastre um Monstrinho para ver o perfil dele aqui.');
+  }
+
+  function createRecipe() {
+    if (getSubscription()) toast('O wizard de receita entra na próxima fatia.');
+    else navigate('/assinatura', { state: { returnTo: 'papa' } });
   }
 
   return (
@@ -76,11 +83,7 @@ export function HomeScreen() {
           <h2>Vamos montar uma receita?</h2>
           <p>Escolha os ingredientes e a gente calcula as quantidades.</p>
         </div>
-        <button
-          type="button"
-          className="pz-button pz-button--primary wide"
-          onClick={() => toast('O wizard de receita e a assinatura entram nas próximas fatias.')}
-        >
+        <button type="button" className="pz-button pz-button--primary wide" onClick={createRecipe}>
           Criar uma receita <span aria-hidden="true">→</span>
         </button>
       </section>
