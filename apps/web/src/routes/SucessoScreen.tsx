@@ -1,17 +1,82 @@
-import { Link } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import zillaIcon from '../assets/icons/zilla.png';
+import { setHasPet } from '../lib/session.js';
 
 /**
- * Cadastro concluído — placeholder. A próxima fatia traz a tela "success" fiel
- * (confete, retrato do pet, resumo, "Vamos papá!" / "Cadastrar outro Monstrinho").
+ * Cadastro concluído — fiel à tela "success" de `papazilla-prototype`.
+ * Recebe um resumo do Monstrinho recém-cadastrado via `location.state`
+ * (passado pela Anamnese); sem esse estado (ex.: acesso direto), usa um
+ * resumo genérico em vez de dados inventados.
  */
+interface SuccessState {
+  name?: string;
+  sex?: string;
+  weight?: string;
+  goal?: string;
+  activityTime?: string;
+}
+
 export function SucessoScreen() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const state = (location.state as SuccessState | null) ?? {};
+
+  const isFemale = state.sex === 'Fêmea';
+  const noun = isFemale ? 'Monstrinha' : 'Monstrinho';
+  const article = isFemale ? 'a' : 'o';
+  const displayName = state.name || noun;
+
+  function goEat() {
+    setHasPet();
+    navigate('/papa', { replace: true });
+  }
+
+  function addAnother() {
+    navigate('/anamnese');
+  }
+
   return (
-    <section className="pz-screen" style={{ padding: '2rem 1.25rem', alignItems: 'center', textAlign: 'center' }}>
-      <h1>Monstrinho cadastrado!</h1>
-      <p>A tela de boas-vindas com o resumo entra na próxima fatia.</p>
-      <Link to="/zilla" className="pz-button pz-button--primary">
-        Ir para a matilha
-      </Link>
-    </section>
+    <div className="success-view">
+      <div className="confetti" aria-hidden="true">
+        ✦ <span>●</span> ♥ <span>✦</span>
+      </div>
+
+      <div className="success-view__content">
+        <div className="pet-portrait">
+          <img src={zillaIcon} alt={`Ilustração de ${displayName}`} />
+          <span className="success-check" aria-hidden="true">
+            ✓
+          </span>
+        </div>
+        <p className="eyebrow">
+          {isFemale ? 'Nova' : 'Novo'} {noun} na matilha
+        </p>
+        <h1 className="pz-h1">
+          Agora eu conheço {article} {displayName}!
+        </h1>
+        <p>Já guardei tudo o que preciso para ajudar vocês nas próximas fornalhas.</p>
+
+        <div className="success-summary">
+          <span>
+            <strong>{state.weight ? `${state.weight} kg` : '—'}</strong>Peso
+          </span>
+          <span>
+            <strong>{state.goal || '—'}</strong>Objetivo
+          </span>
+          <span>
+            <strong>{state.activityTime || '—'}</strong>Atividade
+          </span>
+        </div>
+      </div>
+
+      <div className="success-view__actions">
+        <button type="button" className="pz-button pz-button--primary wide" onClick={goEat}>
+          Vamos papá!
+        </button>
+        <button type="button" className="pz-button pz-button--text" onClick={addAnother}>
+          Cadastrar outro Monstrinho
+        </button>
+      </div>
+    </div>
   );
 }

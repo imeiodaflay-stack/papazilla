@@ -6,6 +6,7 @@
  */
 const AUTH_KEY = 'papazilla.authenticated';
 const ONBOARDING_KEY = 'papazilla.seenOnboarding';
+const PET_KEY = 'papazilla.hasPet';
 
 function read(key: string): boolean {
   try {
@@ -38,4 +39,12 @@ export function hasSeenOnboarding(): boolean {
 
 export function setSeenOnboarding(): void {
   write(ONBOARDING_KEY, true);
+}
+
+export function hasPet(): boolean {
+  return read(PET_KEY);
+}
+
+export function setHasPet(): void {
+  write(PET_KEY, true);
 }

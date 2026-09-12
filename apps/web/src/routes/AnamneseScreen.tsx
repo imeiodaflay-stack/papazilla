@@ -969,7 +969,18 @@ export function AnamneseScreen() {
 
   function onNext() {
     if (step < LAST) goToStep(adjacent(1));
-    else navigate('/sucesso', { replace: true });
+    else {
+      navigate('/sucesso', {
+        replace: true,
+        state: {
+          name: inputs.name?.trim() || '',
+          sex: singles.sex,
+          weight: inputs.weight?.trim() || '',
+          goal: singles.goal,
+          activityTime: singles.activityTime,
+        },
+      });
+    }
   }
 
   return (
