@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import sheetIcon from '../assets/icons/sheet.png';
 import perfilIcon from '../assets/icons/perfil.png';
 import patinhaIcon from '../assets/icons/patinha.png';
@@ -12,15 +12,25 @@ import { describePet, joinPt } from '../lib/petLabel.js';
  * Respostas da anamnese — fiel à tela "anamnesis-detail" de `papazilla-prototype`:
  * resumo + grupos em acordeão. Modo leitura de verdade, com as respostas reais
  * salvas pela Anamnese (não os valores fixos do protótipo). "Editar respostas"
- * ainda avisa por toast — reabrir a anamnese em modo edição entra depois.
+ * reabre o wizard de verdade (`AnamneseScreen` em modo edição).
  */
 export function AnamnesisDetailScreen() {
   const { petId } = useParams<{ petId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<number>();
 
   const pet = petId ? getPet(petId) : undefined;
+
+  useEffect(() => {
+    const state = location.state as { toast?: string } | null;
+    if (state?.toast) {
+      toast(state.toast);
+      navigate('.', { replace: true, state: null });
+    }
+  }, []);
+
   if (!pet) return <Navigate to="/zilla" replace />;
 
   const { displayName } = describePet(pet);
@@ -184,7 +194,7 @@ export function AnamnesisDetailScreen() {
         <button
           type="button"
           className="pz-button pz-button--primary wide"
-          onClick={() => toast('Edição da anamnese entra na próxima fatia.')}
+          onClick={() => navigate(`/zilla/${pet.id}/anamnese`)}
         >
           Editar respostas
         </button>

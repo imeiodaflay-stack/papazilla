@@ -1,9 +1,9 @@
 import { type ReactNode, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import zillaIcon from '../assets/icons/zilla.png';
 import addIcon from '../assets/icons/adicionar.png';
 import infoIcon from '../assets/icons/info.png';
-import { addPet } from '../lib/petsStore.js';
+import { addPet, getPet, updatePet, type StoredPet } from '../lib/petsStore.js';
 
 /**
  * Anamnese do Monstrinho — fiel à tela "profile" de `papazilla-prototype`.
@@ -11,9 +11,18 @@ import { addPet } from '../lib/petsStore.js';
  * cards de escolha única, pílulas, multi-seleção com opções exclusivas, campos e
  * áreas de texto, painéis condicionais, aviso clínico, revisão e aceite.
  *
- * Fase 0: sem persistência. Ao confirmar, vai para /sucesso.
- * Diferença consciente do protótipo: os campos de texto (nome, peso, etc.) começam
- * vazios — pré-preencher "Mel"/"10" seria dado falso num app real.
+ * Cadastro (`/anamnese`): sem persistência prévia. Ao confirmar, cria o pet e
+ * vai para /sucesso. Diferença consciente do protótipo: os campos de texto
+ * (nome, peso, etc.) começam vazios — pré-preencher "Mel"/"10" seria dado
+ * falso num app real.
+ *
+ * Edição (`/zilla/:petId/anamnese`): reabre o mesmo wizard com as respostas
+ * hoje persistidas em `petsStore.ts` (ver `buildEditState`). Só os campos que
+ * o app de fato grava voltam preenchidos — perguntas cujas respostas não são
+ * salvas em `StoredPet` (ex.: mudança de músculo, digestão, carboidratos
+ * favoritos) reaparecem no valor padrão, porque a resposta original nunca
+ * existiu em lugar nenhum pra recuperar. Ao confirmar, atualiza o pet e volta
+ * para "Respostas atuais" com um toast — não passa por /sucesso de novo.
  */
 
 type Singles = Record<string, string>;
@@ -84,6 +93,59 @@ function defaultMulti(): Multi {
     carbs: new Set(['Tanto faz (escolham por mim)']),
     vegetableFavorites: new Set(['Cenoura']),
   };
+}
+
+/**
+ * Reconstrói o estado inicial do wizard a partir de um pet já cadastrado —
+ * só com o que `StoredPet` de fato guarda. Ver nota de edição no topo do
+ * arquivo sobre as perguntas que não têm resposta persistida pra recuperar.
+ */
+function buildEditState(pet: StoredPet): { singles: Singles; inputs: Inputs; multi: Multi } {
+  const singles: Singles = {
+    ...DEFAULT_SINGLES,
+    sex: pet.sex,
+    neutered: pet.neutered,
+    senior: pet.senior,
+    lifeStage: pet.lifeStage,
+    weightTendency: pet.weightTendency,
+    goal: pet.goal,
+    bodyTop: pet.bodyTop,
+    weightChange: pet.weightChange,
+    activityTime: pet.activityTime,
+    activityType: pet.activityType,
+    appetite: pet.appetite,
+    currentMeals: pet.currentMeals,
+    stool: pet.stool,
+    medication: pet.medication,
+    cookingMethod: pet.cookingMethod,
+    recipeFormat: pet.recipeFormat,
+    avoidProtein: pet.avoidProteinName ? 'Sim' : 'Não',
+    avoidVegetable: pet.avoidVegetableName ? 'Sim' : 'Não',
+    intolerance: pet.intoleranceName ? 'Sim' : 'Não',
+  };
+  if (pet.puppyAgeBand) singles.puppyAgeBand = pet.puppyAgeBand;
+  if (pet.expectedAdultSize) singles.expectedAdultSize = pet.expectedAdultSize;
+
+  const inputs: Inputs = {
+    name: pet.name,
+    breed: pet.breed,
+    age: pet.age,
+    weight: pet.weight,
+    idealWeight: pet.idealWeight,
+    medicationName: pet.medicationName,
+    avoidProteinName: pet.avoidProteinName,
+    avoidVegetableName: pet.avoidVegetableName,
+    intoleranceName: pet.intoleranceName,
+  };
+
+  const multi: Multi = {
+    ...defaultMulti(),
+    health: pet.healthConditions.length > 0 ? new Set(pet.healthConditions) : new Set(['Nenhuma']),
+    proteins: pet.proteins.length > 0 ? new Set(pet.proteins) : new Set(['Todas']),
+    vegetableFavorites: pet.vegetableFavorites.length > 0 ? new Set(pet.vegetableFavorites) : new Set(['Cenoura']),
+  };
+
+  return { singles, inputs, multi };
 }
 
 const HEALTH_COMPLEMENTS = ['Pancreatite', 'Cálculos ou cristais urinários', 'Doença renal'];
@@ -944,14 +1006,21 @@ const LAST = STEPS.length - 1;
 
 export function AnamneseScreen() {
   const navigate = useNavigate();
+  const { petId } = useParams<{ petId: string }>();
+  const editingPet = petId ? getPet(petId) : undefined;
+  const isEditing = Boolean(petId);
+  const editState = useMemo(() => (editingPet ? buildEditState(editingPet) : null), [editingPet]);
+
   const [step, setStep] = useState(0);
-  const [singles, setSingles] = useState<Singles>({ ...DEFAULT_SINGLES });
-  const [inputs, setInputs] = useState<Inputs>({});
-  const [multi, setMulti] = useState<Multi>(defaultMulti);
-  const [consent, setConsent] = useState(false);
+  const [singles, setSingles] = useState<Singles>(() => editState?.singles ?? { ...DEFAULT_SINGLES });
+  const [inputs, setInputs] = useState<Inputs>(() => editState?.inputs ?? {});
+  const [multi, setMulti] = useState<Multi>(() => editState?.multi ?? defaultMulti());
+  const [consent, setConsent] = useState(Boolean(editingPet));
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<number>();
   const bodyRef = useRef<HTMLDivElement>(null);
+
+  if (isEditing && !editingPet) return <Navigate to="/zilla" replace />;
 
   function toast(message: string) {
     window.clearTimeout(toastTimer.current);
@@ -1019,7 +1088,7 @@ export function AnamneseScreen() {
         .filter((c) => c !== 'Nenhuma')
         .map((c) => (c === 'Outra' && inputs.otherHealth?.trim() ? inputs.otherHealth.trim() : c));
 
-      addPet({
+      const petPatch = {
         name,
         sex,
         neutered: singles.neutered ?? '',
@@ -1051,18 +1120,27 @@ export function AnamneseScreen() {
         intoleranceName: singles.intolerance === 'Sim' ? inputs.intoleranceName?.trim() || '' : '',
         cookingMethod: singles.cookingMethod ?? '',
         recipeFormat: singles.recipeFormat ?? '',
-      });
+      };
 
-      navigate('/sucesso', {
-        replace: true,
-        state: {
-          name,
-          sex,
-          weight: inputs.weight?.trim() || '',
-          goal,
-          activityTime: singles.activityTime,
-        },
-      });
+      if (editingPet) {
+        updatePet(editingPet.id, petPatch);
+        navigate(`/zilla/${editingPet.id}/respostas`, {
+          replace: true,
+          state: { toast: 'Respostas da anamnese atualizadas.' },
+        });
+      } else {
+        addPet(petPatch);
+        navigate('/sucesso', {
+          replace: true,
+          state: {
+            name,
+            sex,
+            weight: inputs.weight?.trim() || '',
+            goal,
+            activityTime: singles.activityTime,
+          },
+        });
+      }
     }
   }
 
@@ -1073,7 +1151,7 @@ export function AnamneseScreen() {
           type="button"
           className="flow-header__back"
           aria-label="Fechar anamnese"
-          onClick={() => navigate('/zilla')}
+          onClick={() => navigate(editingPet ? `/zilla/${editingPet.id}/respostas` : '/zilla')}
         >
           ←
         </button>
@@ -1116,7 +1194,7 @@ export function AnamneseScreen() {
           disabled={nextDisabled}
           onClick={onNext}
         >
-          {step === LAST ? 'Confirmar cadastro' : 'Continuar →'}
+          {step === LAST ? (editingPet ? 'Salvar alterações' : 'Confirmar cadastro') : 'Continuar →'}
         </button>
       </footer>
 

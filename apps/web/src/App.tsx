@@ -44,6 +44,7 @@ export const router = createBrowserRouter([
   { path: '/zilla/:petId', element: <PetDetailScreen /> },
   { path: '/zilla/:petId/editar', element: <PetEditScreen /> },
   { path: '/zilla/:petId/respostas', element: <AnamnesisDetailScreen /> },
+  { path: '/zilla/:petId/anamnese', element: <AnamneseScreen /> },
   { path: '/curiosidades', element: <CuriosidadesScreen /> },
   { path: '/curiosidades/:curiosidadeId', element: <CuriosidadeDetalheScreen /> },
   { path: '/receitas', element: <ReceitasScreen /> },
