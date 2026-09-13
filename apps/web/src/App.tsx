@@ -15,6 +15,7 @@ import { AssinaturaScreen } from './routes/AssinaturaScreen.js';
 import { GerenciarAssinaturaScreen } from './routes/GerenciarAssinaturaScreen.js';
 import { AnamneseScreen } from './routes/AnamneseScreen.js';
 import { SucessoScreen } from './routes/SucessoScreen.js';
+import { ReceitaScreen } from './routes/ReceitaScreen.js';
 
 /**
  * Rotas do MVP. Fluxo confirmado (arquitetura-tecnica.md):
@@ -29,6 +30,7 @@ export const router = createBrowserRouter([
   { path: '/onboarding', element: <OnboardingScreen /> },
   { path: '/anamnese', element: <AnamneseScreen /> },
   { path: '/sucesso', element: <SucessoScreen /> },
+  { path: '/receita', element: <ReceitaScreen /> },
   { path: '/conta', element: <ContaScreen /> },
   { path: '/ajuda', element: <AjudaScreen /> },
   { path: '/assinatura', element: <AssinaturaScreen /> },

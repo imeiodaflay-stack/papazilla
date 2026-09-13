@@ -15,21 +15,30 @@ import { setSubscription, type SubscriptionPayment, type SubscriptionPlan } from
  * aberto). Assinar só grava o plano localmente, como o protótipo — nenhuma
  * cobrança acontece de verdade.
  */
-type ReturnTo = 'papa' | 'conta';
+type ReturnTo = 'papa' | 'conta' | 'recipe';
 
 interface PaywallState {
   returnTo?: ReturnTo;
 }
 
-function returnPath(returnTo: ReturnTo | undefined): string {
-  return returnTo === 'papa' ? '/papa' : '/conta';
+/** Pra onde fechar a oferta sem assinar. "recipe" volta pro Papá (o wizard exige assinatura). */
+function closePath(returnTo: ReturnTo | undefined): string {
+  if (returnTo === 'conta') return '/conta';
+  return '/papa';
+}
+
+/** Pra onde ir depois de assinar. Só "recipe" segue direto pro wizard, como no protótipo. */
+function subscribedPath(returnTo: ReturnTo | undefined): string {
+  if (returnTo === 'recipe') return '/receita';
+  return closePath(returnTo);
 }
 
 export function AssinaturaScreen() {
   const navigate = useNavigate();
   const location = useLocation();
   const returnTo = (location.state as PaywallState | null)?.returnTo;
-  const backTo = returnPath(returnTo);
+  const backTo = closePath(returnTo);
+  const afterSubscribe = subscribedPath(returnTo);
 
   const activePet = getActivePet();
   const { preposition, displayName } = describePet(activePet);
@@ -72,7 +81,7 @@ export function AssinaturaScreen() {
   function subscribe() {
     setSubscription({ plan, payment: plan === 'annual' ? annualPayment : 'monthly' });
     toast(plan === 'annual' ? 'Plano anual ativado. Boa fornalha!' : 'Plano mensal ativado. Boa fornalha!');
-    window.setTimeout(() => navigate(backTo, { replace: true }), 900);
+    window.setTimeout(() => navigate(afterSubscribe, { replace: true }), 900);
   }
 
   return (

@@ -36,8 +36,8 @@ export function HomeScreen() {
   }
 
   function createRecipe() {
-    if (getSubscription()) toast('O wizard de receita entra na próxima fatia.');
-    else navigate('/assinatura', { state: { returnTo: 'papa' } });
+    if (getSubscription()) navigate('/receita');
+    else navigate('/assinatura', { state: { returnTo: 'recipe' } });
   }
 
   return (
