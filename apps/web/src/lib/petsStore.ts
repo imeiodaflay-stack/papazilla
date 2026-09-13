@@ -12,6 +12,16 @@ export interface StoredPet {
   name: string;
   sex: string;
   neutered: string;
+  /** "Sim"/"Não" — junto de `neutered`, alimenta o ajuste percentual do motor. */
+  senior: string;
+  /** "Adulto" | "Filhote". */
+  lifeStage: string;
+  /** Preenchido só quando `lifeStage === 'Filhote'`. */
+  puppyAgeBand: string;
+  /** Preenchido só quando `lifeStage === 'Filhote'`. */
+  expectedAdultSize: string;
+  /** Tendência de peso/atividade — mesma faixa da calculadora original. */
+  weightTendency: string;
   breed: string;
   age: string;
   weight: string;

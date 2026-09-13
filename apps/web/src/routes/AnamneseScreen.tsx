@@ -39,6 +39,9 @@ const FALLBACK: Record<string, string> = {
 const DEFAULT_SINGLES: Singles = {
   sex: 'Fêmea',
   neutered: 'Sim',
+  senior: 'Não',
+  lifeStage: 'Adulto',
+  weightTendency: 'Normal',
   goal: 'Melhorar a qualidade da alimentação',
   bodyTop: 'Corpo proporcional, com cintura visível',
   ribs: 'Consigo sentir facilmente',
@@ -289,6 +292,44 @@ const STEPS: Step[] = [
         </Question>
         <Question title="É castrado?">
           <Pills name="neutered" options={['Sim', 'Não']} ctx={ctx} />
+        </Question>
+        <Question title="É idoso(a)?">
+          <Pills name="senior" options={['Sim', 'Não']} ctx={ctx} />
+        </Question>
+        <Question title="Fase de vida">
+          <Pills name="lifeStage" options={['Adulto', 'Filhote']} ctx={ctx} />
+        </Question>
+        {ctx.singles.lifeStage === 'Filhote' ? (
+          <>
+            <Question title="Faixa etária do filhote">
+              <SingleCards
+                name="puppyAgeBand"
+                ctx={ctx}
+                compact
+                options={['2 a 4 meses', '4 a 6 meses', '6 a 8 meses', '8 a 10 meses', '10 a 18 meses', '18 meses ou mais']}
+              />
+            </Question>
+            <Question title="Porte adulto esperado">
+              <SingleCards
+                name="expectedAdultSize"
+                ctx={ctx}
+                compact
+                options={[
+                  'Pequeno (adulto 5–10kg)',
+                  'Médio (adulto 10–25kg)',
+                  'Grande (adulto 25–35kg)',
+                  'Gigante (adulto 35kg+)',
+                ]}
+              />
+            </Question>
+          </>
+        ) : null}
+        <Question title="Tendência de peso">
+          <Pills
+            name="weightTendency"
+            options={['Tende a engordar', 'Normal', 'Magro(a) / muito ativo(a)']}
+            ctx={ctx}
+          />
         </Question>
       </>
     ),
@@ -982,6 +1023,11 @@ export function AnamneseScreen() {
         name,
         sex,
         neutered: singles.neutered ?? '',
+        senior: singles.senior ?? '',
+        lifeStage: singles.lifeStage ?? '',
+        puppyAgeBand: singles.lifeStage === 'Filhote' ? singles.puppyAgeBand ?? '' : '',
+        expectedAdultSize: singles.lifeStage === 'Filhote' ? singles.expectedAdultSize ?? '' : '',
+        weightTendency: singles.weightTendency ?? '',
         breed: inputs.breed?.trim() || '',
         age: inputs.age?.trim() || '',
         weight: inputs.weight?.trim() || '',
