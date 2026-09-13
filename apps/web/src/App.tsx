@@ -10,6 +10,8 @@ import { PapaRoute } from './routes/PapaRoute.js';
 import { CuriosidadesScreen } from './routes/CuriosidadesScreen.js';
 import { CuriosidadeDetalheScreen } from './routes/CuriosidadeDetalheScreen.js';
 import { ReceitasScreen } from './routes/ReceitasScreen.js';
+import { RecipeDetailScreen } from './routes/RecipeDetailScreen.js';
+import { RecipeCookLogScreen } from './routes/RecipeCookLogScreen.js';
 import { ContaScreen } from './routes/ContaScreen.js';
 import { AjudaScreen } from './routes/AjudaScreen.js';
 import { AssinaturaScreen } from './routes/AssinaturaScreen.js';
@@ -22,9 +24,9 @@ import { ReceitaScreen } from './routes/ReceitaScreen.js';
  * Rotas do MVP. Fluxo confirmado (arquitetura-tecnica.md):
  * Splash → Entrar/criar conta → Onboarding → Cadastro do 1º Monstrinho → Papá.
  * Navegação inferior (app-view): Pets / Papá / Curiosidades / Salvas.
- * Minha conta, a anamnese, as telas da área Pets (lista/perfil/respostas) e
- * Curiosidades têm cabeçalho próprio — não usam a casca genérica `AppShell`
- * (ver `ZillaRoute`).
+ * Minha conta, a anamnese, as telas da área Pets (lista/perfil/respostas),
+ * Curiosidades e Receitas salvas têm cabeçalho próprio — não usam a casca
+ * genérica `AppShell` (ver `ZillaRoute`).
  */
 export const router = createBrowserRouter([
   { path: '/', element: <SplashScreen /> },
@@ -42,12 +44,12 @@ export const router = createBrowserRouter([
   { path: '/zilla/:petId/respostas', element: <AnamnesisDetailScreen /> },
   { path: '/curiosidades', element: <CuriosidadesScreen /> },
   { path: '/curiosidades/:curiosidadeId', element: <CuriosidadeDetalheScreen /> },
+  { path: '/receitas', element: <ReceitasScreen /> },
+  { path: '/receitas/:recipeId', element: <RecipeDetailScreen /> },
+  { path: '/receitas/:recipeId/preparo', element: <RecipeCookLogScreen /> },
   {
     element: <AppShell />,
-    children: [
-      { path: '/papa', element: <PapaRoute /> },
-      { path: '/receitas', element: <ReceitasScreen /> },
-    ],
+    children: [{ path: '/papa', element: <PapaRoute /> }],
   },
   { path: '*', element: <Navigate to="/" replace /> },
 ]);

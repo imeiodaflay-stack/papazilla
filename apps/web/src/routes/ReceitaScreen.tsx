@@ -1,19 +1,28 @@
 import { useMemo, useRef, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import type { DailyPlan, FormulationId, RecipeRow, SupplementId } from '@papazilla/nutrition-engine';
-import { CARBS, FORMULATIONS, ORGANS, PROTEINS, SUPPLEMENTS, VEGETABLES, findItem } from '@papazilla/nutrition-engine';
+import type { FormulationId, SupplementId } from '@papazilla/nutrition-engine';
+import { CARBS, FORMULATIONS, ORGANS, PROTEINS, VEGETABLES, findItem } from '@papazilla/nutrition-engine';
 import zillaIcon from '../assets/icons/zilla.png';
 import potinhoIcon from '../assets/icons/potinho.png';
-import addIcon from '../assets/icons/adicionar.png';
 import infoIcon from '../assets/icons/info.png';
-import receitaIcon from '../assets/icons/receita.png';
-import { getActivePet, listPets, type StoredPet } from '../lib/petsStore.js';
+import { getActivePet, listPets } from '../lib/petsStore.js';
 import { describePet, joinPt } from '../lib/petLabel.js';
 import { getSubscription } from '../lib/subscription.js';
 import { derivePredominantProtein } from '../lib/engineMapping.js';
 import { buildPetPlan, buildSharedRecipe } from '../lib/recipeEngine.js';
 import { addRecipe } from '../lib/recipesStore.js';
+import {
+  FORMULATION_LABELS,
+  FORMULATION_ORDER,
+  SUPPLEMENT_LABELS,
+  SUPPLEMENT_ORDER,
+  formatGrams,
+  formulationSummary,
+  mealsCount,
+  supplementReference,
+} from '../lib/recipeDisplay.js';
 import { IngredientPicker } from '../components/IngredientPicker.js';
+import { RecipeResultCard } from '../components/RecipeResultCard.js';
 
 /**
  * Wizard da receita — fiel à tela "recipe" de `papazilla-prototype` (9 etapas:
@@ -39,69 +48,9 @@ import { IngredientPicker } from '../components/IngredientPicker.js';
  *   protótipo).
  */
 
-const FORMULATION_LABELS: Record<FormulationId, string> = {
-  padrao: 'Padrão',
-  'mais-proteina': 'Mais proteína',
-  intermediaria: 'Intermediária',
-  'mais-visceras': 'Mais vísceras',
-};
-
-const FORMULATION_ORDER: FormulationId[] = ['padrao', 'mais-proteina', 'intermediaria', 'mais-visceras'];
-
-function formulationSummary(id: FormulationId): string {
-  const f = FORMULATIONS[id];
-  return `${f.meat}% carnes · ${f.organs}% vísceras · ${f.carb}% carboidratos · ${f.vegetables}% vegetais`;
-}
-
-const SUPPLEMENT_ORDER: SupplementId[] = ['food-dog', 'nutroplus'];
-
-const SUPPLEMENT_LABELS: Record<SupplementId, string> = {
-  'food-dog': 'Food Dog',
-  nutroplus: 'Nutroplus Manutenção',
-};
-
-function supplementReference(id: SupplementId): string {
-  const s = SUPPLEMENTS[id];
-  return `${s.adultFactor.toLocaleString('pt-BR', { minimumFractionDigits: 1 })} g para cada 100 g de comida pronta (adulto)`;
-}
-
 const FORMAT_OPTIONS = ['Quantidade dos alimentos crus', 'Quantidade dos alimentos prontos', 'Os dois'];
 
 const BATCH_DAY_OPTIONS = [1, 3, 7];
-
-function mealsCount(plan: DailyPlan): number {
-  const match = /\d+/.exec(plan.mealsPerDay);
-  return match ? Number(match[0]) : 2;
-}
-
-function mealSize(plan: DailyPlan): number {
-  return Math.round(plan.totalGramsPerDay / mealsCount(plan));
-}
-
-function formatGrams(value: number): string {
-  return `${Math.round(value).toLocaleString('pt-BR')} g`;
-}
-
-function formatRowAmount(row: RecipeRow, format: string): string {
-  const cookedTxt = row.cookedGrams !== undefined ? formatGrams(row.cookedGrams) : '';
-  const rawTxt = row.rawGrams !== undefined ? formatGrams(row.rawGrams) : '';
-  if (format === 'Quantidade dos alimentos crus') return rawTxt ? `≈ ${rawTxt} cru` : '—';
-  if (format === 'Quantidade dos alimentos prontos') return cookedTxt ? `≈ ${cookedTxt} pronto` : '—';
-  if (rawTxt && cookedTxt) return `≈ ${rawTxt} cru · ${cookedTxt} pronto`;
-  return rawTxt ? `≈ ${rawTxt}` : cookedTxt ? `≈ ${cookedTxt}` : '—';
-}
-
-function prepPortionsText(petPlans: { pet: StoredPet; plan: DailyPlan }[], days: number): string {
-  if (petPlans.length > 1) {
-    const parts = petPlans.map(
-      ({ pet, plan }) => `${days} ${days === 1 ? 'porção' : 'porções'} de ${formatGrams(plan.totalGramsPerDay)} para ${pet.name}`,
-    );
-    return `Depois de misturar, separe ${joinPt(parts)}. Identifique os recipientes com nome e data.`;
-  }
-  const plan = petPlans[0]!.plan;
-  const totalMeals = days * mealsCount(plan);
-  return `Monte ${days} ${days === 1 ? 'porção diária' : 'porções diárias'} de ${formatGrams(plan.totalGramsPerDay)} ou ${totalMeals} refeições de ${formatGrams(mealSize(plan))}. Use recipientes rasos, limpos e identificados com a data.`;
-}
 
 export function ReceitaScreen() {
   const navigate = useNavigate();
@@ -231,18 +180,6 @@ export function ReceitaScreen() {
         days,
       )
     : null;
-
-  /**
-   * O primeiro pet da lista pode não ser o que tem condição de saúde — não dá
-   * pra assumir que o alerta clínico cai no índice 0 do flatMap. Achamos o
-   * plano que exige revisão e colocamos o disclaimer dele (sempre o primeiro
-   * do próprio array, por convenção de `daily-plan.ts`) na frente.
-   */
-  const clinicalPlanEntry = petPlans.find(({ plan }) => plan.clinicalReviewRequired);
-  const flatDisclaimers = [...new Set(petPlans.flatMap(({ plan }) => plan.disclaimers))];
-  const orderedDisclaimers = clinicalPlanEntry
-    ? [clinicalPlanEntry.plan.disclaimers[0]!, ...flatDisclaimers.filter((d) => d !== clinicalPlanEntry.plan.disclaimers[0])]
-    : flatDisclaimers;
 
   const contextLabel =
     selectedPets.length > 1
@@ -533,257 +470,7 @@ export function ReceitaScreen() {
         ) : null}
 
         {isResultStep && recipe ? (
-          <div className="recipe-result-card">
-            <div className="recipe-result-card__total">
-              <span>
-                <small>Total da receita</small>
-                <strong>{formatGrams(recipe.totalCookedGrams)}</strong>
-                <small>prontos</small>
-              </span>
-              <img src={potinhoIcon} alt="" />
-            </div>
-            <div className="recipe-preset-result">
-              <small>Proporção escolhida</small>
-              <strong>{FORMULATION_LABELS[formulation]}</strong>
-              <span>{formulationSummary(formulation)}</span>
-            </div>
-            {selectedPets.length > 1 ? (
-              <div className="pet-portion-breakdown">
-                <div>
-                  <small>Uma base para</small>
-                  <strong>{joinPt(selectedPets.map((p) => p.name))}</strong>
-                </div>
-                {petPlans.map(({ pet, plan }) => (
-                  <span key={pet.id}>
-                    <b>{pet.name}</b>
-                    <small>
-                      {formatGrams(plan.totalGramsPerDay)}/dia · {formatGrams(mealSize(plan))}/ref.
-                    </small>
-                  </span>
-                ))}
-              </div>
-            ) : null}
-            <div className="result-group">
-              <h3>O que pesar</h3>
-              {recipe.groups
-                .filter((g) => g.key !== 'herbs')
-                .map((group) => (
-                  <div key={group.key}>
-                    <span>{group.rows.map((r) => r.label).join(', ')}</span>
-                    <strong>{group.rows.map((r) => formatRowAmount(r, format)).join(' + ')}</strong>
-                  </div>
-                ))}
-            </div>
-            {recipe.notes.length > 0 ? (
-              <div className="result-group">
-                <h3>Vale saber</h3>
-                {recipe.notes.map((note) => (
-                  <div key={note.code} className="shared-recipe-note">
-                    <img src={infoIcon} alt="" />
-                    <p>{note.text}</p>
-                  </div>
-                ))}
-              </div>
-            ) : null}
-            <div className="supplement-result">
-              <div className="supplement-result__title">
-                <img src={addIcon} alt="" />
-                <span>
-                  <small>Também entra no potinho</small>
-                  <h3>Suplementos e finalização</h3>
-                </span>
-              </div>
-              <p className="supplement-context">
-                {selectedPets.length > 1
-                  ? 'A base é compartilhada; as doses continuam separadas por pet.'
-                  : `Dose calculada sobre a porção pronta de ${selectedPets[0]?.name ?? 'o Monstrinho'}.`}
-              </p>
-              <div className="pet-finalizers">
-                {petPlans.map(({ pet, plan }, index) => (
-                  <details key={pet.id} className="pet-finalizer-card" open={petPlans.length === 1 || index === 0}>
-                    <summary>
-                      <span className="pet-finalizer-card__pet">
-                        <i className="recipe-pet-avatar">
-                          <img src={zillaIcon} alt="" />
-                        </i>
-                        <span>
-                          <strong>{pet.name}</strong>
-                          <small>
-                            {formatGrams(plan.totalGramsPerDay)}/dia · {formatGrams(mealSize(plan))} por refeição
-                          </small>
-                        </span>
-                      </span>
-                      <b aria-hidden="true">⌄</b>
-                    </summary>
-                    <div className="pet-finalizer-card__doses">
-                      <p>
-                        <span>
-                          <strong>{plan.supplement.name}</strong>
-                          <small>{plan.supplement.ramp}</small>
-                        </span>
-                        <b>{plan.supplement.doseGramsPerDay.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} g/dia</b>
-                      </p>
-                      <p>
-                        <span>
-                          <strong>Óleo vegetal</strong>
-                          <small>{plan.vegetableOil.note}</small>
-                        </span>
-                        <b>{plan.vegetableOil.dose}</b>
-                      </p>
-                      <p>
-                        <span>
-                          <strong>Óleo de peixe ou krill</strong>
-                          <small>Diário ou 3× por semana</small>
-                        </span>
-                        <b>{plan.fishOil.dose}</b>
-                      </p>
-                      <p className="pet-finalizer-card__salt">
-                        <span>
-                          <strong>Sal integral</strong>
-                          <small>{plan.saltGuidance}</small>
-                        </span>
-                        <b>Opcional</b>
-                      </p>
-                    </div>
-                  </details>
-                ))}
-              </div>
-              {petPlans.length > 1 ? (
-                <aside className="shared-finalizer-warning">
-                  <img src={infoIcon} alt="" />
-                  <span>Separe as porções de cada pet antes de adicionar suplementos, óleos e doses individuais.</span>
-                </aside>
-              ) : null}
-            </div>
-            <details className="recipe-preparation" open>
-              <summary>
-                <span>
-                  <img src={receitaIcon} alt="" />
-                  Modo de preparo
-                </span>
-                <b aria-hidden="true">⌄</b>
-              </summary>
-              <div className="recipe-preparation__body">
-                <p className="recipe-preparation__intro">
-                  Passo a passo para esta combinação. Os tempos consideram cortes pequenos e são aproximados.
-                </p>
-                <ol className="prep-steps">
-                  <li>
-                    <span>1</span>
-                    <div>
-                      <strong>Organize uma bancada limpa</strong>
-                      <p>
-                        Lave as mãos por 20 segundos. Separe tábua e faca usadas na carne crua, não lave o frango e pese todos
-                        os ingredientes ainda crus.
-                      </p>
-                    </div>
-                  </li>
-                  <li>
-                    <span>2</span>
-                    <div>
-                      <strong>Faça cortes uniformes</strong>
-                      <p>
-                        Corte carnes em cubos de 2–3 cm; vísceras em pedaços de 1,5–2 cm; tubérculos e vegetais em cubos de
-                        1,5–2 cm. Tamanhos parecidos cozinham por igual.
-                      </p>
-                    </div>
-                  </li>
-                  <li>
-                    <span>3</span>
-                    <div>
-                      <strong>Cozinhe sem temperos</strong>
-                      <p>Cozinhe cada grupo separadamente, em água ou no vapor. Não use cebola, alho, molhos ou temperos prontos.</p>
-                    </div>
-                  </li>
-                  <li className="prep-step--temperature">
-                    <span>
-                      <img src={infoIcon} alt="" />
-                    </span>
-                    <div>
-                      <strong>Confirme 74&nbsp;°C nas carnes e vísceras</strong>
-                      <p>Meça no centro da parte mais espessa. Cor e tempo sozinhos não confirmam um cozimento seguro.</p>
-                    </div>
-                  </li>
-                  <li>
-                    <span>4</span>
-                    <div>
-                      <strong>Escorra, espere amornar e misture</strong>
-                      <p>Desfie ou pique depois de cozido. Misture tudo até os ingredientes ficarem bem distribuídos; não ofereça a comida quente.</p>
-                    </div>
-                  </li>
-                  <li>
-                    <span>5</span>
-                    <div>
-                      <strong>Divida a fornalha</strong>
-                      <p>{prepPortionsText(petPlans, days)}</p>
-                    </div>
-                  </li>
-                  <li>
-                    <span>6</span>
-                    <div>
-                      <strong>Finalize somente na hora de servir</strong>
-                      <p>Adicione suplemento, óleos e qualquer dose individual indicada à porção já fria ou morna. Não tempere a receita por conta própria.</p>
-                    </div>
-                  </li>
-                  <li>
-                    <span>7</span>
-                    <div>
-                      <strong>Guarde com segurança</strong>
-                      <p>Refrigere em até 2 horas e use as porções refrigeradas em 3–4 dias. Congele o restante e descongele dentro da geladeira.</p>
-                    </div>
-                  </li>
-                </ol>
-                <p className="prep-footnote">
-                  *Estimativa para cubos de 2–3 cm em fervura suave. Quantidade, panela e fogão alteram o tempo; o termômetro
-                  define o ponto seguro.
-                </p>
-                <div className="prep-sources">
-                  <span>Segurança alimentar</span>
-                  <a
-                    href="https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/food-safety-basics/safe-temperature-chart"
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    Temperatura ↗
-                  </a>
-                  <a href="https://ask.fsis.usda.gov/article/Is-it-necessary-to-rinse-soak-or-brine-chicken-to-make-it-safe" target="_blank" rel="noopener">
-                    Frango ↗
-                  </a>
-                  <a href="https://www.fda.gov/animal-veterinary/animal-health-literacy/tips-safe-handling-pet-food-and-treats" target="_blank" rel="noopener">
-                    Higiene ↗
-                  </a>
-                </div>
-              </div>
-            </details>
-            {selectedPets.length > 1 ? (
-              <div className="portion-row">
-                {petPlans.map(({ pet, plan }) => (
-                  <span key={pet.id}>
-                    <small>{pet.name}</small>
-                    <strong>{formatGrams(plan.totalGramsPerDay)}/dia</strong>
-                    <b>{formatGrams(mealSize(plan))}/refeição</b>
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <div className="portion-row">
-                <span>
-                  <small>Por dia</small>
-                  <strong>{formatGrams(petPlans[0]!.plan.totalGramsPerDay)}</strong>
-                </span>
-                <span>
-                  <small>Por refeição</small>
-                  <strong>{formatGrams(mealSize(petPlans[0]!.plan))}</strong>
-                </span>
-              </div>
-            )}
-            {orderedDisclaimers.map((text, i) => (
-              <div key={i} className={i === 0 && clinicalPlanEntry ? 'clinical-warning' : 'shared-recipe-note'}>
-                <img src={infoIcon} alt="" />
-                <p>{text}</p>
-              </div>
-            ))}
-          </div>
+          <RecipeResultCard recipe={recipe} petPlans={petPlans} formulation={formulation} days={days} format={format} />
         ) : null}
       </div>
 
