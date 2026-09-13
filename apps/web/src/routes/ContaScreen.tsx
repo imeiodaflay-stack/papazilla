@@ -1,5 +1,18 @@
-import { Link } from 'react-router-dom';
+import { useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import editarIcon from '../assets/icons/editar.png';
+import patinhaIcon from '../assets/icons/patinha.png';
+import perfilIcon from '../assets/icons/perfil.png';
+import sucessoIcon from '../assets/icons/sucesso.png';
+import notificacoesIcon from '../assets/icons/notificacoes.png';
+import ajustesIcon from '../assets/icons/ajustes.png';
+import mensagemIcon from '../assets/icons/mensagem.png';
+import infoIcon from '../assets/icons/info.png';
+import excluirIcon from '../assets/icons/excluir.png';
+import { listPets } from '../lib/petsStore.js';
+import { describePet, joinPt } from '../lib/petLabel.js';
 import { getSubscription } from '../lib/subscription.js';
+import { setAuthenticated } from '../lib/session.js';
 
 const PLAN_NAME = { annual: 'Papazilla Anual', monthly: 'Papazilla Mensal' } as const;
 const PLAN_PAYMENT = {
@@ -9,47 +22,247 @@ const PLAN_PAYMENT = {
 } as const;
 
 /**
- * Minha conta — identidade, assinatura, acesso, documentos legais, contato e
- * exclusão da conta. Acessada pelo avatar, fora da navegação inferior.
+ * Minha conta — fiel à tela "user-profile" de `papazilla-prototype`: identidade,
+ * plano, conta e acesso, preferências, ajuda e privacidade, sair da conta.
+ *
+ * Sem provedor de login real ainda (Fase 0), então nome/e-mail permanecem
+ * genéricos em vez de um valor inventado — diferente do protótipo, que mostra
+ * "Flávia Coelho" fixo. "Sair da conta" é real (limpa a sessão simulada e volta
+ * pro login); o resto das linhas ainda avisa por toast.
  */
 export function ContaScreen() {
+  const navigate = useNavigate();
   const subscription = getSubscription();
+  const pets = listPets();
+  const [notifications, setNotifications] = useState(true);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const toastTimer = useRef<number>();
+
+  function toast(message: string) {
+    window.clearTimeout(toastTimer.current);
+    setToastMsg(message);
+    toastTimer.current = window.setTimeout(() => setToastMsg(null), 2600);
+  }
+
+  const petsLine =
+    pets.length > 0
+      ? `Tutor(a) de ${joinPt(pets.map((p) => describePet(p).displayName))}`
+      : 'Ainda sem Monstrinhos cadastrados';
+
+  const planName = subscription ? PLAN_NAME[subscription.plan] : 'Acesso gratuito';
+  const planDescription = subscription
+    ? 'Receitas personalizadas para toda a matilha, salvas e disponíveis em qualquer aparelho.'
+    : 'Cadastre seus pets e explore os conteúdos. Assine para criar receitas personalizadas.';
+  const valueLabel = subscription ? (subscription.plan === 'monthly' ? 'Renovação mensal' : 'Pagamento') : 'Receitas';
+  const planValue = subscription ? PLAN_PAYMENT[subscription.payment] : 'Benefício premium';
+
+  function goManagePlan() {
+    if (subscription) navigate('/assinatura/gerenciar');
+    else navigate('/assinatura', { state: { returnTo: 'conta' } });
+  }
+
+  function toggleNotifications() {
+    setNotifications((prev) => {
+      const next = !prev;
+      toast(next ? 'Lembretes da matilha ativados.' : 'Lembretes da matilha desativados.');
+      return next;
+    });
+  }
+
+  function signOut() {
+    toast('Você saiu da conta.');
+    window.setTimeout(() => {
+      setAuthenticated(false);
+      navigate('/entrar', { replace: true });
+    }, 700);
+  }
 
   return (
-    <section className="pz-screen">
-      <h1>Minha conta</h1>
+    <div className="user-profile-view">
+      <header className="user-profile-header">
+        <button type="button" className="flow-header__back" aria-label="Voltar" onClick={() => navigate(-1)}>
+          ←
+        </button>
+        <div>
+          <p className="eyebrow">Seu espaço</p>
+          <h1>Minha conta</h1>
+        </div>
+        <span aria-hidden="true" />
+      </header>
 
-      <div className="pz-card pz-screen">
-        <h2 style={{ font: 'var(--pz-text-h3)' }}>Identidade</h2>
-        <p>Tutor(a) — (dados virão do provedor de login)</p>
-      </div>
+      <div className="user-profile-content">
+        <section className="user-identity-card">
+          <button
+            type="button"
+            className="user-avatar-large"
+            aria-label="Alterar foto do perfil"
+            onClick={() => toast('A câmera ou a galeria será aberta aqui.')}
+          >
+            <span>F</span>
+            <i aria-hidden="true">＋</i>
+          </button>
+          <div>
+            <h2>Tutor(a)</h2>
+            <p>Dados virão do provedor de login</p>
+            <span>{petsLine}</span>
+          </div>
+          <button
+            type="button"
+            className="user-edit-button"
+            onClick={() => toast('A edição de nome, foto e e-mail será aberta aqui.')}
+          >
+            <img src={editarIcon} alt="" />
+            Editar
+          </button>
+        </section>
 
-      <div className="pz-card pz-screen">
-        <h2 style={{ font: 'var(--pz-text-h3)' }}>Assinatura</h2>
-        <p>
-          {subscription
-            ? `${PLAN_NAME[subscription.plan]} ativo · ${PLAN_PAYMENT[subscription.payment]}.`
-            : 'Plano gratuito. Assine para criar receitas personalizadas.'}
-        </p>
-        <Link to="/assinatura" state={{ returnTo: 'conta' }} className="pz-btn pz-btn--ghost">
-          {subscription ? 'Gerenciar plano →' : 'Conhecer planos →'}
-        </Link>
-      </div>
+        <section className="user-plan-card">
+          <div className="user-plan-card__top">
+            <span>
+              <img src={patinhaIcon} alt="" />
+            </span>
+            <div>
+              <small>Seu plano</small>
+              <strong>{planName}</strong>
+            </div>
+            <b>{subscription ? 'Ativo' : 'Grátis'}</b>
+          </div>
+          <p>{planDescription}</p>
+          <div className="user-plan-card__bottom">
+            <span>
+              <small>{valueLabel}</small>
+              <strong>{planValue}</strong>
+            </span>
+            <button type="button" onClick={goManagePlan}>
+              {subscription ? 'Gerenciar plano →' : 'Conhecer planos →'}
+            </button>
+          </div>
+        </section>
 
-      <div className="pz-card pz-screen">
-        <h2 style={{ font: 'var(--pz-text-h3)' }}>Ajuda e privacidade</h2>
-        <p>Dúvidas, documentos legais, canal de contato e exclusão da conta.</p>
-        <Link to="/ajuda" className="pz-btn pz-btn--ghost">
-          Central de Ajuda
-        </Link>
-        <button type="button" className="pz-btn pz-btn--ghost" disabled>
+        <section className="user-settings-group" aria-labelledby="account-settings-title">
+          <h2 id="account-settings-title">Conta e acesso</h2>
+          <button
+            type="button"
+            className="user-settings-row"
+            onClick={() => toast('A edição dos dados pessoais será aberta aqui.')}
+          >
+            <span className="user-settings-row__icon">
+              <img src={perfilIcon} alt="" />
+            </span>
+            <span>
+              <strong>Dados pessoais</strong>
+              <small>Nome, foto e e-mail</small>
+            </span>
+            <b aria-hidden="true">›</b>
+          </button>
+          <button
+            type="button"
+            className="user-settings-row"
+            onClick={() => toast('As formas de entrada conectadas serão mostradas aqui.')}
+          >
+            <span className="user-settings-row__icon">
+              <img src={sucessoIcon} alt="" />
+            </span>
+            <span>
+              <strong>Acesso e segurança</strong>
+              <small>Como você entra na conta</small>
+            </span>
+            <b aria-hidden="true">›</b>
+          </button>
+        </section>
+
+        <section className="user-settings-group" aria-labelledby="preferences-title">
+          <h2 id="preferences-title">Preferências</h2>
+          <div className="user-settings-row user-settings-row--toggle">
+            <span className="user-settings-row__icon">
+              <img src={notificacoesIcon} alt="" />
+            </span>
+            <span>
+              <strong>Lembretes da matilha</strong>
+              <small>Fornalhas, avaliações e novidades</small>
+            </span>
+            <button
+              type="button"
+              className={`user-toggle${notifications ? ' is-on' : ''}`}
+              role="switch"
+              aria-checked={notifications}
+              aria-label="Ativar lembretes"
+              onClick={toggleNotifications}
+            >
+              <i aria-hidden="true" />
+            </button>
+          </div>
+          <button
+            type="button"
+            className="user-settings-row"
+            onClick={() => toast('Papazilla usa sempre o visual oficial — sem tema alternativo por enquanto.')}
+          >
+            <span className="user-settings-row__icon">
+              <img src={ajustesIcon} alt="" />
+            </span>
+            <span>
+              <strong>Aparência</strong>
+              <small>Visual oficial do Papazilla</small>
+            </span>
+            <b aria-hidden="true">›</b>
+          </button>
+        </section>
+
+        <section className="user-settings-group" aria-labelledby="support-title">
+          <h2 id="support-title">Ajuda e privacidade</h2>
+          <Link to="/ajuda" className="user-settings-row">
+            <span className="user-settings-row__icon">
+              <img src={mensagemIcon} alt="" />
+            </span>
+            <span>
+              <strong>Central de Ajuda</strong>
+              <small>Dúvidas e contato</small>
+            </span>
+            <b aria-hidden="true">›</b>
+          </Link>
+          <button
+            type="button"
+            className="user-settings-row"
+            onClick={() => toast('Termos de Uso e Política de Privacidade serão abertos aqui.')}
+          >
+            <span className="user-settings-row__icon">
+              <img src={infoIcon} alt="" />
+            </span>
+            <span>
+              <strong>Termos e privacidade</strong>
+              <small>Como cuidamos dos seus dados</small>
+            </span>
+            <b aria-hidden="true">›</b>
+          </button>
+          <button
+            type="button"
+            className="user-settings-row"
+            onClick={() =>
+              toast('As opções para baixar ou excluir os dados terão uma confirmação antes de continuar.')
+            }
+          >
+            <span className="user-settings-row__icon">
+              <img src={excluirIcon} alt="" />
+            </span>
+            <span>
+              <strong>Dados da conta</strong>
+              <small>Baixar ou solicitar exclusão</small>
+            </span>
+            <b aria-hidden="true">›</b>
+          </button>
+        </section>
+
+        <button type="button" className="user-signout" onClick={signOut}>
           Sair da conta
         </button>
+        <p className="user-app-version">Papazilla · versão em desenvolvimento</p>
       </div>
 
-      <Link to="/zilla" className="pz-btn pz-btn--ghost">
-        Voltar
-      </Link>
-    </section>
+      {toastMsg ? (
+        <div className="pz-toast is-visible" role="status">
+          {toastMsg}
+        </div>
+      ) : null}
+    </div>
   );
 }
