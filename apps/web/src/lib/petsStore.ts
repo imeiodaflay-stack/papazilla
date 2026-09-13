@@ -89,6 +89,18 @@ export function addPet(data: Omit<StoredPet, 'id' | 'createdAt' | 'updatedAt'>):
   return pet;
 }
 
+/** Atualiza campos de um pet existente (edição de dados principais). Não mexe em id/createdAt. */
+export function updatePet(id: string, patch: Partial<Omit<StoredPet, 'id' | 'createdAt'>>): StoredPet | undefined {
+  const pets = readPets();
+  const index = pets.findIndex((p) => p.id === id);
+  if (index === -1) return undefined;
+  const current = pets[index]!;
+  const updated: StoredPet = { ...current, ...patch, updatedAt: new Date().toISOString() };
+  pets[index] = updated;
+  writePets(pets);
+  return updated;
+}
+
 export function getActivePetId(): string | null {
   try {
     return localStorage.getItem(ACTIVE_PET_KEY);

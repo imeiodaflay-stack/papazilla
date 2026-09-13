@@ -5,6 +5,7 @@ import { AuthScreen } from './routes/AuthScreen.js';
 import { OnboardingScreen } from './routes/OnboardingScreen.js';
 import { ZillaRoute } from './routes/ZillaRoute.js';
 import { PetDetailScreen } from './routes/PetDetailScreen.js';
+import { PetEditScreen } from './routes/PetEditScreen.js';
 import { AnamnesisDetailScreen } from './routes/AnamnesisDetailScreen.js';
 import { PapaRoute } from './routes/PapaRoute.js';
 import { CuriosidadesScreen } from './routes/CuriosidadesScreen.js';
@@ -41,6 +42,7 @@ export const router = createBrowserRouter([
   { path: '/assinatura/gerenciar', element: <GerenciarAssinaturaScreen /> },
   { path: '/zilla', element: <ZillaRoute /> },
   { path: '/zilla/:petId', element: <PetDetailScreen /> },
+  { path: '/zilla/:petId/editar', element: <PetEditScreen /> },
   { path: '/zilla/:petId/respostas', element: <AnamnesisDetailScreen /> },
   { path: '/curiosidades', element: <CuriosidadesScreen /> },
   { path: '/curiosidades/:curiosidadeId', element: <CuriosidadeDetalheScreen /> },

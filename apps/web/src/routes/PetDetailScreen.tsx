@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react';
-import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import zillaIcon from '../assets/icons/zilla.png';
 import calendarioIcon from '../assets/icons/calendario.png';
 import graficoIcon from '../assets/icons/grafico-barras.png';
@@ -12,18 +12,27 @@ import { describePet, neuteredLabel } from '../lib/petLabel.js';
 
 /**
  * Perfil do pet — fiel à tela "pet-detail" de `papazilla-prototype`: retrato,
- * identidade, dados principais e card de anamnese. "Editar" e "•••" ainda
- * avisam por toast (edição de dados entra na próxima fatia); "Ver respostas"
- * abre a anamnese em modo leitura de verdade.
+ * identidade, dados principais e card de anamnese. "Editar" abre a edição de
+ * verdade (`PetEditScreen`); "•••" ainda avisa por toast (mais opções entram
+ * depois). "Ver respostas" abre a anamnese em modo leitura de verdade.
  */
 export function PetDetailScreen() {
   const { petId } = useParams<{ petId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<number>();
 
   const pet = petId ? getPet(petId) : undefined;
   const pets = listPets();
+
+  useEffect(() => {
+    const state = location.state as { toast?: string } | null;
+    if (state?.toast) {
+      toast(state.toast);
+      navigate('.', { replace: true, state: null });
+    }
+  }, []);
 
   if (!pet) return <Navigate to="/zilla" replace />;
 
@@ -102,7 +111,7 @@ export function PetDetailScreen() {
                 <p className="eyebrow">De relance</p>
                 <h2>Dados principais</h2>
               </div>
-              <button type="button" onClick={() => toast('Editar dados principais entra na próxima fatia.')}>
+              <button type="button" onClick={() => navigate(`/zilla/${pet.id}/editar`)}>
                 Editar
               </button>
             </div>

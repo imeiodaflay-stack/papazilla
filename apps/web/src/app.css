@@ -1163,6 +1163,45 @@
   color: var(--pz-ink-label);
   font: 600 0.68rem / 1.2 var(--pz-font-body);
 }
+.pet-photo-editor {
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  gap: 0.15rem 0.7rem;
+  align-items: center;
+  width: 100%;
+  min-height: 76px;
+  margin-bottom: 1rem;
+  padding: 0.55rem;
+  border: 1px solid var(--pz-border);
+  border-radius: 18px;
+  background: #fff;
+  text-align: left;
+}
+.pet-photo-editor > span {
+  display: grid;
+  place-items: center;
+  grid-row: 1 / 3;
+  width: 58px;
+  height: 58px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #eef0d7;
+}
+.pet-photo-editor img {
+  width: 55px;
+  height: 55px;
+  object-fit: contain;
+}
+.pet-photo-editor strong {
+  align-self: end;
+  color: var(--pz-accent-ink);
+  font: 800 0.8rem / 1.2 var(--pz-font-support);
+}
+.pet-photo-editor small {
+  align-self: start;
+  color: var(--pz-ink-label);
+  font-size: 0.65rem;
+}
 
 .form-grid {
   display: grid;
