@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import editarIcon from '../assets/icons/editar.png';
 import patinhaIcon from '../assets/icons/patinha.png';
 import perfilIcon from '../assets/icons/perfil.png';
@@ -13,6 +13,7 @@ import { listPets } from '../lib/petsStore.js';
 import { describePet, joinPt } from '../lib/petLabel.js';
 import { getSubscription } from '../lib/subscription.js';
 import { setAuthenticated } from '../lib/session.js';
+import { getUserProfile } from '../lib/userProfile.js';
 
 const PLAN_NAME = { annual: 'Papazilla Anual', monthly: 'Papazilla Mensal' } as const;
 const PLAN_PAYMENT = {
@@ -25,15 +26,19 @@ const PLAN_PAYMENT = {
  * Minha conta — fiel à tela "user-profile" de `papazilla-prototype`: identidade,
  * plano, conta e acesso, preferências, ajuda e privacidade, sair da conta.
  *
- * Sem provedor de login real ainda (Fase 0), então nome/e-mail permanecem
- * genéricos em vez de um valor inventado — diferente do protótipo, que mostra
- * "Flávia Coelho" fixo. "Sair da conta" é real (limpa a sessão simulada e volta
- * pro login); o resto das linhas ainda avisa por toast.
+ * Sem provedor de login real ainda (Fase 0), então nome/e-mail só aparecem
+ * se o próprio tutor os preencher em "Dados pessoais" (`UserProfileEditScreen`)
+ * — sem isso, ficam genéricos em vez de um valor inventado (diferente do
+ * protótipo, que mostra "Flávia Coelho" fixo). "Sair da conta" é real; "Dados
+ * pessoais", "Acesso e segurança", "Termos e privacidade" e "Dados da conta"
+ * agora abrem telas de verdade (ver rotas em `App.tsx`).
  */
 export function ContaScreen() {
   const navigate = useNavigate();
+  const location = useLocation();
   const subscription = getSubscription();
   const pets = listPets();
+  const userProfile = getUserProfile();
   const [notifications, setNotifications] = useState(true);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<number>();
@@ -43,6 +48,14 @@ export function ContaScreen() {
     setToastMsg(message);
     toastTimer.current = window.setTimeout(() => setToastMsg(null), 2600);
   }
+
+  useEffect(() => {
+    const state = location.state as { toast?: string } | null;
+    if (state?.toast) {
+      toast(state.toast);
+      navigate('.', { replace: true, state: null });
+    }
+  }, []);
 
   const petsLine =
     pets.length > 0
@@ -102,15 +115,11 @@ export function ContaScreen() {
             <i aria-hidden="true">＋</i>
           </button>
           <div>
-            <h2>Tutor(a)</h2>
-            <p>Dados virão do provedor de login</p>
+            <h2>{userProfile?.name || 'Tutor(a)'}</h2>
+            <p>{userProfile?.email || 'Nome e e-mail ainda não cadastrados'}</p>
             <span>{petsLine}</span>
           </div>
-          <button
-            type="button"
-            className="user-edit-button"
-            onClick={() => toast('A edição de nome, foto e e-mail será aberta aqui.')}
-          >
+          <button type="button" className="user-edit-button" onClick={() => navigate('/conta/editar')}>
             <img src={editarIcon} alt="" />
             Editar
           </button>
@@ -144,7 +153,7 @@ export function ContaScreen() {
           <button
             type="button"
             className="user-settings-row"
-            onClick={() => toast('A edição dos dados pessoais será aberta aqui.')}
+            onClick={() => navigate('/conta/editar')}
           >
             <span className="user-settings-row__icon">
               <img src={perfilIcon} alt="" />
@@ -158,7 +167,7 @@ export function ContaScreen() {
           <button
             type="button"
             className="user-settings-row"
-            onClick={() => toast('As formas de entrada conectadas serão mostradas aqui.')}
+            onClick={() => navigate('/conta/acesso')}
           >
             <span className="user-settings-row__icon">
               <img src={sucessoIcon} alt="" />
@@ -223,7 +232,7 @@ export function ContaScreen() {
           <button
             type="button"
             className="user-settings-row"
-            onClick={() => toast('Termos de Uso e Política de Privacidade serão abertos aqui.')}
+            onClick={() => navigate('/conta/termos')}
           >
             <span className="user-settings-row__icon">
               <img src={infoIcon} alt="" />
@@ -237,9 +246,7 @@ export function ContaScreen() {
           <button
             type="button"
             className="user-settings-row"
-            onClick={() =>
-              toast('As opções para baixar ou excluir os dados terão uma confirmação antes de continuar.')
-            }
+            onClick={() => navigate('/conta/dados')}
           >
             <span className="user-settings-row__icon">
               <img src={excluirIcon} alt="" />

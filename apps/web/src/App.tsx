@@ -14,6 +14,10 @@ import { ReceitasScreen } from './routes/ReceitasScreen.js';
 import { RecipeDetailScreen } from './routes/RecipeDetailScreen.js';
 import { RecipeCookLogScreen } from './routes/RecipeCookLogScreen.js';
 import { ContaScreen } from './routes/ContaScreen.js';
+import { UserProfileEditScreen } from './routes/UserProfileEditScreen.js';
+import { AccountAccessScreen } from './routes/AccountAccessScreen.js';
+import { TermosPrivacidadeScreen } from './routes/TermosPrivacidadeScreen.js';
+import { AccountDataScreen } from './routes/AccountDataScreen.js';
 import { AjudaScreen } from './routes/AjudaScreen.js';
 import { AssinaturaScreen } from './routes/AssinaturaScreen.js';
 import { GerenciarAssinaturaScreen } from './routes/GerenciarAssinaturaScreen.js';
@@ -37,6 +41,10 @@ export const router = createBrowserRouter([
   { path: '/sucesso', element: <SucessoScreen /> },
   { path: '/receita', element: <ReceitaScreen /> },
   { path: '/conta', element: <ContaScreen /> },
+  { path: '/conta/editar', element: <UserProfileEditScreen /> },
+  { path: '/conta/acesso', element: <AccountAccessScreen /> },
+  { path: '/conta/termos', element: <TermosPrivacidadeScreen /> },
+  { path: '/conta/dados', element: <AccountDataScreen /> },
   { path: '/ajuda', element: <AjudaScreen /> },
   { path: '/assinatura', element: <AssinaturaScreen /> },
   { path: '/assinatura/gerenciar', element: <GerenciarAssinaturaScreen /> },

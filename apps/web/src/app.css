@@ -1241,6 +1241,21 @@
   color: var(--pz-ink-label);
   font: 700 0.75rem / 1 var(--pz-font-support);
 }
+.field-error {
+  color: var(--pz-danger-ink);
+  font: 600 0.64rem / 1.3 var(--pz-font-body);
+}
+.confirm-actions {
+  display: flex;
+  gap: 0.7rem;
+  margin-top: 0.75rem;
+}
+.confirm-actions .pz-button--outline {
+  flex: 0 0 auto;
+}
+.confirm-actions .pz-button--primary {
+  flex: 1;
+}
 
 .profile-question {
   margin-top: 1.1rem;
