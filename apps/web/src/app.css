@@ -2074,6 +2074,27 @@
   letter-spacing: 0.05rem;
   color: var(--pz-chocolate);
 }
+.pet-more-menu {
+  margin-top: -0.5rem;
+  padding: 0.4rem;
+  display: grid;
+  background: #fff;
+  border: 1px solid var(--pz-border);
+  border-radius: 14px;
+  box-shadow: var(--pz-shadow-pop);
+}
+.pet-more-menu__danger {
+  padding: 0.6rem 0.7rem;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: 10px;
+  color: var(--pz-danger-ink);
+  font: 700 0.72rem / 1 var(--pz-font-support);
+}
+.pet-more-menu__danger:active {
+  background: var(--pz-danger-bg);
+}
 
 .pet-section {
   margin-top: 1.25rem;

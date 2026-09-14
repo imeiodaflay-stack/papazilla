@@ -6,15 +6,18 @@ import graficoIcon from '../assets/icons/grafico-barras.png';
 import patinhaIcon from '../assets/icons/patinha.png';
 import sucessoIcon from '../assets/icons/sucesso.png';
 import sheetIcon from '../assets/icons/sheet.png';
+import infoIcon from '../assets/icons/info.png';
 import { AppNav } from '../components/AppNav.js';
-import { getPet, listPets, setActivePetId } from '../lib/petsStore.js';
+import { deletePet, getPet, listPets, setActivePetId } from '../lib/petsStore.js';
 import { describePet, neuteredLabel } from '../lib/petLabel.js';
+import { setHasPet } from '../lib/session.js';
 
 /**
  * Perfil do pet — fiel à tela "pet-detail" de `papazilla-prototype`: retrato,
  * identidade, dados principais e card de anamnese. "Editar" abre a edição de
- * verdade (`PetEditScreen`); "•••" ainda avisa por toast (mais opções entram
- * depois). "Ver respostas" abre a anamnese em modo leitura de verdade.
+ * verdade (`PetEditScreen`); "Ver respostas" abre a anamnese em modo leitura
+ * de verdade. "•••" abre "Excluir Monstrinho" (real, com confirmação — sem
+ * tela equivalente no protótipo, que só mostrava um toast).
  */
 export function PetDetailScreen() {
   const { petId } = useParams<{ petId: string }>();
@@ -22,6 +25,8 @@ export function PetDetailScreen() {
   const location = useLocation();
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<number>();
+  const [showMore, setShowMore] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const pet = petId ? getPet(petId) : undefined;
   const pets = listPets();
@@ -51,6 +56,12 @@ export function PetDetailScreen() {
   function switchPet(id: string) {
     setActivePetId(id);
     navigate(`/zilla/${id}`);
+  }
+
+  function confirmDelete() {
+    deletePet(pet!.id);
+    if (listPets().length === 0) setHasPet(false);
+    navigate('/zilla', { replace: true });
   }
 
   return (
@@ -99,11 +110,49 @@ export function PetDetailScreen() {
               type="button"
               className="pet-more"
               aria-label="Mais opções para o pet"
-              onClick={() => toast('Mais opções entram nas próximas fatias.')}
+              onClick={() => setShowMore((v) => !v)}
             >
               •••
             </button>
           </section>
+
+          {showMore && !confirmingDelete ? (
+            <div className="pet-more-menu">
+              <button type="button" className="pet-more-menu__danger" onClick={() => setConfirmingDelete(true)}>
+                Excluir Monstrinho
+              </button>
+            </div>
+          ) : null}
+
+          {confirmingDelete ? (
+            <div className="pet-section">
+              <div className="clinical-warning">
+                <img src={infoIcon} alt="" />
+                <p>
+                  <strong>Excluir {displayName}?</strong>
+                  <span>
+                    Essa ação não pode ser desfeita. O perfil, as respostas da anamnese e o histórico deste Monstrinho
+                    serão apagados deste aparelho.
+                  </span>
+                </p>
+              </div>
+              <div className="confirm-actions">
+                <button
+                  type="button"
+                  className="pz-button pz-button--outline"
+                  onClick={() => {
+                    setConfirmingDelete(false);
+                    setShowMore(false);
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button type="button" className="pz-button pz-button--primary" onClick={confirmDelete}>
+                  Sim, excluir
+                </button>
+              </div>
+            </div>
+          ) : null}
 
           <section className="pet-section">
             <div className="pet-section__heading">

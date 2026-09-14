@@ -101,6 +101,21 @@ export function updatePet(id: string, patch: Partial<Omit<StoredPet, 'id' | 'cre
   return updated;
 }
 
+/**
+ * Remove um pet da matilha (irreversível — Fase 0 não tem "lixeira"). Se era
+ * o pet ativo, o trocador de pet passa a apontar pro mais recente restante.
+ * Não mexe em receitas salvas que citam esse pet — elas continuam existindo
+ * e cada tela lida com o `petId` órfão na hora de ler (ver `RecipeDetailScreen`).
+ */
+export function deletePet(id: string): void {
+  const pets = readPets().filter((p) => p.id !== id);
+  writePets(pets);
+  if (getActivePetId() === id) {
+    const next = pets[pets.length - 1];
+    if (next) setActivePetId(next.id);
+  }
+}
+
 export function getActivePetId(): string | null {
   try {
     return localStorage.getItem(ACTIVE_PET_KEY);

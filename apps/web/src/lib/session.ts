@@ -45,6 +45,6 @@ export function hasPet(): boolean {
   return read(PET_KEY);
 }
 
-export function setHasPet(): void {
-  write(PET_KEY, true);
+export function setHasPet(value = true): void {
+  write(PET_KEY, value);
 }
