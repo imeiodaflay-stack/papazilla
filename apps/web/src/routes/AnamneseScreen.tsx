@@ -1,5 +1,5 @@
 import { type ReactNode, useMemo, useRef, useState } from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import zillaIcon from '../assets/icons/zilla.png';
 import addIcon from '../assets/icons/adicionar.png';
 import infoIcon from '../assets/icons/info.png';
@@ -1006,9 +1006,11 @@ const LAST = STEPS.length - 1;
 
 export function AnamneseScreen() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { petId } = useParams<{ petId: string }>();
   const editingPet = petId ? getPet(petId) : undefined;
   const isEditing = Boolean(petId);
+  const returnToRecipe = !isEditing && (location.state as { returnTo?: string } | null)?.returnTo === 'recipe';
   const editState = useMemo(() => (editingPet ? buildEditState(editingPet) : null), [editingPet]);
 
   const [step, setStep] = useState(0);
@@ -1128,6 +1130,12 @@ export function AnamneseScreen() {
           replace: true,
           state: { toast: 'Respostas da anamnese atualizadas.' },
         });
+      } else if (returnToRecipe) {
+        addPet(petPatch);
+        navigate('/receita', {
+          replace: true,
+          state: { toast: `${name || 'Novo Monstrinho'} cadastrado! Ele já está disponível para esta receita.` },
+        });
       } else {
         addPet(petPatch);
         navigate('/sucesso', {
@@ -1151,7 +1159,7 @@ export function AnamneseScreen() {
           type="button"
           className="flow-header__back"
           aria-label="Fechar anamnese"
-          onClick={() => navigate(editingPet ? `/zilla/${editingPet.id}/respostas` : '/zilla')}
+          onClick={() => navigate(editingPet ? `/zilla/${editingPet.id}/respostas` : returnToRecipe ? '/receita' : '/zilla')}
         >
           ←
         </button>

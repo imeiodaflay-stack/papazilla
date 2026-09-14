@@ -1,16 +1,17 @@
-import { useMemo, useRef, useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import type { FormulationId, SupplementId } from '@papazilla/nutrition-engine';
 import { CARBS, FORMULATIONS, ORGANS, PROTEINS, VEGETABLES, findItem } from '@papazilla/nutrition-engine';
 import zillaIcon from '../assets/icons/zilla.png';
 import potinhoIcon from '../assets/icons/potinho.png';
 import infoIcon from '../assets/icons/info.png';
-import { getActivePet, listPets } from '../lib/petsStore.js';
+import { getActivePet, getActivePetId, listPets } from '../lib/petsStore.js';
 import { describePet, joinPt } from '../lib/petLabel.js';
 import { getSubscription } from '../lib/subscription.js';
 import { derivePredominantProtein } from '../lib/engineMapping.js';
 import { buildPetPlan, buildSharedRecipe } from '../lib/recipeEngine.js';
 import { addRecipe } from '../lib/recipesStore.js';
+import { clearRecipeDraft, peekRecipeDraft, saveRecipeDraft } from '../lib/recipeDraft.js';
 import {
   FORMULATION_LABELS,
   FORMULATION_ORDER,
@@ -39,9 +40,11 @@ import { RecipeResultCard } from '../components/RecipeResultCard.js';
  *   proteína), e o tutor escolhe ativamente se quiser incluir alguma.
  * - O controle de formato (cru/pronto/os dois) é usado de verdade na tela de
  *   resultado — no protótipo ele existia mas não alterava o texto exibido.
- * - "Cadastrar outro Monstrinho" leva para a anamnese normal (termina em
- *   /sucesso) em vez de voltar direto para o wizard — o retorno automático ao
- *   wizard após o cadastro é o fluxo do protótipo, mas fica para outra fatia.
+ * - "Cadastrar outro Monstrinho" salva um rascunho do progresso do wizard
+ *   (`recipeDraft.ts`, sessionStorage) antes de ir pra anamnese; ao concluir
+ *   o cadastro, volta pra cá com o rascunho recarregado e o Monstrinho novo
+ *   já incluído na seleção — fiel ao "recipeStep = 0; showScreen('recipe')"
+ *   do protótipo.
  * - `season` não é coletado em lugar nenhum ainda; fixado em "mild" (ver
  *   `recipeEngine.ts`). `predominantProtein` é derivada da seleção de
  *   proteínas do próprio wizard, não é uma pergunta separada (mesma regra do
@@ -54,24 +57,32 @@ const BATCH_DAY_OPTIONS = [1, 3, 7];
 
 export function ReceitaScreen() {
   const navigate = useNavigate();
+  const location = useLocation();
   const subscription = getSubscription();
   const pets = listPets();
+  const draft = peekRecipeDraft();
 
   const [step, setStep] = useState(0);
   const [selectedPetIds, setSelectedPetIds] = useState<Set<string>>(() => {
+    if (draft) {
+      const ids = new Set(draft.selectedPetIds);
+      const activeId = getActivePetId();
+      if (activeId) ids.add(activeId);
+      return ids;
+    }
     const active = getActivePet();
     return new Set(active ? [active.id] : pets[0] ? [pets[0].id] : []);
   });
-  const [formulation, setFormulation] = useState<FormulationId>('padrao');
-  const [proteins, setProteins] = useState<Set<string>>(new Set(['frango_peito']));
-  const [carbs, setCarbs] = useState<Set<string>>(new Set(['batata_doce']));
-  const [vegetables, setVegetables] = useState<Set<string>>(new Set(['cenoura']));
-  const [organs, setOrgans] = useState<Set<string>>(new Set());
-  const [supplement, setSupplement] = useState<SupplementId>('food-dog');
-  const [days, setDays] = useState(7);
+  const [formulation, setFormulation] = useState<FormulationId>(() => draft?.formulation ?? 'padrao');
+  const [proteins, setProteins] = useState<Set<string>>(() => new Set(draft?.proteins ?? ['frango_peito']));
+  const [carbs, setCarbs] = useState<Set<string>>(() => new Set(draft?.carbs ?? ['batata_doce']));
+  const [vegetables, setVegetables] = useState<Set<string>>(() => new Set(draft?.vegetables ?? ['cenoura']));
+  const [organs, setOrgans] = useState<Set<string>>(() => new Set(draft?.organs ?? []));
+  const [supplement, setSupplement] = useState<SupplementId>(() => draft?.supplement ?? 'food-dog');
+  const [days, setDays] = useState(() => draft?.days ?? 7);
   const [customDaysText, setCustomDaysText] = useState('');
   const [customSelected, setCustomSelected] = useState(false);
-  const [format, setFormat] = useState('Os dois');
+  const [format, setFormat] = useState(() => draft?.format ?? 'Os dois');
   const [saved, setSaved] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<number>();
@@ -82,6 +93,18 @@ export function ReceitaScreen() {
     setToastMsg(message);
     toastTimer.current = window.setTimeout(() => setToastMsg(null), 2600);
   }
+
+  useEffect(() => {
+    clearRecipeDraft();
+  }, []);
+
+  useEffect(() => {
+    const state = location.state as { toast?: string } | null;
+    if (state?.toast) {
+      toast(state.toast);
+      navigate('.', { replace: true, state: null });
+    }
+  }, []);
 
   const predominantProtein = useMemo(
     () => derivePredominantProtein([...proteins].map((id) => findItem(id)).filter((it): it is NonNullable<typeof it> => Boolean(it))),
@@ -142,6 +165,21 @@ export function ReceitaScreen() {
     setCustomSelected(true);
     const n = Math.max(1, Math.min(30, Number(raw) || 1));
     setDays(n);
+  }
+
+  function goRegisterAnotherPet() {
+    saveRecipeDraft({
+      selectedPetIds: [...selectedPetIds],
+      formulation,
+      proteins: [...proteins],
+      carbs: [...carbs],
+      vegetables: [...vegetables],
+      organs: [...organs],
+      supplement,
+      days,
+      format,
+    });
+    navigate('/anamnese', { state: { returnTo: 'recipe' } });
   }
 
   const nextDisabled =
@@ -312,7 +350,7 @@ export function ReceitaScreen() {
                 )}
               </p>
             </div>
-            <button type="button" className="add-recipe-pet" onClick={() => navigate('/anamnese')}>
+            <button type="button" className="add-recipe-pet" onClick={goRegisterAnotherPet}>
               <span>＋</span>
               <div>
                 <strong>Cadastrar outro Monstrinho</strong>
