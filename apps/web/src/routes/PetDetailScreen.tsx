@@ -117,8 +117,8 @@ export function PetDetailScreen() {
           </section>
 
           {showMore && !confirmingDelete ? (
-            <div className="pet-more-menu">
-              <button type="button" className="pet-more-menu__danger" onClick={() => setConfirmingDelete(true)}>
+            <div className="more-menu">
+              <button type="button" className="more-menu__item more-menu__item--danger" onClick={() => setConfirmingDelete(true)}>
                 Excluir Monstrinho
               </button>
             </div>

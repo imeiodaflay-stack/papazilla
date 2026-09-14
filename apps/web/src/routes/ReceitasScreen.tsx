@@ -6,7 +6,7 @@ import { AppNav } from '../components/AppNav.js';
 import { listPets } from '../lib/petsStore.js';
 import { listRecipes } from '../lib/recipesStore.js';
 import { joinPt } from '../lib/petLabel.js';
-import { recipeTitle, relativeTimeLabel } from '../lib/recipeDisplay.js';
+import { displayRecipeTitle, relativeTimeLabel } from '../lib/recipeDisplay.js';
 
 /**
  * Receitas salvas — fiel à tela "saved-recipes" de `papazilla-prototype`,
@@ -105,8 +105,9 @@ export function ReceitasScreen() {
                         <small>
                           Para {petNames} · {relativeTimeLabel(recipe.createdAt)}
                         </small>
-                        <strong>{recipeTitle(recipe.selection)}</strong>
+                        <strong>{displayRecipeTitle(recipe)}</strong>
                         <span className="recipe-card-meta">
+                          {recipe.favorite ? <b>★ Favorita</b> : null}
                           <b>{cookCount === 0 ? 'Ainda não preparada' : cookCount === 1 ? 'Feita 1 vez' : `Feita ${cookCount} vezes`}</b>
                           {avgRating !== null ? <b>♥ {avgRating.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}</b> : null}
                         </span>

@@ -2074,7 +2074,7 @@
   letter-spacing: 0.05rem;
   color: var(--pz-chocolate);
 }
-.pet-more-menu {
+.more-menu {
   margin-top: -0.5rem;
   padding: 0.4rem;
   display: grid;
@@ -2083,16 +2083,22 @@
   border-radius: 14px;
   box-shadow: var(--pz-shadow-pop);
 }
-.pet-more-menu__danger {
+.more-menu__item {
   padding: 0.6rem 0.7rem;
   text-align: left;
   background: transparent;
   border: 0;
   border-radius: 10px;
-  color: var(--pz-danger-ink);
+  color: var(--pz-ink);
   font: 700 0.72rem / 1 var(--pz-font-support);
 }
-.pet-more-menu__danger:active {
+.more-menu__item:active {
+  background: var(--pz-surface-soft);
+}
+.more-menu__item--danger {
+  color: var(--pz-danger-ink);
+}
+.more-menu__item--danger:active {
   background: var(--pz-danger-bg);
 }
 
@@ -4431,6 +4437,50 @@
 .cook-history article small {
   color: var(--pz-ink-label);
   font-size: 0.6rem;
+}
+.cook-history-list {
+  display: grid;
+  gap: 0.65rem;
+}
+.cook-history-entry {
+  padding: 0.75rem 0.85rem;
+  background: #fff;
+  border: 1px solid var(--pz-border);
+  border-radius: 16px;
+}
+.cook-history-entry__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.cook-history-entry__top strong {
+  font: 800 0.75rem / 1.2 var(--pz-font-support);
+}
+.cook-history-entry__rating {
+  display: flex;
+  gap: 0.05rem;
+}
+.cook-history-entry__rating b {
+  color: var(--pz-coral);
+  font-size: 0.85rem;
+  font-style: normal;
+  opacity: 0.22;
+}
+.cook-history-entry__rating b.is-on {
+  opacity: 1;
+}
+.cook-history-entry > small {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--pz-ink-label);
+  font-size: 0.6rem;
+}
+.cook-history-entry > p {
+  margin: 0.4rem 0 0;
+  color: var(--pz-ink-muted);
+  font-size: 0.68rem;
+  line-height: 1.45;
 }
 .flow-footer--single {
   display: block;

@@ -5,10 +5,10 @@ import potinhoIcon from '../assets/icons/potinho.png';
 import sucessoIcon from '../assets/icons/sucesso.png';
 import infoIcon from '../assets/icons/info.png';
 import { getPet } from '../lib/petsStore.js';
-import { getRecipe } from '../lib/recipesStore.js';
+import { deleteRecipe, getRecipe, renameRecipe, setRecipeFavorite } from '../lib/recipesStore.js';
 import { derivePredominantProtein } from '../lib/engineMapping.js';
 import { buildPetPlan, buildSharedRecipe } from '../lib/recipeEngine.js';
-import { formatGrams, formatRowAmount, orderDisclaimers, recipeIngredientSummary, recipeTitle } from '../lib/recipeDisplay.js';
+import { displayRecipeTitle, formatGrams, formatRowAmount, orderDisclaimers, recipeIngredientSummary } from '../lib/recipeDisplay.js';
 import { describePet, joinPt } from '../lib/petLabel.js';
 import { RecipeFinalizers } from '../components/RecipeFinalizers.js';
 import { RecipePreparationSteps } from '../components/RecipePreparationSteps.js';
@@ -16,11 +16,13 @@ import { RecipePreparationSteps } from '../components/RecipePreparationSteps.js'
 /**
  * Detalhe de uma receita salva — fiel à tela "recipe-detail" de
  * `papazilla-prototype`, mas com números reais (recalculados na hora com o
- * mesmo motor do wizard, a partir do que foi persistido em `recipesStore`).
+ * mesmo motor do wizard, a partir do que foi persistido em `recipesStore`) e
+ * "•••" de verdade: Renomear, Favoritar/Desfavoritar e Excluir (no protótipo
+ * era só um toast).
  *
  * Diferenças conscientes do protótipo:
- * - Sem "A preferida da Mel": não existe um conceito real de receita
- *   favorita ainda, então o eyebrow usa só o nome do(s) pet(s).
+ * - Sem "A preferida da Mel": o eyebrow usa o nome do(s) pet(s); "favorita"
+ *   agora é um estado real que o tutor liga/desliga, não um texto fixo.
  * - Sem foto: nenhuma receita real tem foto capturada ainda.
  * - "Já virou tradição" só aparece quando há pelo menos um preparo
  *   registrado; sem preparo nenhum, mostra um convite pra registrar o
@@ -35,6 +37,10 @@ export function RecipeDetailScreen() {
   const storedRecipe = recipeId ? getRecipe(recipeId) : undefined;
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<number>();
+  const [showMore, setShowMore] = useState(false);
+  const [renaming, setRenaming] = useState(false);
+  const [titleInput, setTitleInput] = useState(storedRecipe ? displayRecipeTitle(storedRecipe) : '');
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   function toast(message: string) {
     window.clearTimeout(toastTimer.current);
@@ -43,6 +49,24 @@ export function RecipeDetailScreen() {
   }
 
   if (!storedRecipe) return <Navigate to="/receitas" replace />;
+
+  function toggleFavorite() {
+    setRecipeFavorite(storedRecipe!.id, !storedRecipe!.favorite);
+    setShowMore(false);
+    toast(storedRecipe!.favorite ? 'Removida dos favoritos.' : 'Adicionada aos favoritos.');
+  }
+
+  function saveRename() {
+    renameRecipe(storedRecipe!.id, titleInput);
+    setRenaming(false);
+    setShowMore(false);
+    toast('Receita renomeada.');
+  }
+
+  function confirmDelete() {
+    deleteRecipe(storedRecipe!.id);
+    navigate('/receitas', { replace: true });
+  }
 
   const pets = storedRecipe.petIds.map((id) => getPet(id)).filter((p): p is NonNullable<typeof p> => Boolean(p));
   if (pets.length === 0) return <Navigate to="/receitas" replace />;
@@ -87,21 +111,90 @@ export function RecipeDetailScreen() {
           type="button"
           className="flow-header__avatar recipe-detail-menu"
           aria-label="Mais opções"
-          onClick={() => toast('Aqui entram renomear, favoritar e excluir.')}
+          onClick={() => setShowMore((v) => !v)}
         >
           •••
         </button>
       </header>
 
       <div className="flow-body recipe-detail-body">
+        {showMore ? (
+          <div className="more-menu">
+            <button
+              type="button"
+              className="more-menu__item"
+              onClick={() => {
+                setTitleInput(displayRecipeTitle(storedRecipe));
+                setRenaming(true);
+                setShowMore(false);
+              }}
+            >
+              Renomear
+            </button>
+            <button type="button" className="more-menu__item" onClick={toggleFavorite}>
+              {storedRecipe.favorite ? 'Desfavoritar' : 'Favoritar'}
+            </button>
+            <button
+              type="button"
+              className="more-menu__item more-menu__item--danger"
+              onClick={() => {
+                setConfirmingDelete(true);
+                setShowMore(false);
+              }}
+            >
+              Excluir receita
+            </button>
+          </div>
+        ) : null}
+
+        {renaming ? (
+          <div className="pet-section">
+            <label className="profile-field profile-field--full">
+              <span>Nome da receita</span>
+              <input value={titleInput} onChange={(e) => setTitleInput(e.target.value)} autoFocus />
+            </label>
+            <div className="confirm-actions">
+              <button type="button" className="pz-button pz-button--outline" onClick={() => setRenaming(false)}>
+                Cancelar
+              </button>
+              <button type="button" className="pz-button pz-button--primary" disabled={!titleInput.trim()} onClick={saveRename}>
+                Salvar
+              </button>
+            </div>
+          </div>
+        ) : null}
+
+        {confirmingDelete ? (
+          <div className="pet-section">
+            <div className="clinical-warning">
+              <img src={infoIcon} alt="" />
+              <p>
+                <strong>Excluir esta receita?</strong>
+                <span>Essa ação não pode ser desfeita. A receita e o histórico de fornalhas dela serão apagados.</span>
+              </p>
+            </div>
+            <div className="confirm-actions">
+              <button type="button" className="pz-button pz-button--outline" onClick={() => setConfirmingDelete(false)}>
+                Cancelar
+              </button>
+              <button type="button" className="pz-button pz-button--primary" onClick={confirmDelete}>
+                Sim, excluir
+              </button>
+            </div>
+          </div>
+        ) : null}
+
         <div className="recipe-detail-photo recipe-photo recipe-photo--empty">
           <img src={potinhoIcon} alt="" />
           <em>Sem foto ainda</em>
         </div>
 
         <div className="recipe-detail-title">
-          <p className="eyebrow">{eyebrowTitle}</p>
-          <h1>{recipeTitle(storedRecipe.selection)}</h1>
+          <p className="eyebrow">
+            {eyebrowTitle}
+            {storedRecipe.favorite ? ' · ★ Favorita' : ''}
+          </p>
+          <h1>{displayRecipeTitle(storedRecipe)}</h1>
           <p>{recipeIngredientSummary(storedRecipe.selection)}</p>
         </div>
 
@@ -178,7 +271,7 @@ export function RecipeDetailScreen() {
                 <p className="eyebrow">Histórico</p>
                 <h2>Últimas fornalhas</h2>
               </div>
-              <button type="button" onClick={() => toast('O histórico completo entra na próxima rodada.')}>
+              <button type="button" onClick={() => navigate(`/receitas/${storedRecipe.id}/historico`)}>
                 Ver todas
               </button>
             </div>

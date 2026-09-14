@@ -13,6 +13,7 @@ import { CuriosidadeDetalheScreen } from './routes/CuriosidadeDetalheScreen.js';
 import { ReceitasScreen } from './routes/ReceitasScreen.js';
 import { RecipeDetailScreen } from './routes/RecipeDetailScreen.js';
 import { RecipeCookLogScreen } from './routes/RecipeCookLogScreen.js';
+import { RecipeHistoryScreen } from './routes/RecipeHistoryScreen.js';
 import { ContaScreen } from './routes/ContaScreen.js';
 import { UserProfileEditScreen } from './routes/UserProfileEditScreen.js';
 import { AccountAccessScreen } from './routes/AccountAccessScreen.js';
@@ -58,6 +59,7 @@ export const router = createBrowserRouter([
   { path: '/receitas', element: <ReceitasScreen /> },
   { path: '/receitas/:recipeId', element: <RecipeDetailScreen /> },
   { path: '/receitas/:recipeId/preparo', element: <RecipeCookLogScreen /> },
+  { path: '/receitas/:recipeId/historico', element: <RecipeHistoryScreen /> },
   {
     element: <AppShell />,
     children: [{ path: '/papa', element: <PapaRoute /> }],

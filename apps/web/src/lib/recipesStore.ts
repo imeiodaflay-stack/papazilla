@@ -27,6 +27,9 @@ export interface StoredRecipe {
   format: string;
   createdAt: string;
   cookLogs: CookLog[];
+  /** Título dado pelo tutor em "Renomear" — quando ausente, a tela deriva um da seleção de ingredientes. */
+  customTitle?: string;
+  favorite: boolean;
 }
 
 function readRecipes(): StoredRecipe[] {
@@ -35,7 +38,11 @@ function readRecipes(): StoredRecipe[] {
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return (parsed as StoredRecipe[]).map((r) => ({ ...r, cookLogs: Array.isArray(r.cookLogs) ? r.cookLogs : [] }));
+    return (parsed as StoredRecipe[]).map((r) => ({
+      ...r,
+      cookLogs: Array.isArray(r.cookLogs) ? r.cookLogs : [],
+      favorite: r.favorite === true,
+    }));
   } catch {
     return [];
   }
@@ -64,8 +71,8 @@ function newId(prefix: string): string {
     : `${prefix}_${now}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
-export function addRecipe(data: Omit<StoredRecipe, 'id' | 'createdAt' | 'cookLogs'>): StoredRecipe {
-  const recipe: StoredRecipe = { ...data, id: newId('recipe'), createdAt: new Date().toISOString(), cookLogs: [] };
+export function addRecipe(data: Omit<StoredRecipe, 'id' | 'createdAt' | 'cookLogs' | 'favorite'>): StoredRecipe {
+  const recipe: StoredRecipe = { ...data, id: newId('recipe'), createdAt: new Date().toISOString(), cookLogs: [], favorite: false };
   const recipes = readRecipes();
   recipes.push(recipe);
   writeRecipes(recipes);
@@ -80,4 +87,30 @@ export function addCookLog(recipeId: string, log: Omit<CookLog, 'id'>): StoredRe
   recipe.cookLogs.push({ ...log, id: newId('cook') });
   writeRecipes(recipes);
   return recipe;
+}
+
+/** Renomeia a receita. `title` vazio remove o nome customizado e volta a derivar da seleção. */
+export function renameRecipe(recipeId: string, title: string): StoredRecipe | undefined {
+  const recipes = readRecipes();
+  const recipe = recipes.find((r) => r.id === recipeId);
+  if (!recipe) return undefined;
+  const trimmed = title.trim();
+  if (trimmed) recipe.customTitle = trimmed;
+  else delete recipe.customTitle;
+  writeRecipes(recipes);
+  return recipe;
+}
+
+export function setRecipeFavorite(recipeId: string, favorite: boolean): StoredRecipe | undefined {
+  const recipes = readRecipes();
+  const recipe = recipes.find((r) => r.id === recipeId);
+  if (!recipe) return undefined;
+  recipe.favorite = favorite;
+  writeRecipes(recipes);
+  return recipe;
+}
+
+/** Remove a receita salva (e o histórico de preparos dela). Irreversível. */
+export function deleteRecipe(recipeId: string): void {
+  writeRecipes(readRecipes().filter((r) => r.id !== recipeId));
 }

@@ -105,6 +105,11 @@ export function recipeTitle(selection: { proteins: string[]; carbs: string[] }):
   return `${joinPt(proteins)} com ${joinPt(carbs)}`;
 }
 
+/** Título exibido: o nome que o tutor deu em "Renomear", ou o derivado da seleção quando não há um. */
+export function displayRecipeTitle(recipe: { customTitle?: string; selection: { proteins: string[]; carbs: string[] } }): string {
+  return recipe.customTitle?.trim() || recipeTitle(recipe.selection);
+}
+
 /** Lista curta de ingredientes pra subtítulo, na ordem proteína→carbo→vegetal→víscera. */
 export function recipeIngredientSummary(selection: {
   proteins: string[];
