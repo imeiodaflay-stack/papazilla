@@ -14,6 +14,9 @@ import { useNavigate } from 'react-router-dom';
  * deve revisar o conteúdo e, idealmente, um advogado deve validar — em
  * especial porque o app lida com dados de saúde do pet e é voltado a
  * consumidores no Brasil (LGPD, CDC, Marco Civil da Internet).
+ *
+ * Razão social confirmada (Flaybio Inc); CNPJ ainda não existe — fica como
+ * placeholder até a empresa ser formalizada.
  */
 const TERMOS_SECTIONS: { heading: string; body: string }[] = [
   {
@@ -61,7 +64,7 @@ const TERMOS_SECTIONS: { heading: string; body: string }[] = [
 const PRIVACIDADE_SECTIONS: { heading: string; body: string }[] = [
   {
     heading: '1. Quem trata seus dados',
-    body: 'Os dados pessoais tratados pelo Papazilla são de responsabilidade de [razão social a definir], inscrita no CNPJ [a definir]. Dúvidas ou solicitações sobre seus dados podem ser enviadas para imeiodaflay@gmail.com.',
+    body: 'Os dados pessoais tratados pelo Papazilla são de responsabilidade de Flaybio Inc, inscrita no CNPJ [a definir]. Dúvidas ou solicitações sobre seus dados podem ser enviadas para imeiodaflay@gmail.com.',
   },
   {
     heading: '2. Quais dados coletamos',
