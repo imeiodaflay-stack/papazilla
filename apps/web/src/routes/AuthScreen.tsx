@@ -4,12 +4,18 @@ import lockup from '../assets/papazilla-lockup.png';
 import mailIcon from '../assets/icons/mensagem.png';
 import helloIcon from '../assets/icons/perfil.png';
 import { setAuthenticated } from '../lib/session.js';
+import { supabase } from '../lib/supabase.js';
 
 /**
  * Login / criar conta — fiel à tela "Login e conta" de `papazilla-prototype`.
  * Conta obrigatória antes do onboarding, com Google, Apple e e-mail sem senha
- * (magic link / código). Fase 0: fluxo simulado localmente, sem chamada real ao
- * Supabase. Estados: opções → e-mail → código → nome → onboarding.
+ * (magic link / código).
+ *
+ * Google já usa o Supabase de verdade (`signInWithOAuth`) quando o app tem
+ * chaves configuradas (`lib/supabase.ts`): o navegador sai pra tela do Google
+ * e volta em `/auth/callback`, que decide o destino. Sem chaves (Fase 0 local
+ * sem `.env.local`), cai no fluxo simulado antigo pra continuar navegável.
+ * Apple e e-mail ainda são só o fluxo simulado — entram numa próxima fatia.
  */
 type AuthMode = 'options' | 'email' | 'code' | 'name';
 
@@ -40,7 +46,20 @@ export function AuthScreen() {
 
   function loginWithGoogle() {
     setGoogleBusy(true);
-    window.setTimeout(finishAuth, 650);
+    if (!supabase) {
+      window.setTimeout(finishAuth, 650);
+      return;
+    }
+    supabase.auth
+      .signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: `${window.location.origin}/auth/callback` },
+      })
+      .then(({ error }) => {
+        if (!error) return; // sucesso: o navegador já está saindo para o Google
+        setGoogleBusy(false);
+        showToast('Não foi possível conectar com o Google. Tente de novo.');
+      });
   }
 
   return (

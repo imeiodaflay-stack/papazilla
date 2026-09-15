@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import lockup from '../assets/papazilla-lockup.png';
-import { hasSeenOnboarding, isAuthenticated } from '../lib/session.js';
+import { hasSeenOnboarding, initAuth, isAuthenticated } from '../lib/session.js';
 
 /**
  * Splash fiel ao protótipo (`papazilla-prototype`): dois orbs de fundo, lockup e
@@ -9,14 +9,17 @@ import { hasSeenOnboarding, isAuthenticated } from '../lib/session.js';
  * após 1350 ms. Alternativa estática completa para `prefers-reduced-motion`.
  *
  * Fluxo (arquitetura-tecnica.md): Splash → Entrar/criar conta → Onboarding → Papá.
- * Na Fase 0 não há sessão real, então sempre vai para /entrar. Quando o Supabase
- * estiver ligado: com sessão + pet → /papa; com sessão → /onboarding; senão → /entrar.
+ * `initAuth()` resolve a sessão real do Supabase (quando configurado) antes de
+ * decidir o destino, pra um usuário já logado não cair de volta em /entrar.
  */
 export function SplashScreen() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    let cancelled = false;
+    const timer = window.setTimeout(async () => {
+      await initAuth();
+      if (cancelled) return;
       const dest = !isAuthenticated()
         ? '/entrar'
         : hasSeenOnboarding()
@@ -24,7 +27,10 @@ export function SplashScreen() {
           : '/onboarding';
       navigate(dest, { replace: true });
     }, 1350);
-    return () => clearTimeout(timer);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
   }, [navigate]);
 
   return (

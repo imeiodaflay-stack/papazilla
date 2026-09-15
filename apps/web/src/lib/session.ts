@@ -1,12 +1,57 @@
 /**
- * Sessão simulada localmente (Fase 0), espelhando `papazilla.authenticated` do
- * protótipo. Só roteia a experiência de primeiro uso. Será substituída pela sessão
- * real do Supabase quando a autenticação entrar. Todo acesso é protegido por
+ * Sessão de autenticação. Quando `VITE_SUPABASE_URL`/`VITE_SUPABASE_PUBLISHABLE_KEY`
+ * estão configuradas, `isAuthenticated()` reflete a sessão real do Supabase
+ * (cacheada em memória por `initAuth()` + `onAuthStateChange`, pra continuar
+ * síncrona nos pontos que já dependiam disso, como `SplashScreen`). Sem
+ * chaves configuradas, cai de volta no flag simulado em `localStorage` da
+ * Fase 0 — mantém o app utilizável sem um projeto Supabase real.
+ *
+ * `hasSeenOnboarding`/`hasPet` continuam só locais (não fazem parte da
+ * autenticação em si). Todo acesso a `localStorage` é protegido por
  * try/catch (janela privada, storage bloqueado).
  */
+import type { User } from '@supabase/supabase-js';
+import { isSupabaseConfigured } from './env.js';
+import { supabase } from './supabase.js';
+import { syncProfileFromAuthUser } from './userProfile.js';
+
 const AUTH_KEY = 'papazilla.authenticated';
 const ONBOARDING_KEY = 'papazilla.seenOnboarding';
 const PET_KEY = 'papazilla.hasPet';
+
+let cachedUser: User | null = null;
+let initPromise: Promise<void> | null = null;
+
+function applySession(user: User | null): void {
+  cachedUser = user;
+  if (user) syncProfileFromAuthUser(user);
+}
+
+/** Resolve a sessão inicial do Supabase e mantém `cachedUser` em dia depois disso. Idempotente. */
+export function initAuth(): Promise<void> {
+  if (!isSupabaseConfigured || !supabase) return Promise.resolve();
+  if (!initPromise) {
+    const client = supabase;
+    initPromise = client.auth.getSession().then(({ data }) => {
+      applySession(data.session?.user ?? null);
+    });
+    client.auth.onAuthStateChange((_event, session) => {
+      applySession(session?.user ?? null);
+    });
+  }
+  return initPromise;
+}
+
+// `cachedUser` só existe em memória (reseta a cada carregamento da página).
+// Chamar aqui garante que qualquer rota — não só Splash/AuthCallback — comece
+// a resolver a sessão real assim que o módulo carrega, sem esperar um efeito
+// em algum componente específico rodar primeiro.
+void initAuth();
+
+/** Provedor usado no login real (`google`, `apple`, `email`...), ou `null` sem sessão/Supabase configurado. */
+export function getAuthProvider(): string | null {
+  return cachedUser?.app_metadata?.provider ?? null;
+}
 
 function read(key: string): boolean {
   try {
@@ -26,10 +71,17 @@ function write(key: string, value: boolean): void {
 }
 
 export function isAuthenticated(): boolean {
-  return read(AUTH_KEY);
+  return isSupabaseConfigured ? Boolean(cachedUser) : read(AUTH_KEY);
 }
 
 export function setAuthenticated(value: boolean): void {
+  if (isSupabaseConfigured && supabase) {
+    if (!value) {
+      cachedUser = null;
+      void supabase.auth.signOut();
+    }
+    return;
+  }
   write(AUTH_KEY, value);
 }
 

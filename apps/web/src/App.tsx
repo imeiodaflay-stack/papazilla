@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { AppShell } from './components/AppShell.js';
 import { SplashScreen } from './routes/SplashScreen.js';
 import { AuthScreen } from './routes/AuthScreen.js';
+import { AuthCallbackScreen } from './routes/AuthCallbackScreen.js';
 import { OnboardingScreen } from './routes/OnboardingScreen.js';
 import { ZillaRoute } from './routes/ZillaRoute.js';
 import { PetDetailScreen } from './routes/PetDetailScreen.js';
@@ -37,6 +38,7 @@ import { ReceitaScreen } from './routes/ReceitaScreen.js';
 export const router = createBrowserRouter([
   { path: '/', element: <SplashScreen /> },
   { path: '/entrar', element: <AuthScreen /> },
+  { path: '/auth/callback', element: <AuthCallbackScreen /> },
   { path: '/onboarding', element: <OnboardingScreen /> },
   { path: '/anamnese', element: <AnamneseScreen /> },
   { path: '/sucesso', element: <SucessoScreen /> },
