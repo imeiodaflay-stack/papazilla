@@ -4,6 +4,7 @@ import zillaIcon from '../assets/icons/zilla.png';
 import addIcon from '../assets/icons/adicionar.png';
 import infoIcon from '../assets/icons/info.png';
 import { addPet, getPet, updatePet, type StoredPet } from '../lib/petsStore.js';
+import { deriveWeightTendency } from '../lib/bodyCondition.js';
 
 /**
  * Anamnese do Monstrinho — fiel à tela "profile" de `papazilla-prototype`.
@@ -50,7 +51,6 @@ const DEFAULT_SINGLES: Singles = {
   neutered: 'Sim',
   senior: 'Não',
   lifeStage: 'Adulto',
-  weightTendency: 'Normal',
   goal: 'Melhorar a qualidade da alimentação',
   bodyTop: 'Corpo proporcional, com cintura visível',
   ribs: 'Consigo sentir facilmente',
@@ -107,7 +107,6 @@ function buildEditState(pet: StoredPet): { singles: Singles; inputs: Inputs; mul
     neutered: pet.neutered,
     senior: pet.senior,
     lifeStage: pet.lifeStage,
-    weightTendency: pet.weightTendency,
     goal: pet.goal,
     bodyTop: pet.bodyTop,
     weightChange: pet.weightChange,
@@ -125,6 +124,10 @@ function buildEditState(pet: StoredPet): { singles: Singles; inputs: Inputs; mul
   };
   if (pet.puppyAgeBand) singles.puppyAgeBand = pet.puppyAgeBand;
   if (pet.expectedAdultSize) singles.expectedAdultSize = pet.expectedAdultSize;
+  // Pets cadastrados antes de `ribs`/`belly` existirem não têm essas respostas
+  // salvas — cai no padrão do spread acima em vez de sobrescrever com vazio.
+  if (pet.ribs) singles.ribs = pet.ribs;
+  if (pet.belly) singles.belly = pet.belly;
 
   const inputs: Inputs = {
     name: pet.name,
@@ -386,13 +389,6 @@ const STEPS: Step[] = [
             </Question>
           </>
         ) : null}
-        <Question title="Tendência de peso">
-          <Pills
-            name="weightTendency"
-            options={['Tende a engordar', 'Normal', 'Magro(a) / muito ativo(a)']}
-            ctx={ctx}
-          />
-        </Question>
       </>
     ),
   },
@@ -426,7 +422,8 @@ const STEPS: Step[] = [
   {
     eyebrow: '3 · Condição corporal',
     title: 'Como está o corpo dele?',
-    intro: 'Olhe por cima, passe as mãos pelas laterais do peito e depois observe a barriga de lado.',
+    intro:
+      'Olhe por cima, passe as mãos pelas laterais do peito e depois observe a barriga de lado. É essa avaliação — não uma impressão geral — que ajusta a quantidade da receita pra mais ou pra menos.',
     body: (ctx) => (
       <>
         <Question first title="Olhando seu cão de cima, qual opção mais parece com ele?">
@@ -1089,6 +1086,9 @@ export function AnamneseScreen() {
       const healthConditions = [...(multi.health ?? [])]
         .filter((c) => c !== 'Nenhuma')
         .map((c) => (c === 'Outra' && inputs.otherHealth?.trim() ? inputs.otherHealth.trim() : c));
+      const bodyTop = singles.bodyTop ?? '';
+      const ribs = singles.ribs ?? '';
+      const belly = singles.belly ?? '';
 
       const petPatch = {
         name,
@@ -1098,13 +1098,15 @@ export function AnamneseScreen() {
         lifeStage: singles.lifeStage ?? '',
         puppyAgeBand: singles.lifeStage === 'Filhote' ? singles.puppyAgeBand ?? '' : '',
         expectedAdultSize: singles.lifeStage === 'Filhote' ? singles.expectedAdultSize ?? '' : '',
-        weightTendency: singles.weightTendency ?? '',
+        weightTendency: deriveWeightTendency(bodyTop, ribs, belly),
         breed: inputs.breed?.trim() || '',
         age: inputs.age?.trim() || '',
         weight: inputs.weight?.trim() || '',
         goal,
         idealWeight: goal === 'Emagrecer' ? inputs.idealWeight?.trim() || '' : '',
-        bodyTop: singles.bodyTop ?? '',
+        bodyTop,
+        ribs,
+        belly,
         weightChange: singles.weightChange ?? '',
         activityTime: singles.activityTime ?? '',
         activityType: singles.activityType ?? '',

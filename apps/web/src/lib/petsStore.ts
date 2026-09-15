@@ -40,7 +40,12 @@ export interface StoredPet {
   puppyAgeBand: string;
   /** Preenchido só quando `lifeStage === 'Filhote'`. */
   expectedAdultSize: string;
-  /** Tendência de peso/atividade — mesma faixa da calculadora original. */
+  /**
+   * Tendência de peso/atividade — mesma faixa da calculadora original.
+   * Não é mais perguntada direto: `deriveWeightTendency` (`lib/bodyCondition.ts`)
+   * a calcula a partir de `bodyTop`/`ribs`/`belly` (Condição corporal),
+   * avaliação física objetiva em vez de autodeclaração solta.
+   */
   weightTendency: string;
   breed: string;
   age: string;
@@ -48,6 +53,8 @@ export interface StoredPet {
   goal: string;
   idealWeight: string;
   bodyTop: string;
+  ribs: string;
+  belly: string;
   weightChange: string;
   activityTime: string;
   activityType: string;
@@ -118,6 +125,8 @@ function rowToStoredPet(row: PetRow): StoredPet {
     goal: snapshot.goal ?? '',
     idealWeight: snapshot.idealWeight ?? '',
     bodyTop: snapshot.bodyTop ?? '',
+    ribs: snapshot.ribs ?? '',
+    belly: snapshot.belly ?? '',
     weightChange: snapshot.weightChange ?? '',
     activityTime: snapshot.activityTime ?? '',
     activityType: snapshot.activityType ?? '',
