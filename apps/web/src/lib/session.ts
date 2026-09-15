@@ -6,37 +6,45 @@
  * chaves configuradas, cai de volta no flag simulado em `localStorage` da
  * Fase 0 — mantém o app utilizável sem um projeto Supabase real.
  *
- * `hasSeenOnboarding`/`hasPet` continuam só locais (não fazem parte da
- * autenticação em si). Todo acesso a `localStorage` é protegido por
- * try/catch (janela privada, storage bloqueado).
+ * `hasSeenOnboarding` continua só local (não faz parte da autenticação em
+ * si). `hasPet` deriva direto de `listPets()` — não é mais um flag manual
+ * separado: antes disso, um usuário que cadastrasse um pet num aparelho e
+ * abrisse o app noutro só veria a matilha se tivesse clicado o botão certo
+ * que ligava esse flag no primeiro aparelho, o que não faz sentido agora que
+ * a matilha sincroniza de verdade pelo Supabase. Todo acesso a `localStorage`
+ * é protegido por try/catch (janela privada, storage bloqueado).
  */
 import type { User } from '@supabase/supabase-js';
 import { isSupabaseConfigured } from './env.js';
 import { supabase } from './supabase.js';
 import { syncProfileFromAuthUser } from './userProfile.js';
+import { listPets, loadPetsForOwner } from './petsStore.js';
 
 const AUTH_KEY = 'papazilla.authenticated';
 const ONBOARDING_KEY = 'papazilla.seenOnboarding';
-const PET_KEY = 'papazilla.hasPet';
 
 let cachedUser: User | null = null;
 let initPromise: Promise<void> | null = null;
 
-function applySession(user: User | null): void {
+async function applySession(user: User | null): Promise<void> {
   cachedUser = user;
   if (user) syncProfileFromAuthUser(user);
+  await loadPetsForOwner(user?.id ?? null);
 }
 
-/** Resolve a sessão inicial do Supabase e mantém `cachedUser` em dia depois disso. Idempotente. */
+/**
+ * Resolve a sessão inicial do Supabase e mantém `cachedUser` em dia depois
+ * disso. Idempotente — quem chama (`SplashScreen`) pode confiar que, quando
+ * a promise resolve, tanto a sessão quanto a matilha (`petsStore.ts`) já
+ * estão carregadas, não só a sessão.
+ */
 export function initAuth(): Promise<void> {
   if (!isSupabaseConfigured || !supabase) return Promise.resolve();
   if (!initPromise) {
     const client = supabase;
-    initPromise = client.auth.getSession().then(({ data }) => {
-      applySession(data.session?.user ?? null);
-    });
+    initPromise = client.auth.getSession().then(({ data }) => applySession(data.session?.user ?? null));
     client.auth.onAuthStateChange((_event, session) => {
-      applySession(session?.user ?? null);
+      void applySession(session?.user ?? null);
     });
   }
   return initPromise;
@@ -78,6 +86,7 @@ export function setAuthenticated(value: boolean): void {
   if (isSupabaseConfigured && supabase) {
     if (!value) {
       cachedUser = null;
+      void loadPetsForOwner(null);
       void supabase.auth.signOut();
     }
     return;
@@ -94,9 +103,5 @@ export function setSeenOnboarding(): void {
 }
 
 export function hasPet(): boolean {
-  return read(PET_KEY);
-}
-
-export function setHasPet(value = true): void {
-  write(PET_KEY, value);
+  return listPets().length > 0;
 }

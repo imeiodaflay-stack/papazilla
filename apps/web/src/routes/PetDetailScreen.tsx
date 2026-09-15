@@ -10,7 +10,6 @@ import infoIcon from '../assets/icons/info.png';
 import { AppNav } from '../components/AppNav.js';
 import { deletePet, getPet, listPets, setActivePetId } from '../lib/petsStore.js';
 import { describePet, neuteredLabel } from '../lib/petLabel.js';
-import { setHasPet } from '../lib/session.js';
 
 /**
  * Perfil do pet — fiel à tela "pet-detail" de `papazilla-prototype`: retrato,
@@ -60,7 +59,6 @@ export function PetDetailScreen() {
 
   function confirmDelete() {
     deletePet(pet!.id);
-    if (listPets().length === 0) setHasPet(false);
     navigate('/zilla', { replace: true });
   }
 

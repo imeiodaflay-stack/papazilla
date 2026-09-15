@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { hasSeenOnboarding, initAuth, setAuthenticated } from '../lib/session.js';
+import { loadPetsForOwner } from '../lib/petsStore.js';
 import { supabase } from '../lib/supabase.js';
 
 /**
@@ -21,23 +22,28 @@ export function AuthCallbackScreen() {
       return;
     }
 
-    function proceed(hasSession: boolean) {
+    function proceed(userId: string | null) {
       if (doneRef.current) return;
       doneRef.current = true;
-      if (!hasSession) {
+      if (!userId) {
         setFailed(true);
         return;
       }
       setAuthenticated(true);
-      navigate(hasSeenOnboarding() ? '/zilla' : '/onboarding', { replace: true });
+      // Espera a matilha carregar do Supabase antes de navegar — sem isso, um
+      // usuário com pets em outro aparelho cairia num /zilla vazio até algo
+      // (que hoje não existe) forçar uma nova leitura de listPets().
+      void loadPetsForOwner(userId).then(() => {
+        navigate(hasSeenOnboarding() ? '/zilla' : '/onboarding', { replace: true });
+      });
     }
 
     void initAuth(); // garante que o listener que sincroniza o perfil (session.ts) já está armado
-    const { data } = supabase.auth.onAuthStateChange((_event, session) => proceed(Boolean(session)));
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => proceed(session?.user.id ?? null));
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) proceed(true);
+      if (session) proceed(session.user.id);
     });
-    const timeout = window.setTimeout(() => proceed(false), 8000);
+    const timeout = window.setTimeout(() => proceed(null), 8000);
 
     return () => {
       data.subscription.unsubscribe();

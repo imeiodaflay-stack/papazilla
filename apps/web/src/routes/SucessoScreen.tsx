@@ -1,6 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import zillaIcon from '../assets/icons/zilla.png';
-import { setHasPet } from '../lib/session.js';
 import { describePet } from '../lib/petLabel.js';
 
 /**
@@ -24,7 +23,6 @@ export function SucessoScreen() {
   const { isFemale, noun, article, displayName } = describePet(state);
 
   function goEat() {
-    setHasPet();
     navigate('/papa', { replace: true });
   }
 

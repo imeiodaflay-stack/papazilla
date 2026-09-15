@@ -1,8 +1,28 @@
+import { isSupabaseConfigured } from './env.js';
+import { supabase } from './supabase.js';
+
 /**
- * Matilha local (Fase 0, sem Supabase ainda). Guarda o subconjunto das respostas
- * da anamnese que a área Pets exibe hoje — não é o registro completo que um dia
- * vai para `pet_anamneses` no Supabase (ver `arquitetura-tecnica.md`).
- * Tudo protegido por try/catch (janela privada, storage bloqueado).
+ * Matilha do tutor. Com Supabase configurado e sessão real, `cachedPets` é
+ * carregado da tabela `pets` (ver `supabase/migrations/`) por
+ * `loadPetsForOwner` — chamada por `session.ts` toda vez que a sessão de auth
+ * muda, então o resto do app nunca precisa saber de userId ou de promises
+ * aqui. Sem Supabase configurado (ou sem sessão), cai de volta no
+ * `localStorage` puro da Fase 0.
+ *
+ * As leituras (`listPets`, `getPet`, `getActivePet`) continuam síncronas de
+ * propósito — hoje 19 arquivos chamam essas funções direto no corpo do
+ * componente, sem `useEffect`; trocar a API pra async exigiria reescrever
+ * todos eles. Em vez disso, `cachedPets` é um cache em memória: escritas
+ * (`addPet`/`updatePet`/`deletePet`) atualizam esse cache e o localStorage na
+ * hora (o app continua parecendo instantâneo) e disparam a gravação real no
+ * Supabase em segundo plano.
+ *
+ * Só `name`/`breed`/`sex`/`neutered`/`lifeStage` viram colunas de verdade em
+ * `pets` (identidade, como `arquitetura-tecnica.md` pede). Todo o resto —
+ * idade, peso, rotina, saúde, preferências — ainda não tem uma tabela própria
+ * (`pet_anamneses`, versionada, é trabalho futuro) e por enquanto viaja
+ * inteiro dentro de `anamnesis_snapshot` (jsonb). Tudo protegido por
+ * try/catch nos acessos a localStorage (janela privada, storage bloqueado).
  */
 const PETS_KEY = 'papazilla.pets';
 const ACTIVE_PET_KEY = 'papazilla.activePetId';
@@ -48,7 +68,20 @@ export interface StoredPet {
   updatedAt: string;
 }
 
-function readPets(): StoredPet[] {
+interface PetRow {
+  id: string;
+  owner_id: string;
+  name: string;
+  breed: string | null;
+  sex: string | null;
+  neutered: boolean | null;
+  life_stage: string | null;
+  anamnesis_snapshot: Record<string, unknown> | null;
+  created_at: string;
+  updated_at: string;
+}
+
+function readLocalPets(): StoredPet[] {
   try {
     const raw = localStorage.getItem(PETS_KEY);
     if (!raw) return [];
@@ -59,7 +92,7 @@ function readPets(): StoredPet[] {
   }
 }
 
-function writePets(pets: StoredPet[]): void {
+function writeLocalPets(pets: StoredPet[]): void {
   try {
     localStorage.setItem(PETS_KEY, JSON.stringify(pets));
   } catch {
@@ -67,12 +100,105 @@ function writePets(pets: StoredPet[]): void {
   }
 }
 
+function rowToStoredPet(row: PetRow): StoredPet {
+  const snapshot = (row.anamnesis_snapshot ?? {}) as Partial<StoredPet>;
+  return {
+    id: row.id,
+    name: row.name,
+    breed: row.breed ?? '',
+    sex: row.sex ?? '',
+    neutered: row.neutered === null ? '' : row.neutered ? 'Sim' : 'Não',
+    lifeStage: row.life_stage ?? '',
+    senior: snapshot.senior ?? '',
+    puppyAgeBand: snapshot.puppyAgeBand ?? '',
+    expectedAdultSize: snapshot.expectedAdultSize ?? '',
+    weightTendency: snapshot.weightTendency ?? '',
+    age: snapshot.age ?? '',
+    weight: snapshot.weight ?? '',
+    goal: snapshot.goal ?? '',
+    idealWeight: snapshot.idealWeight ?? '',
+    bodyTop: snapshot.bodyTop ?? '',
+    weightChange: snapshot.weightChange ?? '',
+    activityTime: snapshot.activityTime ?? '',
+    activityType: snapshot.activityType ?? '',
+    appetite: snapshot.appetite ?? '',
+    currentMeals: snapshot.currentMeals ?? '',
+    stool: snapshot.stool ?? '',
+    healthConditions: snapshot.healthConditions ?? [],
+    medication: snapshot.medication ?? '',
+    medicationName: snapshot.medicationName ?? '',
+    proteins: snapshot.proteins ?? [],
+    vegetableFavorites: snapshot.vegetableFavorites ?? [],
+    avoidProteinName: snapshot.avoidProteinName ?? '',
+    avoidVegetableName: snapshot.avoidVegetableName ?? '',
+    intoleranceName: snapshot.intoleranceName ?? '',
+    cookingMethod: snapshot.cookingMethod ?? '',
+    recipeFormat: snapshot.recipeFormat ?? '',
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function toRow(pet: StoredPet, owner: string): Omit<PetRow, 'created_at' | 'updated_at'> {
+  const { id, name, breed, sex, neutered, lifeStage, createdAt: _createdAt, updatedAt: _updatedAt, ...snapshot } = pet;
+  return {
+    id,
+    owner_id: owner,
+    name,
+    breed: breed || null,
+    sex: sex || null,
+    neutered: neutered === '' ? null : neutered === 'Sim',
+    life_stage: lifeStage || null,
+    anamnesis_snapshot: snapshot,
+  };
+}
+
+let cachedPets: StoredPet[] = readLocalPets();
+let ownerId: string | null = null;
+
+/** Chamada por `session.ts` a cada mudança de sessão. Sem Supabase/usuário, mantém o cache local de sempre. */
+export async function loadPetsForOwner(userId: string | null): Promise<void> {
+  ownerId = userId;
+  if (!isSupabaseConfigured || !supabase || !userId) {
+    cachedPets = readLocalPets();
+    return;
+  }
+  const { data, error } = await supabase.from('pets').select('*').eq('owner_id', userId).order('created_at', { ascending: true });
+  if (error || !data) {
+    console.error('[petsStore] Falha ao carregar a matilha do Supabase', error);
+    return;
+  }
+  cachedPets = (data as PetRow[]).map(rowToStoredPet);
+  writeLocalPets(cachedPets);
+}
+
+function persistPet(pet: StoredPet): void {
+  if (!isSupabaseConfigured || !supabase || !ownerId) return;
+  void supabase
+    .from('pets')
+    .upsert(toRow(pet, ownerId))
+    .then(({ error }) => {
+      if (error) console.error('[petsStore] Falha ao salvar o pet no Supabase', error);
+    });
+}
+
+function persistDelete(id: string): void {
+  if (!isSupabaseConfigured || !supabase || !ownerId) return;
+  void supabase
+    .from('pets')
+    .delete()
+    .eq('id', id)
+    .then(({ error }) => {
+      if (error) console.error('[petsStore] Falha ao excluir o pet no Supabase', error);
+    });
+}
+
 export function listPets(): StoredPet[] {
-  return readPets();
+  return cachedPets;
 }
 
 export function getPet(id: string): StoredPet | undefined {
-  return readPets().find((p) => p.id === id);
+  return cachedPets.find((p) => p.id === id);
 }
 
 export function addPet(data: Omit<StoredPet, 'id' | 'createdAt' | 'updatedAt'>): StoredPet {
@@ -82,40 +208,42 @@ export function addPet(data: Omit<StoredPet, 'id' | 'createdAt' | 'updatedAt'>):
       ? crypto.randomUUID()
       : `pet_${now}_${Math.random().toString(36).slice(2, 8)}`;
   const pet: StoredPet = { ...data, id, createdAt: now, updatedAt: now };
-  const pets = readPets();
-  pets.push(pet);
-  writePets(pets);
+  cachedPets = [...cachedPets, pet];
+  writeLocalPets(cachedPets);
   setActivePetId(id);
+  persistPet(pet);
   return pet;
 }
 
 /** Atualiza campos de um pet existente (edição de dados principais). Não mexe em id/createdAt. */
 export function updatePet(id: string, patch: Partial<Omit<StoredPet, 'id' | 'createdAt'>>): StoredPet | undefined {
-  const pets = readPets();
-  const index = pets.findIndex((p) => p.id === id);
+  const index = cachedPets.findIndex((p) => p.id === id);
   if (index === -1) return undefined;
-  const current = pets[index]!;
+  const current = cachedPets[index]!;
   const updated: StoredPet = { ...current, ...patch, updatedAt: new Date().toISOString() };
-  pets[index] = updated;
-  writePets(pets);
+  cachedPets = cachedPets.map((p, i) => (i === index ? updated : p));
+  writeLocalPets(cachedPets);
+  persistPet(updated);
   return updated;
 }
 
 /**
- * Remove um pet da matilha (irreversível — Fase 0 não tem "lixeira"). Se era
- * o pet ativo, o trocador de pet passa a apontar pro mais recente restante.
- * Não mexe em receitas salvas que citam esse pet — elas continuam existindo
- * e cada tela lida com o `petId` órfão na hora de ler (ver `RecipeDetailScreen`).
+ * Remove um pet da matilha (irreversível — sem "lixeira"). Se era o pet
+ * ativo, o trocador de pet passa a apontar pro mais recente restante. Não
+ * mexe em receitas salvas que citam esse pet — elas continuam existindo e
+ * cada tela lida com o `petId` órfão na hora de ler (ver `RecipeDetailScreen`).
  */
 export function deletePet(id: string): void {
-  const pets = readPets().filter((p) => p.id !== id);
-  writePets(pets);
+  cachedPets = cachedPets.filter((p) => p.id !== id);
+  writeLocalPets(cachedPets);
   if (getActivePetId() === id) {
-    const next = pets[pets.length - 1];
+    const next = cachedPets[cachedPets.length - 1];
     if (next) setActivePetId(next.id);
   }
+  persistDelete(id);
 }
 
+/** Trocador de pet: preferência só local (por aparelho), não sincroniza pelo Supabase. */
 export function getActivePetId(): string | null {
   try {
     return localStorage.getItem(ACTIVE_PET_KEY);
@@ -134,8 +262,7 @@ export function setActivePetId(id: string): void {
 
 /** Pet ativo: o escolhido pelo trocador de pet, com fallback pro mais recente da matilha. */
 export function getActivePet(): StoredPet | null {
-  const pets = readPets();
-  if (pets.length === 0) return null;
+  if (cachedPets.length === 0) return null;
   const activeId = getActivePetId();
-  return pets.find((p) => p.id === activeId) ?? pets[pets.length - 1] ?? null;
+  return cachedPets.find((p) => p.id === activeId) ?? cachedPets[cachedPets.length - 1] ?? null;
 }
