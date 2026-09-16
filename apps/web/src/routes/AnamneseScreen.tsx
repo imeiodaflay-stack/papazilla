@@ -501,31 +501,51 @@ const STEPS: Step[] = [
     eyebrow: '5 · Histórico de peso',
     title: 'O peso mudou recentemente?',
     intro: 'Considere os últimos 3 a 6 meses.',
-    body: (ctx) => (
-      <>
-        <Question first title="Nos últimos 3 a 6 meses, o peso dele:">
-          <SingleCards
-            name="weightChange"
-            ctx={ctx}
-            compact
-            options={[
-              'Ficou praticamente igual',
-              'Aumentou um pouco',
-              'Aumentou bastante',
-              'Diminuiu um pouco',
-              'Diminuiu bastante',
-              'Não sei',
-            ]}
-          />
-        </Question>
-        <Question title="Você sabe quanto ele pesava antes?">
-          <Pills name="previousWeightKnown" options={['Sim', 'Não sei']} ctx={ctx} />
-          <ConditionalPanel show={ctx.singles.previousWeightKnown === 'Sim'}>
-            <Field id="previousWeight" label="Peso anterior" ctx={ctx} suffix="kg" />
-          </ConditionalPanel>
-        </Question>
-      </>
-    ),
+    body: (ctx) => {
+      const goalIsMaintain = ctx.singles.goal === 'Manter o peso atual';
+      const gainedALot = ctx.singles.weightChange === 'Aumentou bastante';
+      return (
+        <>
+          <Question first title="Nos últimos 3 a 6 meses, o peso dele:">
+            <SingleCards
+              name="weightChange"
+              ctx={ctx}
+              compact
+              options={[
+                'Ficou praticamente igual',
+                'Aumentou um pouco',
+                'Aumentou bastante',
+                'Diminuiu um pouco',
+                'Diminuiu bastante',
+                'Não sei',
+              ]}
+            />
+          </Question>
+          {goalIsMaintain && gainedALot ? (
+            <div className="clinical-warning">
+              <img src={infoIcon} alt="" />
+              <p>
+                <strong>O objetivo escolhido e o histórico de peso não combinam.</strong>
+                <span>
+                  Você marcou "Manter o peso atual" no Passo 2, mas contou aqui que o peso aumentou
+                  bastante nos últimos meses. Se o objetivo real é voltar ao peso de antes, volte ao{' '}
+                  <button type="button" className="clinical-warning__link" onClick={() => ctx.goToStep(1)}>
+                    Passo 2
+                  </button>{' '}
+                  e marque "Emagrecer" — assim a receita já sai calculada pra isso.
+                </span>
+              </p>
+            </div>
+          ) : null}
+          <Question title="Você sabe quanto ele pesava antes?">
+            <Pills name="previousWeightKnown" options={['Sim', 'Não sei']} ctx={ctx} />
+            <ConditionalPanel show={ctx.singles.previousWeightKnown === 'Sim'}>
+              <Field id="previousWeight" label="Peso anterior" ctx={ctx} suffix="kg" />
+            </ConditionalPanel>
+          </Question>
+        </>
+      );
+    },
   },
   {
     eyebrow: '6 · Atividade',

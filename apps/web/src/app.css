@@ -1441,6 +1441,15 @@
 .clinical-warning b {
   font-weight: 800;
 }
+.clinical-warning__link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 800;
+  text-decoration: underline;
+}
 
 .profile-review {
   overflow: hidden;
