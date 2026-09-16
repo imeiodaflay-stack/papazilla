@@ -46,52 +46,24 @@ const FALLBACK: Record<string, string> = {
   carbs: 'Tanto faz (escolham por mim)',
 };
 
-const DEFAULT_SINGLES: Singles = {
-  sex: 'Fêmea',
-  neutered: 'Sim',
-  senior: 'Não',
-  lifeStage: 'Adulto',
-  goal: 'Melhorar a qualidade da alimentação',
-  bodyTop: 'Corpo proporcional, com cintura visível',
-  ribs: 'Consigo sentir facilmente',
-  belly: 'Levemente recolhida',
-  muscleChange: 'Não sei',
-  weightChange: 'Ficou praticamente igual',
-  previousWeightKnown: 'Não sei',
-  activityTime: '40 a 60 minutos',
-  activityType: 'Brincadeiras ativas',
-  appetite: 'Come normalmente',
-  currentFood: 'Ração seca',
-  currentMeals: '2',
-  currentAmountKnown: 'Não sei',
-  treats: '1 a 2 por dia',
-  familyFood: 'Às vezes',
-  stool: 'Firmes e bem formadas',
-  stoolFrequency: '2 vezes por dia',
-  pancreatitisHistory: 'Não sei',
-  urinaryType: 'Não sei',
-  renalStage: 'Não sei',
-  medication: 'Não',
-  supplementsUse: 'Não',
-  lastVet: 'Há menos de 6 meses',
-  bloodTests: 'Sim, estavam normais',
-  avoidProtein: 'Não',
-  intolerance: 'Não',
-  avoidVegetable: 'Não',
-  cookingMethod: 'Panela com água',
-  recipeFormat: 'Os dois',
-  preferredMeals: 'Quero que o Papazilla recomende',
-};
+/**
+ * Sem respostas padrão: cada pergunta começa vazia e a pessoa precisa
+ * escolher algo pra poder avançar (ver `isStepComplete`). O spread abaixo
+ * fica vazio de propósito — existe só pra manter um único ponto de partida
+ * pro estado de "singles" tanto no cadastro novo quanto no fallback de
+ * `buildEditState` para campos que o pet não tem salvo.
+ */
+const DEFAULT_SINGLES: Singles = {};
 
 function defaultMulti(): Multi {
   return {
-    muscle: new Set(['Nenhuma dessas mudanças']),
-    digestion: new Set(['Nenhuma dessas']),
-    health: new Set(['Nenhuma']),
+    muscle: new Set(),
+    digestion: new Set(),
+    health: new Set(),
     supplements: new Set(),
-    proteins: new Set(['Todas']),
-    carbs: new Set(['Tanto faz (escolham por mim)']),
-    vegetableFavorites: new Set(['Cenoura']),
+    proteins: new Set(),
+    carbs: new Set(),
+    vegetableFavorites: new Set(),
   };
 }
 
@@ -194,6 +166,99 @@ const CONDITION_GUIDANCE: Record<string, string> = {
 
 const PAPAZILLA_ROLE_NOTE =
   'O Papazilla existe pra simplificar o dia a dia de quem prepara alimentação natural pro cão — as recomendações são baseadas em literatura veterinária e revisadas por profissionais, mas a receita final precisa ser verificada e acompanhada pelo veterinário do seu cão, principalmente se essa for a primeira vez que ele transiciona pra alimentação natural.';
+
+function filled(value: string | undefined): boolean {
+  return Boolean((value ?? '').trim());
+}
+
+/**
+ * Sem resposta padrão pré-marcada (ver `DEFAULT_SINGLES`), então cada passo
+ * precisa dizer explicitamente o que conta como "respondido" pra liberar o
+ * "Continuar" — índice do array `STEPS`, 0-based, mapeado 1:1 pro eyebrow
+ * "N · ..." de cada passo (índice 0 = passo 1, índice 9 = passo 10, etc.).
+ * Só cobre as perguntas principais de cada passo (as que alimentam o
+ * cálculo ou que o próprio passo pede como obrigatórias); campos de texto
+ * puramente complementares (raça, observações sobre exame de sangue etc.)
+ * continuam opcionais.
+ */
+function isStepComplete(
+  step: number,
+  { singles, inputs, multi, consent }: { singles: Singles; inputs: Inputs; multi: Multi; consent: boolean },
+): boolean {
+  switch (step) {
+    case 0: {
+      if (!filled(inputs.name) || !filled(inputs.weight)) return false;
+      if (!singles.sex || !singles.neutered || !singles.senior || !singles.lifeStage) return false;
+      if (singles.lifeStage === 'Filhote' && (!singles.puppyAgeBand || !singles.expectedAdultSize)) return false;
+      return true;
+    }
+    case 1:
+      if (!singles.goal) return false;
+      if (singles.goal === 'Emagrecer' && !filled(inputs.idealWeight)) return false;
+      return true;
+    case 2:
+      return Boolean(singles.bodyTop && singles.ribs && singles.belly);
+    case 3: {
+      if ((multi.muscle?.size ?? 0) === 0) return false;
+      const hasChange = [...(multi.muscle ?? [])].some((v) => !(EXCLUSIVE.muscle ?? []).includes(v));
+      return !hasChange || Boolean(singles.muscleChange);
+    }
+    case 4: {
+      if (!singles.weightChange || !singles.previousWeightKnown) return false;
+      return singles.previousWeightKnown !== 'Sim' || filled(inputs.previousWeight);
+    }
+    case 5:
+      return Boolean(singles.activityTime && singles.activityType);
+    case 6:
+      return Boolean(singles.appetite);
+    case 7: {
+      if (!singles.currentFood || !singles.currentMeals || !singles.currentAmountKnown) return false;
+      return singles.currentAmountKnown !== 'Sim' || filled(inputs.currentAmount);
+    }
+    case 8:
+      return Boolean(singles.treats && singles.familyFood);
+    case 9:
+      return Boolean(singles.stool && singles.stoolFrequency && (multi.digestion?.size ?? 0) > 0);
+    case 10:
+      return (multi.health?.size ?? 0) > 0 && (!multi.health?.has('Outra') || filled(inputs.otherHealth));
+    case 11: {
+      if (multi.health?.has('Pancreatite') && !singles.pancreatitisHistory) return false;
+      if (multi.health?.has('Cálculos ou cristais urinários') && !singles.urinaryType) return false;
+      if (multi.health?.has('Doença renal') && !singles.renalStage) return false;
+      return true;
+    }
+    case 12: {
+      if (!singles.medication || !singles.supplementsUse) return false;
+      if (singles.medication === 'Sim' && !filled(inputs.medicationName)) return false;
+      if (singles.supplementsUse === 'Sim') {
+        if ((multi.supplements?.size ?? 0) === 0) return false;
+        if (multi.supplements?.has('Outro') && !filled(inputs.otherSupplement)) return false;
+      }
+      return true;
+    }
+    case 13:
+      return Boolean(singles.lastVet && singles.bloodTests);
+    case 14: {
+      if ((multi.proteins?.size ?? 0) === 0) return false;
+      if (!singles.avoidProtein || !singles.intolerance) return false;
+      if (singles.avoidProtein === 'Sim' && !filled(inputs.avoidProteinName)) return false;
+      if (singles.intolerance === 'Sim' && !filled(inputs.intoleranceName)) return false;
+      return true;
+    }
+    case 15:
+      return (multi.carbs?.size ?? 0) > 0;
+    case 16:
+      return Boolean(singles.avoidVegetable) && (singles.avoidVegetable !== 'Sim' || filled(inputs.avoidVegetableName));
+    case 17:
+      return Boolean(singles.cookingMethod && singles.recipeFormat);
+    case 18:
+      return Boolean(singles.preferredMeals);
+    case 19:
+      return consent;
+    default:
+      return true;
+  }
+}
 
 interface Ctx {
   singles: Singles;
@@ -1176,10 +1241,7 @@ export function AnamneseScreen() {
     [singles, inputs, multi, consent],
   );
 
-  const missingIdealWeight =
-    step === 1 && singles.goal === 'Emagrecer' && !(inputs.idealWeight ?? '').trim();
-  const missingConsent = step === LAST && !consent;
-  const nextDisabled = missingIdealWeight || missingConsent;
+  const nextDisabled = !isStepComplete(step, { singles, inputs, multi, consent });
 
   const current = STEPS[step]!;
 
@@ -1307,9 +1369,6 @@ export function AnamneseScreen() {
         </button>
         <div>
           <span className="flow-header__eyebrow">Perfil do Monstrinho</span>
-          <strong>
-            Etapa {step + 1} de {STEPS.length}
-          </strong>
         </div>
         <span className="flow-header__avatar">
           <img src={zillaIcon} alt="" />
