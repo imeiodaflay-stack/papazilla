@@ -35,13 +35,24 @@ export function supplementReference(id: SupplementId): string {
   return `${s.adultFactor.toLocaleString('pt-BR', { minimumFractionDigits: 1 })} g para cada 100 g de comida pronta (adulto)`;
 }
 
-export function mealsCount(plan: DailyPlan): number {
+/**
+ * Passo 19 da Anamnese ("Quantas refeições por dia?") deixa o tutor escolher
+ * um número fixo de refeições; se ele não pediu pra Papazilla recomendar,
+ * essa preferência substitui o `mealsPerDay` calculado pelo motor só na
+ * exibição (o motor continua calculando a porção total do mesmo jeito).
+ */
+export function mealsCount(plan: DailyPlan, pet?: Pick<StoredPet, 'preferredMeals'>): number {
+  const preferred = pet?.preferredMeals;
+  if (preferred && preferred !== 'Quero que o Papazilla recomende') {
+    const preferredNumber = Number(preferred);
+    if (Number.isFinite(preferredNumber) && preferredNumber > 0) return preferredNumber;
+  }
   const match = /\d+/.exec(plan.mealsPerDay);
   return match ? Number(match[0]) : 2;
 }
 
-export function mealSize(plan: DailyPlan): number {
-  return Math.round(plan.totalGramsPerDay / mealsCount(plan));
+export function mealSize(plan: DailyPlan, pet?: Pick<StoredPet, 'preferredMeals'>): number {
+  return Math.round(plan.totalGramsPerDay / mealsCount(plan, pet));
 }
 
 export function formatGrams(value: number): string {
@@ -64,9 +75,9 @@ export function prepPortionsText(petPlans: { pet: StoredPet; plan: DailyPlan }[]
     );
     return `Depois de misturar, separe ${joinPt(parts)}. Identifique os recipientes com nome e data.`;
   }
-  const plan = petPlans[0]!.plan;
-  const totalMeals = days * mealsCount(plan);
-  return `Monte ${days} ${days === 1 ? 'porção diária' : 'porções diárias'} de ${formatGrams(plan.totalGramsPerDay)} ou ${totalMeals} refeições de ${formatGrams(mealSize(plan))}. Use recipientes rasos, limpos e identificados com a data.`;
+  const { pet, plan } = petPlans[0]!;
+  const totalMeals = days * mealsCount(plan, pet);
+  return `Monte ${days} ${days === 1 ? 'porção diária' : 'porções diárias'} de ${formatGrams(plan.totalGramsPerDay)} ou ${totalMeals} refeições de ${formatGrams(mealSize(plan, pet))}. Use recipientes rasos, limpos e identificados com a data.`;
 }
 
 /**

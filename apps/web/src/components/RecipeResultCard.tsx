@@ -3,6 +3,8 @@ import potinhoIcon from '../assets/icons/potinho.png';
 import infoIcon from '../assets/icons/info.png';
 import type { StoredPet } from '../lib/petsStore.js';
 import { joinPt } from '../lib/petLabel.js';
+import { matchDietPreferences } from '../lib/dietPreferences.js';
+import { digestionContextFor, hasDigestiveSensitivity } from '../lib/digestionSensitivity.js';
 import {
   FORMULATION_LABELS,
   formatGrams,
@@ -40,6 +42,11 @@ export function RecipeResultCard({
   const petsWithFrequentExtras = selectedPets.filter(
     (pet) => pet.treats === 'Muitos ao longo do dia' || pet.familyFood === 'Frequentemente',
   );
+  const rowLabels = recipe.groups.flatMap((g) => g.rows.map((r) => r.label));
+  const dietPreferenceNotes = selectedPets
+    .map((pet) => ({ pet, ...matchDietPreferences(pet, rowLabels) }))
+    .filter((m) => m.liked.length > 0 || m.avoided.length > 0);
+  const sensitivePetNames = selectedPets.filter(hasDigestiveSensitivity).map((pet) => pet.name);
 
   return (
     <div className="recipe-result-card">
@@ -66,7 +73,7 @@ export function RecipeResultCard({
             <span key={pet.id}>
               <b>{pet.name}</b>
               <small>
-                {formatGrams(plan.totalGramsPerDay)}/dia · {formatGrams(mealSize(plan))}/ref.
+                {formatGrams(plan.totalGramsPerDay)}/dia · {formatGrams(mealSize(plan, pet))}/ref.
               </small>
             </span>
           ))}
@@ -83,6 +90,29 @@ export function RecipeResultCard({
             </div>
           ))}
       </div>
+      {dietPreferenceNotes.length > 0 ? (
+        <div className="result-group">
+          <h3>Gostos do seu monstrinho</h3>
+          {dietPreferenceNotes.map(({ pet, liked, avoided }) => (
+            <div key={pet.id} className="shared-recipe-note">
+              <img src={infoIcon} alt="" />
+              <p>
+                {liked.length > 0 ? (
+                  <>
+                    Você contou que {pet.name} adora {joinPt(liked)} — essa receita tem!{' '}
+                  </>
+                ) : null}
+                {avoided.length > 0 ? (
+                  <>
+                    Fique de olho: essa receita tem {joinPt(avoided)}, que você marcou como algo que{' '}
+                    {pet.name} não deveria comer. Vale revisar antes de preparar.
+                  </>
+                ) : null}
+              </p>
+            </div>
+          ))}
+        </div>
+      ) : null}
       <div className="result-group">
         <h3>Limite de petiscos</h3>
         <div>
@@ -105,12 +135,18 @@ export function RecipeResultCard({
       {recipe.notes.length > 0 ? (
         <div className="result-group">
           <h3>Vale saber</h3>
-          {recipe.notes.map((note) => (
-            <div key={note.code} className="shared-recipe-note">
-              <img src={infoIcon} alt="" />
-              <p>{note.text}</p>
-            </div>
-          ))}
+          {recipe.notes.map((note) => {
+            const context = digestionContextFor(note, sensitivePetNames);
+            return (
+              <div key={note.code} className="shared-recipe-note">
+                <img src={infoIcon} alt="" />
+                <p>
+                  {note.text}
+                  {context ? <><br />{context}</> : null}
+                </p>
+              </div>
+            );
+          })}
         </div>
       ) : null}
       <RecipeFinalizers petPlans={petPlans} />
@@ -121,7 +157,7 @@ export function RecipeResultCard({
             <span key={pet.id}>
               <small>{pet.name}</small>
               <strong>{formatGrams(plan.totalGramsPerDay)}/dia</strong>
-              <b>{formatGrams(mealSize(plan))}/refeição</b>
+              <b>{formatGrams(mealSize(plan, pet))}/refeição</b>
             </span>
           ))}
         </div>
@@ -133,7 +169,7 @@ export function RecipeResultCard({
           </span>
           <span>
             <small>Por refeição</small>
-            <strong>{formatGrams(mealSize(petPlans[0]!.plan))}</strong>
+            <strong>{formatGrams(mealSize(petPlans[0]!.plan, petPlans[0]!.pet))}</strong>
           </span>
         </div>
       )}

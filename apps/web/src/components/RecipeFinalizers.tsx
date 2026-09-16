@@ -37,7 +37,7 @@ export function RecipeFinalizers({ petPlans }: { petPlans: { pet: StoredPet; pla
                 <span>
                   <strong>{pet.name}</strong>
                   <small>
-                    {formatGrams(plan.totalGramsPerDay)}/dia · {formatGrams(mealSize(plan))} por refeição
+                    {formatGrams(plan.totalGramsPerDay)}/dia · {formatGrams(mealSize(plan, pet))} por refeição
                   </small>
                 </span>
               </span>

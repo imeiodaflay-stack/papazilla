@@ -275,7 +275,7 @@ export function ReceitaScreen() {
     recipeIntro =
       selectedPets.length > 1
         ? `Receita compartilhada para ${joinPt(selectedPets.map((p) => p.name))} · ${days} ${days === 1 ? 'dia' : 'dias'} · ${formatGrams(sharedTotal)} prontos por dia.`
-        : `Receita para ${days} ${days === 1 ? 'dia' : 'dias'} · ${formatGrams(sharedTotal)} prontos por dia · divididos em ${mealsCount(petPlans[0]!.plan)} refeições.`;
+        : `Receita para ${days} ${days === 1 ? 'dia' : 'dias'} · ${formatGrams(sharedTotal)} prontos por dia · divididos em ${mealsCount(petPlans[0]!.plan, petPlans[0]!.pet)} refeições.`;
   }
 
   return (
@@ -328,7 +328,7 @@ export function ReceitaScreen() {
                         {pet.lifeStage === 'Filhote' ? 'filhote' : 'adulto'}
                       </small>
                       <b>
-                        {formatGrams(plan.totalGramsPerDay)} por dia · {mealsCount(plan)} refeições
+                        {formatGrams(plan.totalGramsPerDay)} por dia · {mealsCount(plan, pet)} refeições
                       </b>
                     </span>
                     <i aria-hidden="true">✓</i>
