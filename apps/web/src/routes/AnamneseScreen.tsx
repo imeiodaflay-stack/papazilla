@@ -118,19 +118,32 @@ function buildEditState(pet: StoredPet): { singles: Singles; inputs: Inputs; mul
     medication: pet.medication,
     cookingMethod: pet.cookingMethod,
     recipeFormat: pet.recipeFormat,
-    avoidProtein: pet.avoidProteinName ? 'Sim' : 'Não',
-    avoidVegetable: pet.avoidVegetableName ? 'Sim' : 'Não',
-    intolerance: pet.intoleranceName ? 'Sim' : 'Não',
+    // Pets cadastrados antes de `avoidProtein`/`avoidVegetable`/`intolerance` (o
+    // "Sim"/"Não" em si) existirem só têm o texto — infere a partir dele.
+    avoidProtein: pet.avoidProtein || (pet.avoidProteinName ? 'Sim' : 'Não'),
+    avoidVegetable: pet.avoidVegetable || (pet.avoidVegetableName ? 'Sim' : 'Não'),
+    intolerance: pet.intolerance || (pet.intoleranceName ? 'Sim' : 'Não'),
   };
   if (pet.puppyAgeBand) singles.puppyAgeBand = pet.puppyAgeBand;
   if (pet.expectedAdultSize) singles.expectedAdultSize = pet.expectedAdultSize;
-  // Pets cadastrados antes de `ribs`/`belly` existirem não têm essas respostas
-  // salvas — cai no padrão do spread acima em vez de sobrescrever com vazio.
+  // Pets cadastrados antes de um campo existir não têm essa resposta salva —
+  // cai no padrão do spread acima em vez de sobrescrever com vazio.
   if (pet.ribs) singles.ribs = pet.ribs;
   if (pet.belly) singles.belly = pet.belly;
   if (pet.muscleChangeSeverity) singles.muscleChange = pet.muscleChangeSeverity;
+  if (pet.previousWeightKnown) singles.previousWeightKnown = pet.previousWeightKnown;
+  if (pet.currentFood) singles.currentFood = pet.currentFood;
+  if (pet.currentAmountKnown) singles.currentAmountKnown = pet.currentAmountKnown;
   if (pet.treats) singles.treats = pet.treats;
   if (pet.familyFood) singles.familyFood = pet.familyFood;
+  if (pet.stoolFrequency) singles.stoolFrequency = pet.stoolFrequency;
+  if (pet.pancreatitisHistory) singles.pancreatitisHistory = pet.pancreatitisHistory;
+  if (pet.urinaryType) singles.urinaryType = pet.urinaryType;
+  if (pet.renalStage) singles.renalStage = pet.renalStage;
+  if (pet.supplementsUse) singles.supplementsUse = pet.supplementsUse;
+  if (pet.lastVet) singles.lastVet = pet.lastVet;
+  if (pet.bloodTests) singles.bloodTests = pet.bloodTests;
+  if (pet.preferredMeals) singles.preferredMeals = pet.preferredMeals;
 
   const inputs: Inputs = {
     name: pet.name,
@@ -138,7 +151,11 @@ function buildEditState(pet: StoredPet): { singles: Singles; inputs: Inputs; mul
     age: pet.age,
     weight: pet.weight,
     idealWeight: pet.idealWeight,
+    previousWeight: pet.previousWeight,
+    currentAmount: pet.currentAmount,
     medicationName: pet.medicationName,
+    otherSupplement: pet.otherSupplementName,
+    bloodNotes: pet.bloodNotes,
     avoidProteinName: pet.avoidProteinName,
     avoidVegetableName: pet.avoidVegetableName,
     intoleranceName: pet.intoleranceName,
@@ -148,8 +165,11 @@ function buildEditState(pet: StoredPet): { singles: Singles; inputs: Inputs; mul
     ...defaultMulti(),
     health: pet.healthConditions.length > 0 ? new Set(pet.healthConditions) : new Set(['Nenhuma']),
     muscle: pet.muscleChangeSigns.length > 0 ? new Set(pet.muscleChangeSigns) : new Set(['Nenhuma dessas mudanças']),
+    digestion: pet.digestionSigns.length > 0 ? new Set(pet.digestionSigns) : new Set(['Nenhuma dessas']),
+    supplements: new Set(pet.currentSupplements),
     proteins: pet.proteins.length > 0 ? new Set(pet.proteins) : new Set(['Todas']),
     vegetableFavorites: pet.vegetableFavorites.length > 0 ? new Set(pet.vegetableFavorites) : new Set(['Cenoura']),
+    carbs: pet.carbs.length > 0 ? new Set(pet.carbs) : new Set(['Tanto faz (escolham por mim)']),
   };
 
   return { singles, inputs, multi };
@@ -157,6 +177,23 @@ function buildEditState(pet: StoredPet): { singles: Singles; inputs: Inputs; mul
 
 const HEALTH_COMPLEMENTS = ['Pancreatite', 'Cálculos ou cristais urinários', 'Doença renal'];
 const DECIMAL_KEYS = ['weight', 'idealWeight', 'previousWeight', 'currentAmount'];
+
+/**
+ * Orientação específica por condição — sugestão pro tutor conversar com o
+ * veterinário sobre esses pontos, não uma regra que o motor aplica sozinho
+ * (o Papazilla não decide dieta terapêutica, ver `escopo-mvp.md`).
+ */
+const CONDITION_GUIDANCE: Record<string, string> = {
+  'Doença renal': 'Tende a pedir menos proteína e mais cautela com vísceras — o veterinário pode ajustar isso com você.',
+  'Cálculos ou cristais urinários':
+    'Dependendo do tipo de cálculo, alguns vegetais e proteínas devem ser evitados — vale confirmar o tipo com o veterinário antes de montar a receita.',
+  Pancreatite: 'Vale ter cautela extra com vísceras muito gordurosas — confirme com o veterinário o que é seguro para esse cão.',
+  'Doença hepática': 'Vale ter cautela extra com vísceras muito gordurosas — confirme com o veterinário o que é seguro para esse cão.',
+  Diabetes: 'Pede atenção especial aos carboidratos da receita — o veterinário pode orientar a quantidade certa.',
+};
+
+const PAPAZILLA_ROLE_NOTE =
+  'O Papazilla existe pra simplificar o dia a dia de quem prepara alimentação natural pro cão — as recomendações são baseadas em literatura veterinária e revisadas por profissionais, mas a receita final precisa ser verificada e acompanhada pelo veterinário do seu cão, principalmente se essa for a primeira vez que ele transiciona pra alimentação natural.';
 
 interface Ctx {
   singles: Singles;
@@ -757,10 +794,14 @@ const STEPS: Step[] = [
               <p>
                 <strong>Vale revisar a receita com o veterinário.</strong>
                 <span>
-                  Você informou: <b>{conditions.join(', ')}</b>. O perfil será salvo normalmente. Antes
-                  de oferecer uma receita, recomendamos compartilhá-la com o veterinário que acompanha
-                  seu cão.
+                  Você informou: <b>{conditions.join(', ')}</b>. O perfil será salvo normalmente.
                 </span>
+                {conditions
+                  .filter((c) => CONDITION_GUIDANCE[c])
+                  .map((c) => (
+                    <span key={c}>{CONDITION_GUIDANCE[c]}</span>
+                  ))}
+                <span>{PAPAZILLA_ROLE_NOTE}</span>
               </p>
             </div>
           ) : null}
@@ -794,6 +835,13 @@ const STEPS: Step[] = [
             <Pills name="renalStage" options={['Sim', 'Não', 'Não sei']} ctx={ctx} />
           </Question>
         ) : null}
+        <div className="clinical-warning">
+          <img src={infoIcon} alt="" />
+          <p>
+            <strong>Vale revisar a receita com o veterinário.</strong>
+            <span>{PAPAZILLA_ROLE_NOTE}</span>
+          </p>
+        </div>
       </>
     ),
   },
@@ -823,6 +871,16 @@ const STEPS: Step[] = [
             </ConditionalPanel>
           </ConditionalPanel>
         </Question>
+        <div className="shared-recipe-note">
+          <img src={infoIcon} alt="" />
+          <p>
+            <strong>Suplementação não é opcional na alimentação natural.</strong>
+            Diferente de uma ração industrializada, a AN cozida em casa não vem com vitaminas e minerais
+            já balanceados — por isso toda receita do Papazilla inclui um suplemento vitamínico-mineral
+            calculado (você escolhe o produto no próximo passo, o da receita). Pular essa parte é o
+            principal jeito de uma dieta caseira ficar desbalanceada com o tempo.
+          </p>
+        </div>
       </>
     ),
   },
@@ -857,6 +915,14 @@ const STEPS: Step[] = [
             />
           </ConditionalPanel>
         </Question>
+        <div className="shared-recipe-note">
+          <img src={infoIcon} alt="" />
+          <p>
+            Mesmo com o cão saudável, o check-up veterinário (incluindo peso e exame físico) é recomendado
+            pelo menos 1x ao ano — e a cada consulta vale revisar a receita da alimentação natural com o
+            veterinário, ajustando o que for preciso.
+          </p>
+        </div>
       </>
     ),
   },
@@ -974,12 +1040,6 @@ const STEPS: Step[] = [
           : ctx.singles.goal;
       return (
         <>
-          <Textarea
-            id="finalNotes"
-            label="Existe alguma coisa importante sobre seu cão que você acha que deveríamos saber?"
-            ctx={ctx}
-            placeholder="Escreva aqui, se quiser"
-          />
           <div className="profile-review profile-review--compact">
             <div className="profile-review__pet">
               <span>
@@ -1162,24 +1222,48 @@ export function AnamneseScreen() {
         muscleChangeSigns: [...(multi.muscle ?? [])],
         muscleChangeSeverity: singles.muscleChange ?? '',
         weightChange: singles.weightChange ?? '',
+        previousWeightKnown: singles.previousWeightKnown ?? '',
+        previousWeight: singles.previousWeightKnown === 'Sim' ? inputs.previousWeight?.trim() || '' : '',
         activityTime: singles.activityTime ?? '',
         activityType: singles.activityType ?? '',
         appetite: singles.appetite ?? '',
+        currentFood: singles.currentFood ?? '',
         currentMeals: singles.currentMeals ?? '',
+        currentAmountKnown: singles.currentAmountKnown ?? '',
+        currentAmount: singles.currentAmountKnown === 'Sim' ? inputs.currentAmount?.trim() || '' : '',
         treats: singles.treats ?? '',
         familyFood: singles.familyFood ?? '',
         stool: singles.stool ?? '',
+        stoolFrequency: singles.stoolFrequency ?? '',
+        digestionSigns: [...(multi.digestion ?? [])],
+        pancreatitisHistory: healthConditions.includes('Pancreatite') ? singles.pancreatitisHistory ?? '' : '',
+        urinaryType: healthConditions.includes('Cálculos ou cristais urinários') ? singles.urinaryType ?? '' : '',
+        renalStage: healthConditions.includes('Doença renal') ? singles.renalStage ?? '' : '',
         healthConditions,
         medication: singles.medication ?? '',
         medicationName: singles.medication === 'Sim' ? inputs.medicationName?.trim() || '' : '',
+        supplementsUse: singles.supplementsUse ?? '',
+        currentSupplements: singles.supplementsUse === 'Sim' ? [...(multi.supplements ?? [])] : [],
+        otherSupplementName:
+          singles.supplementsUse === 'Sim' && multi.supplements?.has('Outro')
+            ? inputs.otherSupplement?.trim() || ''
+            : '',
+        lastVet: singles.lastVet ?? '',
+        bloodTests: singles.bloodTests ?? '',
+        bloodNotes: singles.bloodTests === 'Sim, houve alguma alteração' ? inputs.bloodNotes?.trim() || '' : '',
+        avoidProtein: singles.avoidProtein ?? '',
         proteins: [...(multi.proteins ?? [])],
         vegetableFavorites: [...(multi.vegetableFavorites ?? [])],
+        carbs: [...(multi.carbs ?? [])],
         avoidProteinName: singles.avoidProtein === 'Sim' ? inputs.avoidProteinName?.trim() || '' : '',
+        avoidVegetable: singles.avoidVegetable ?? '',
         avoidVegetableName:
           singles.avoidVegetable === 'Sim' ? inputs.avoidVegetableName?.trim() || '' : '',
+        intolerance: singles.intolerance ?? '',
         intoleranceName: singles.intolerance === 'Sim' ? inputs.intoleranceName?.trim() || '' : '',
         cookingMethod: singles.cookingMethod ?? '',
         recipeFormat: singles.recipeFormat ?? '',
+        preferredMeals: singles.preferredMeals ?? '',
       };
 
       if (editingPet) {

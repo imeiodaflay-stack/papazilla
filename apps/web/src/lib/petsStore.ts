@@ -61,25 +61,58 @@ export interface StoredPet {
   /** "Pequena"/"Moderada"/"Bem evidente"/"Não sei" — só relevante quando `muscleChangeSigns` indica alguma mudança real. */
   muscleChangeSeverity: string;
   weightChange: string;
+  /** "Sim"/"Não sei" — sabe o peso anterior. `previousWeight` só é preenchido quando "Sim". */
+  previousWeightKnown: string;
+  previousWeight: string;
   activityTime: string;
   activityType: string;
   appetite: string;
+  /** O que come hoje — Passo 8, só informativo pra transição, não entra no cálculo da receita nova. */
+  currentFood: string;
   currentMeals: string;
+  currentAmountKnown: string;
+  currentAmount: string;
   /** Frequência de petiscos (Passo 9) — cruzada com o teto de petiscos (10–15% do total) na receita. */
   treats: string;
   /** "Nunca"/"Às vezes"/"Frequentemente" — comida da família, mesmo cruzamento de `treats`. */
   familyFood: string;
   stool: string;
+  stoolFrequency: string;
+  /** Sinais digestivos (Passo 10) — cruzados com avisos de vísceras musculares/vegetais que soltam o intestino na receita. */
+  digestionSigns: string[];
+  /** Só preenchido quando "Pancreatite" está em `healthConditions`. */
+  pancreatitisHistory: string;
+  /** Só preenchido quando "Cálculos ou cristais urinários" está em `healthConditions`. */
+  urinaryType: string;
+  /** Só preenchido quando "Doença renal" está em `healthConditions`. */
+  renalStage: string;
   healthConditions: string[];
   medication: string;
   medicationName: string;
+  supplementsUse: string;
+  currentSupplements: string[];
+  otherSupplementName: string;
+  /** Última consulta veterinária (Passo 14) — cruzado com a recomendação de checkup anual (AAHA). */
+  lastVet: string;
+  bloodTests: string;
+  bloodNotes: string;
+  /** "Sim"/"Não" — se "Sim", `avoidProteinName` traz qual. */
+  avoidProtein: string;
   proteins: string[];
   vegetableFavorites: string[];
+  /** Carboidratos favoritos (Passo 16) — cruzado com a seleção do wizard da receita. */
+  carbs: string[];
   avoidProteinName: string;
+  /** "Sim"/"Não" — se "Sim", `avoidVegetableName` traz qual. */
+  avoidVegetable: string;
   avoidVegetableName: string;
+  /** "Sim"/"Não" — se "Sim", `intoleranceName` traz qual. */
+  intolerance: string;
   intoleranceName: string;
   cookingMethod: string;
   recipeFormat: string;
+  /** "1"/"2"/"3"/"4"/"Quero que o Papazilla recomende" — usado no resultado da receita quando não é a última opção. */
+  preferredMeals: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -139,23 +172,44 @@ function rowToStoredPet(row: PetRow): StoredPet {
     muscleChangeSigns: snapshot.muscleChangeSigns ?? [],
     muscleChangeSeverity: snapshot.muscleChangeSeverity ?? '',
     weightChange: snapshot.weightChange ?? '',
+    previousWeightKnown: snapshot.previousWeightKnown ?? '',
+    previousWeight: snapshot.previousWeight ?? '',
     activityTime: snapshot.activityTime ?? '',
     activityType: snapshot.activityType ?? '',
     appetite: snapshot.appetite ?? '',
+    currentFood: snapshot.currentFood ?? '',
     currentMeals: snapshot.currentMeals ?? '',
+    currentAmountKnown: snapshot.currentAmountKnown ?? '',
+    currentAmount: snapshot.currentAmount ?? '',
     treats: snapshot.treats ?? '',
     familyFood: snapshot.familyFood ?? '',
     stool: snapshot.stool ?? '',
+    stoolFrequency: snapshot.stoolFrequency ?? '',
+    digestionSigns: snapshot.digestionSigns ?? [],
+    pancreatitisHistory: snapshot.pancreatitisHistory ?? '',
+    urinaryType: snapshot.urinaryType ?? '',
+    renalStage: snapshot.renalStage ?? '',
     healthConditions: snapshot.healthConditions ?? [],
     medication: snapshot.medication ?? '',
     medicationName: snapshot.medicationName ?? '',
+    supplementsUse: snapshot.supplementsUse ?? '',
+    currentSupplements: snapshot.currentSupplements ?? [],
+    otherSupplementName: snapshot.otherSupplementName ?? '',
+    lastVet: snapshot.lastVet ?? '',
+    bloodTests: snapshot.bloodTests ?? '',
+    bloodNotes: snapshot.bloodNotes ?? '',
+    avoidProtein: snapshot.avoidProtein ?? '',
     proteins: snapshot.proteins ?? [],
     vegetableFavorites: snapshot.vegetableFavorites ?? [],
+    carbs: snapshot.carbs ?? [],
     avoidProteinName: snapshot.avoidProteinName ?? '',
+    avoidVegetable: snapshot.avoidVegetable ?? '',
     avoidVegetableName: snapshot.avoidVegetableName ?? '',
+    intolerance: snapshot.intolerance ?? '',
     intoleranceName: snapshot.intoleranceName ?? '',
     cookingMethod: snapshot.cookingMethod ?? '',
     recipeFormat: snapshot.recipeFormat ?? '',
+    preferredMeals: snapshot.preferredMeals ?? '',
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
