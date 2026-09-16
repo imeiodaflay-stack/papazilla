@@ -586,19 +586,41 @@ const STEPS: Step[] = [
     eyebrow: '7 · Apetite',
     title: 'Como é a fome?',
     intro: 'Como é o apetite do seu cão?',
-    body: (ctx) => (
-      <SingleCards
-        name="appetite"
-        ctx={ctx}
-        options={[
-          'Come pouco ou é seletivo',
-          'Come normalmente',
-          'Gosta bastante de comer',
-          'Parece estar sempre com fome',
-          'Procura ou pede comida o tempo todo',
-        ]}
-      />
-    ),
+    body: (ctx) => {
+      const veryHungry =
+        ctx.singles.appetite === 'Parece estar sempre com fome' ||
+        ctx.singles.appetite === 'Procura ou pede comida o tempo todo';
+      const losingWeight =
+        ctx.singles.weightChange === 'Diminuiu um pouco' || ctx.singles.weightChange === 'Diminuiu bastante';
+      return (
+        <>
+          <SingleCards
+            name="appetite"
+            ctx={ctx}
+            options={[
+              'Come pouco ou é seletivo',
+              'Come normalmente',
+              'Gosta bastante de comer',
+              'Parece estar sempre com fome',
+              'Procura ou pede comida o tempo todo',
+            ]}
+          />
+          {veryHungry && losingWeight ? (
+            <div className="clinical-warning">
+              <img src={infoIcon} alt="" />
+              <p>
+                <strong>Vale conversar com o veterinário antes de seguir.</strong>
+                <span>
+                  Fome fora do comum junto com perda de peso pode ser sinal de algo além da alimentação —
+                  não é algo pra resolver só aumentando a porção. O perfil será salvo normalmente, mas
+                  recomendamos essa conversa antes de trocar a dieta.
+                </span>
+              </p>
+            </div>
+          ) : null}
+        </>
+      );
+    },
   },
   {
     eyebrow: '8 · Alimentação atual',
