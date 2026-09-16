@@ -129,6 +129,8 @@ function buildEditState(pet: StoredPet): { singles: Singles; inputs: Inputs; mul
   if (pet.ribs) singles.ribs = pet.ribs;
   if (pet.belly) singles.belly = pet.belly;
   if (pet.muscleChangeSeverity) singles.muscleChange = pet.muscleChangeSeverity;
+  if (pet.treats) singles.treats = pet.treats;
+  if (pet.familyFood) singles.familyFood = pet.familyFood;
 
   const inputs: Inputs = {
     name: pet.name,
@@ -1164,6 +1166,8 @@ export function AnamneseScreen() {
         activityType: singles.activityType ?? '',
         appetite: singles.appetite ?? '',
         currentMeals: singles.currentMeals ?? '',
+        treats: singles.treats ?? '',
+        familyFood: singles.familyFood ?? '',
         stool: singles.stool ?? '',
         healthConditions,
         medication: singles.medication ?? '',

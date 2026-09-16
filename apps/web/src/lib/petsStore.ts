@@ -65,6 +65,10 @@ export interface StoredPet {
   activityType: string;
   appetite: string;
   currentMeals: string;
+  /** Frequência de petiscos (Passo 9) — cruzada com o teto de petiscos (10–15% do total) na receita. */
+  treats: string;
+  /** "Nunca"/"Às vezes"/"Frequentemente" — comida da família, mesmo cruzamento de `treats`. */
+  familyFood: string;
   stool: string;
   healthConditions: string[];
   medication: string;
@@ -139,6 +143,8 @@ function rowToStoredPet(row: PetRow): StoredPet {
     activityType: snapshot.activityType ?? '',
     appetite: snapshot.appetite ?? '',
     currentMeals: snapshot.currentMeals ?? '',
+    treats: snapshot.treats ?? '',
+    familyFood: snapshot.familyFood ?? '',
     stool: snapshot.stool ?? '',
     healthConditions: snapshot.healthConditions ?? [],
     medication: snapshot.medication ?? '',

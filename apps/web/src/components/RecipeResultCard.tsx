@@ -3,7 +3,14 @@ import potinhoIcon from '../assets/icons/potinho.png';
 import infoIcon from '../assets/icons/info.png';
 import type { StoredPet } from '../lib/petsStore.js';
 import { joinPt } from '../lib/petLabel.js';
-import { FORMULATION_LABELS, formatGrams, formatRowAmount, formulationSummary, mealSize, orderDisclaimers } from '../lib/recipeDisplay.js';
+import {
+  FORMULATION_LABELS,
+  formatGrams,
+  formatRowAmount,
+  formulationSummary,
+  mealSize,
+  orderDisclaimers,
+} from '../lib/recipeDisplay.js';
 import { RecipeFinalizers } from './RecipeFinalizers.js';
 import { RecipePreparationSteps } from './RecipePreparationSteps.js';
 
@@ -28,6 +35,11 @@ export function RecipeResultCard({
 }) {
   const selectedPets = petPlans.map(({ pet }) => pet);
   const { ordered: orderedDisclaimers, clinicalRequired } = orderDisclaimers(petPlans);
+  const treatsMin = petPlans.reduce((sum, { plan }) => sum + plan.treatsGramsPerDay.min, 0);
+  const treatsMax = petPlans.reduce((sum, { plan }) => sum + plan.treatsGramsPerDay.max, 0);
+  const petsWithFrequentExtras = selectedPets.filter(
+    (pet) => pet.treats === 'Muitos ao longo do dia' || pet.familyFood === 'Frequentemente',
+  );
 
   return (
     <div className="recipe-result-card">
@@ -70,6 +82,25 @@ export function RecipeResultCard({
               <strong>{group.rows.map((r) => formatRowAmount(r, format)).join(' + ')}</strong>
             </div>
           ))}
+      </div>
+      <div className="result-group">
+        <h3>Limite de petiscos</h3>
+        <div>
+          <span>Petiscos e mimos por fora da receita</span>
+          <strong>até {formatGrams(treatsMin)}–{formatGrams(treatsMax)}/dia</strong>
+        </div>
+        <p className="pz-note">10% a 15% do total diário — inclui petiscos, comida da família e qualquer coisa fora do potinho.</p>
+        {petsWithFrequentExtras.length > 0 ? (
+          <div className="shared-recipe-note">
+            <img src={infoIcon} alt="" />
+            <p>
+              Você contou na Anamnese que {joinPt(petsWithFrequentExtras.map((p) => p.name))}{' '}
+              {petsWithFrequentExtras.length > 1 ? 'recebem' : 'recebe'} petiscos ou comida da família com
+              frequência — vale medir ou contar o quanto isso já soma antes de completar com essa receita, pra
+              não passar do limite.
+            </p>
+          </div>
+        ) : null}
       </div>
       {recipe.notes.length > 0 ? (
         <div className="result-group">
