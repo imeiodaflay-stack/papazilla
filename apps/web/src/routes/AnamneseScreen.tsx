@@ -4,7 +4,7 @@ import zillaIcon from '../assets/icons/zilla.png';
 import addIcon from '../assets/icons/adicionar.png';
 import infoIcon from '../assets/icons/info.png';
 import { addPet, getPet, updatePet, type StoredPet } from '../lib/petsStore.js';
-import { deriveWeightTendency } from '../lib/bodyCondition.js';
+import { deriveWeightTendency } from '../lib/weightTendency.js';
 
 /**
  * Anamnese do Monstrinho — fiel à tela "profile" de `papazilla-prototype`.
@@ -1120,7 +1120,13 @@ export function AnamneseScreen() {
         lifeStage: singles.lifeStage ?? '',
         puppyAgeBand: singles.lifeStage === 'Filhote' ? singles.puppyAgeBand ?? '' : '',
         expectedAdultSize: singles.lifeStage === 'Filhote' ? singles.expectedAdultSize ?? '' : '',
-        weightTendency: deriveWeightTendency(bodyTop, ribs, belly),
+        weightTendency: deriveWeightTendency(
+          bodyTop,
+          ribs,
+          belly,
+          singles.activityTime ?? '',
+          singles.activityType ?? '',
+        ),
         breed: inputs.breed?.trim() || '',
         age: inputs.age?.trim() || '',
         weight: inputs.weight?.trim() || '',

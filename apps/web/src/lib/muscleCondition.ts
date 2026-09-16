@@ -3,7 +3,7 @@
  *
  * A WSAVA trata escore de condição muscular (perda leve/moderada/grave) como
  * um eixo independente do escore de condição corporal — um cão pode estar
- * gordo e com perda de músculo ao mesmo tempo (ver `bodyCondition.ts`). A
+ * gordo e com perda de músculo ao mesmo tempo (ver `weightTendency.ts`). A
  * literatura converge em: dietas com mais proteína preservam/recuperam massa
  * magra melhor do que dietas com menos proteína e mais carboidrato (fontes
  * no commit). O motor já tem a formulação certa pra isso — "mais-proteina"

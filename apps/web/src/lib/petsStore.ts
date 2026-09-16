@@ -42,9 +42,10 @@ export interface StoredPet {
   expectedAdultSize: string;
   /**
    * Tendência de peso/atividade — mesma faixa da calculadora original.
-   * Não é mais perguntada direto: `deriveWeightTendency` (`lib/bodyCondition.ts`)
-   * a calcula a partir de `bodyTop`/`ribs`/`belly` (Condição corporal),
-   * avaliação física objetiva em vez de autodeclaração solta.
+   * Não é mais perguntada direto: `deriveWeightTendency` (`lib/weightTendency.ts`)
+   * a calcula a partir de `bodyTop`/`ribs`/`belly` (Condição corporal) e
+   * `activityTime`/`activityType` (Atividade) — avaliação objetiva em vez de
+   * autodeclaração solta.
    */
   weightTendency: string;
   breed: string;
