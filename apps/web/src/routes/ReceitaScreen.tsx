@@ -9,6 +9,7 @@ import { getActivePet, getActivePetId, listPets } from '../lib/petsStore.js';
 import { describePet, joinPt } from '../lib/petLabel.js';
 import { getSubscription } from '../lib/subscription.js';
 import { derivePredominantProtein } from '../lib/engineMapping.js';
+import { hasSignificantMuscleLoss } from '../lib/muscleCondition.js';
 import { buildPetPlan, buildSharedRecipe } from '../lib/recipeEngine.js';
 import { addRecipe } from '../lib/recipesStore.js';
 import { clearRecipeDraft, peekRecipeDraft, saveRecipeDraft } from '../lib/recipeDraft.js';
@@ -116,6 +117,7 @@ export function ReceitaScreen() {
   );
 
   const selectedPets = pets.filter((p) => selectedPetIds.has(p.id));
+  const petsWithMuscleLoss = selectedPets.filter(hasSignificantMuscleLoss);
   const petPlans = useMemo(
     () => selectedPets.map((pet) => ({ pet, plan: buildPetPlan(pet, choices) })),
     [selectedPets.map((p) => p.id).join(','), choices],
@@ -362,6 +364,16 @@ export function ReceitaScreen() {
 
         {step === 1 ? (
           <>
+            {petsWithMuscleLoss.length > 0 ? (
+              <div className="shared-recipe-note">
+                <img src={infoIcon} alt="" />
+                <p>
+                  <strong>Musculatura pede mais proteína</strong>
+                  {joinPt(petsWithMuscleLoss.map((p) => p.name))} {petsWithMuscleLoss.length > 1 ? 'mostraram' : 'mostrou'} perda de músculo moderada ou bem
+                  evidente na Anamnese. "Mais proteína" ajuda a preservar massa muscular — você decide se quer usar.
+                </p>
+              </div>
+            ) : null}
             <div className="recipe-preset-list">
               {FORMULATION_ORDER.map((id) => {
                 const f = FORMULATIONS[id];
@@ -375,6 +387,9 @@ export function ReceitaScreen() {
                     onClick={() => setFormulation(id)}
                   >
                     <span>
+                      {id === 'mais-proteina' && petsWithMuscleLoss.length > 0 ? (
+                        <em className="pz-badge pz-badge--success">Recomendado pela musculatura</em>
+                      ) : null}
                       <strong>{FORMULATION_LABELS[id]}</strong>
                       <small>{formulationSummary(id)}</small>
                     </span>

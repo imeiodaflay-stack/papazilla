@@ -128,6 +128,7 @@ function buildEditState(pet: StoredPet): { singles: Singles; inputs: Inputs; mul
   // salvas — cai no padrão do spread acima em vez de sobrescrever com vazio.
   if (pet.ribs) singles.ribs = pet.ribs;
   if (pet.belly) singles.belly = pet.belly;
+  if (pet.muscleChangeSeverity) singles.muscleChange = pet.muscleChangeSeverity;
 
   const inputs: Inputs = {
     name: pet.name,
@@ -144,6 +145,7 @@ function buildEditState(pet: StoredPet): { singles: Singles; inputs: Inputs; mul
   const multi: Multi = {
     ...defaultMulti(),
     health: pet.healthConditions.length > 0 ? new Set(pet.healthConditions) : new Set(['Nenhuma']),
+    muscle: pet.muscleChangeSigns.length > 0 ? new Set(pet.muscleChangeSigns) : new Set(['Nenhuma dessas mudanças']),
     proteins: pet.proteins.length > 0 ? new Set(pet.proteins) : new Set(['Todas']),
     vegetableFavorites: pet.vegetableFavorites.length > 0 ? new Set(pet.vegetableFavorites) : new Set(['Cenoura']),
   };
@@ -1107,6 +1109,8 @@ export function AnamneseScreen() {
         bodyTop,
         ribs,
         belly,
+        muscleChangeSigns: [...(multi.muscle ?? [])],
+        muscleChangeSeverity: singles.muscleChange ?? '',
         weightChange: singles.weightChange ?? '',
         activityTime: singles.activityTime ?? '',
         activityType: singles.activityType ?? '',

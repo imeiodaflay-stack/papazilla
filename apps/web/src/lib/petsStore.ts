@@ -55,6 +55,10 @@ export interface StoredPet {
   bodyTop: string;
   ribs: string;
   belly: string;
+  /** Sinais de perda de músculo (Passo 4). Vazio ou só "Nenhuma dessas mudanças"/"Não sei avaliar" = sem sinal. */
+  muscleChangeSigns: string[];
+  /** "Pequena"/"Moderada"/"Bem evidente"/"Não sei" — só relevante quando `muscleChangeSigns` indica alguma mudança real. */
+  muscleChangeSeverity: string;
   weightChange: string;
   activityTime: string;
   activityType: string;
@@ -127,6 +131,8 @@ function rowToStoredPet(row: PetRow): StoredPet {
     bodyTop: snapshot.bodyTop ?? '',
     ribs: snapshot.ribs ?? '',
     belly: snapshot.belly ?? '',
+    muscleChangeSigns: snapshot.muscleChangeSigns ?? [],
+    muscleChangeSeverity: snapshot.muscleChangeSeverity ?? '',
     weightChange: snapshot.weightChange ?? '',
     activityTime: snapshot.activityTime ?? '',
     activityType: snapshot.activityType ?? '',
