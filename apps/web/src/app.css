@@ -2392,8 +2392,8 @@
 
 .paywall-benefits {
   display: grid;
-  gap: 0.85rem;
-  margin: 1.85rem 0 2.1rem;
+  gap: 1rem;
+  margin: 2.1rem 0 2.35rem;
   padding: 0 0.15rem;
   list-style: none;
 }
@@ -2427,90 +2427,58 @@
   line-height: 1.25;
 }
 
-.paywall-plans {
-  display: grid;
-  gap: 0.55rem;
-}
-.paywall-plan {
+.paywall-offer {
   overflow: hidden;
-  border: 1.5px solid var(--pz-border);
+  margin-top: 0.3rem;
+  border: 1.5px solid var(--pz-verde-strong);
   border-radius: 20px;
   background: #fff;
-  color: var(--pz-ink);
-}
-.paywall-plan.is-selected {
-  border-color: var(--pz-verde-strong);
   box-shadow: 0 0 0 2px rgb(113 106 17 / 8%);
-}
-.paywall-plan__select,
-.paywall-plan--monthly {
-  display: grid;
-  grid-template-columns: 20px 1fr auto;
-  gap: 0.55rem;
-  align-items: center;
-  width: 100%;
-  min-height: 72px;
-  padding: 0.65rem 0.7rem;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  text-align: left;
-}
-.paywall-radio {
-  display: grid;
-  place-items: center;
-  width: 18px;
-  height: 18px;
-  border: 1.5px solid var(--pz-border-strong);
-  border-radius: 50%;
-}
-.is-selected > .paywall-plan__select .paywall-radio,
-.paywall-plan--monthly.is-selected > .paywall-radio {
-  border: 5px solid var(--pz-verde-strong);
-}
-.paywall-plan__select > span:nth-child(2),
-.paywall-plan--monthly > span:nth-child(2) {
-  display: grid;
-  gap: 0.12rem;
-}
-.paywall-plan__select small {
-  color: var(--pz-accent-ink);
-  font: 900 0.5rem / 1 var(--pz-font-support);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-.paywall-plan__select strong,
-.paywall-plan--monthly > span strong {
-  font: 900 0.72rem / 1.2 var(--pz-font-support);
-}
-.paywall-plan__select em,
-.paywall-plan--monthly em {
-  color: var(--pz-ink-label);
-  font: 600 0.53rem / 1.25 var(--pz-font-body);
-  font-style: normal;
-}
-.paywall-plan__select > b,
-.paywall-plan--monthly > b {
-  color: var(--pz-ink-label);
-  font: 600 0.5rem / 1.25 var(--pz-font-body);
-  font-style: normal;
-  text-align: right;
-}
-.paywall-plan__select > b strong,
-.paywall-plan--monthly > b strong {
   color: var(--pz-ink);
-  font: 900 0.65rem / 1.2 var(--pz-font-support);
+}
+.paywall-offer__badge {
+  display: inline-flex;
+  margin: 0.75rem 0 0 0.75rem;
+  padding: 0.3rem 0.55rem;
+  border-radius: 999px;
+  background: var(--pz-success-bg);
+  color: var(--pz-secondary-ink);
+  font: 800 0.56rem / 1 var(--pz-font-support);
+  letter-spacing: 0.02em;
+}
+.paywall-offer__price {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.6rem 0.9rem 0.85rem;
+}
+.paywall-offer__was {
+  color: var(--pz-ink-label);
+  font: 700 0.62rem / 1 var(--pz-font-support);
+  text-decoration: line-through;
+  text-decoration-color: var(--pz-coral);
+}
+.paywall-offer__price > strong {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  color: var(--pz-chocolate);
+  font: 900 1.85rem / 1.05 var(--pz-font-display);
+  letter-spacing: -0.02em;
+}
+.paywall-offer__price > strong > small {
+  color: var(--pz-ink-label);
+  font: 700 0.7rem / 1 var(--pz-font-support);
+}
+.paywall-offer__hint {
+  color: var(--pz-accent-ink);
+  font: 700 0.58rem / 1.3 var(--pz-font-support);
 }
 
 .annual-payment-options {
   display: grid;
   gap: 0.4rem;
-  padding: 0.55rem 0.65rem 0.1rem 2.95rem;
+  padding: 0.6rem 0.75rem 0.1rem;
   border-top: 1px solid var(--pz-border);
-}
-.paywall-plan:not(.is-selected) .annual-payment-options,
-.paywall-plan:not(.is-selected) .annual-commitment {
-  display: none;
 }
 .annual-payment-option {
   display: grid;
@@ -2553,14 +2521,14 @@
   line-height: 1.25;
 }
 .annual-commitment {
-  margin: 0.4rem 0.75rem 0.65rem 2.95rem;
+  margin: 0.4rem 0.75rem 0.7rem;
   color: var(--pz-ink-label);
   font-size: 0.5rem;
   line-height: 1.35;
 }
 
 .paywall-cta {
-  margin-top: 0.75rem;
+  margin-top: 1.1rem;
 }
 .paywall-disclosure {
   max-width: 310px;

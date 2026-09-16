@@ -1,13 +1,19 @@
 import { useRef, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import patinhaIcon from '../assets/icons/patinha.png';
-import { formatRenewalDate, getSubscription } from '../lib/subscription.js';
+import {
+  ANNUAL_PRICE,
+  formatBRL,
+  formatRenewalDate,
+  getSubscription,
+  INSTALLMENT_PRICE,
+  INSTALLMENTS_COUNT,
+} from '../lib/subscription.js';
 
-const PLAN_NAME = { annual: 'Papazilla Anual', monthly: 'Papazilla Mensal' } as const;
+const PLAN_NAME = { annual: 'Papazilla Anual' } as const;
 const PLAN_PAYMENT = {
-  upfront: 'R$ 107,90 à vista',
-  installments: '12 pagamentos de R$ 9,99',
-  monthly: 'R$ 19,90 por mês',
+  upfront: `${formatBRL(ANNUAL_PRICE)} à vista`,
+  installments: `Em até ${INSTALLMENTS_COUNT}x de ${formatBRL(INSTALLMENT_PRICE)}`,
 } as const;
 
 /**
@@ -32,13 +38,10 @@ export function GerenciarAssinaturaScreen() {
     toastTimer.current = window.setTimeout(() => setToastMsg(null), 2600);
   }
 
-  const isMonthly = subscription.plan === 'monthly';
   const isInstallments = subscription.payment === 'installments';
-  const renewalCopy = isMonthly
-    ? 'A próxima cobrança mensal acontece na data indicada acima.'
-    : isInstallments
-      ? 'Depois dos 12 pagamentos, a assinatura inicia um novo período até você cancelar a renovação.'
-      : 'A próxima cobrança anual acontece na data indicada acima.';
+  const renewalCopy = isInstallments
+    ? `Depois dos ${INSTALLMENTS_COUNT} pagamentos, a assinatura inicia um novo período até você cancelar a renovação.`
+    : 'A próxima cobrança anual acontece na data indicada acima.';
 
   return (
     <div className="user-profile-view">

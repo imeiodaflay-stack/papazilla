@@ -3,13 +3,25 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import zillaFrente from '../assets/zilla-frente.png';
 import { getActivePet } from '../lib/petsStore.js';
 import { describePet } from '../lib/petLabel.js';
-import { setSubscription, type SubscriptionPayment, type SubscriptionPlan } from '../lib/subscription.js';
+import {
+  ANNUAL_ORIGINAL_PRICE,
+  ANNUAL_PRICE,
+  formatBRL,
+  INSTALLMENT_PRICE,
+  INSTALLMENTS_COUNT,
+  setSubscription,
+  type SubscriptionPayment,
+} from '../lib/subscription.js';
 
 /**
- * Oferta de assinatura — fiel à tela "paywall" de `papazilla-prototype`.
- * Aberta a partir de Papá (1ª receita, sem assinatura) ou de Minha conta
- * ("Conhecer planos" / "Gerenciar plano"); `location.state.returnTo` diz
- * pra onde voltar ao fechar ou depois de assinar.
+ * Oferta de assinatura — fiel à tela "paywall" de `papazilla-prototype`,
+ * com uma mudança de produto (Flay, 2026-09): oferta única, sem plano
+ * mensal. Preço "de/por" com desconto por tempo limitado — `ANNUAL_ORIGINAL_PRICE`
+ * é só um valor de referência pra ancorar o desconto, não veio de um plano
+ * anterior de fato cobrado; ajuste ali (`subscription.ts`) se o valor "de"
+ * mudar. Aberta a partir de Papá (1ª receita, sem assinatura) ou de Minha
+ * conta ("Conhecer planos" / "Gerenciar plano"); `location.state.returnTo`
+ * diz pra onde voltar ao fechar ou depois de assinar.
  *
  * Fase 0: sem provedor de pagamento (`arquitetura-tecnica.md` deixa isso em
  * aberto). Assinar só grava o plano localmente, como o protótipo — nenhuma
@@ -43,8 +55,7 @@ export function AssinaturaScreen() {
   const activePet = getActivePet();
   const { preposition, displayName } = describePet(activePet);
 
-  const [plan, setPlan] = useState<SubscriptionPlan>('annual');
-  const [annualPayment, setAnnualPayment] = useState<Exclude<SubscriptionPayment, 'monthly'>>('upfront');
+  const [payment, setPayment] = useState<SubscriptionPayment>('upfront');
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<number>();
 
@@ -54,33 +65,24 @@ export function AssinaturaScreen() {
     toastTimer.current = window.setTimeout(() => setToastMsg(null), 2600);
   }
 
-  function selectAnnualPayment(payment: Exclude<SubscriptionPayment, 'monthly'>) {
-    setPlan('annual');
-    setAnnualPayment(payment);
-  }
-
   const ctaLabel =
-    plan === 'monthly'
-      ? 'Assinar por R$ 19,90/mês'
-      : annualPayment === 'installments'
-        ? 'Assinar em 12 pagamentos'
-        : 'Assinar anual por R$ 107,90';
+    payment === 'installments'
+      ? `Assinar em ${INSTALLMENTS_COUNT}x de ${formatBRL(INSTALLMENT_PRICE)}`
+      : `Assinar por ${formatBRL(ANNUAL_PRICE)}`;
 
   const disclosure =
-    plan === 'monthly'
-      ? 'Cobrança recorrente mensal. Cancele quando quiser; depois do cancelamento, não haverá novas cobranças e o acesso continua até o fim do período já pago.'
-      : annualPayment === 'installments'
-        ? '12 pagamentos de R$ 9,99 · total de R$ 119,88. A renovação inicia um novo período de compromisso.'
-        : 'R$ 107,90 cobrados por 12 meses de acesso. Renovação anual automática; cancele a próxima renovação quando quiser.';
+    payment === 'installments'
+      ? `${INSTALLMENTS_COUNT} pagamentos de ${formatBRL(INSTALLMENT_PRICE)} sem juros · total de ${formatBRL(ANNUAL_PRICE)} por 12 meses de acesso. A renovação inicia um novo período de compromisso.`
+      : `${formatBRL(ANNUAL_PRICE)} cobrados por 12 meses de acesso. Renovação anual automática; cancele a próxima renovação quando quiser.`;
 
-  const annualCommitment =
-    annualPayment === 'installments'
+  const commitment =
+    payment === 'installments'
       ? 'Compromisso de 12 meses. Você pode cancelar a renovação a qualquer momento; os pagamentos do período contratado continuam até o final.'
       : 'Pagamento anual antecipado. A assinatura renova por mais 12 meses até você cancelar a renovação.';
 
   function subscribe() {
-    setSubscription({ plan, payment: plan === 'annual' ? annualPayment : 'monthly' });
-    toast(plan === 'annual' ? 'Plano anual ativado. Boa fornalha!' : 'Plano mensal ativado. Boa fornalha!');
+    setSubscription({ plan: 'annual', payment });
+    toast('Plano ativado. Boa fornalha!');
     window.setTimeout(() => navigate(afterSubscribe, { replace: true }), 900);
   }
 
@@ -138,77 +140,49 @@ export function AssinaturaScreen() {
           </li>
         </ul>
 
-        <div className="paywall-plans" role="radiogroup" aria-label="Escolha um plano">
-          <section className={`paywall-plan${plan === 'annual' ? ' is-selected' : ''}`}>
+        <section className="paywall-offer">
+          <span className="paywall-offer__badge">⏳ Por tempo limitado</span>
+          <div className="paywall-offer__price">
+            <span className="paywall-offer__was">de {formatBRL(ANNUAL_ORIGINAL_PRICE)}</span>
+            <strong>
+              {formatBRL(ANNUAL_PRICE)}
+              <small>/ano</small>
+            </strong>
+            <span className="paywall-offer__hint">Preço especial para os primeiros acessos</span>
+          </div>
+
+          <div className="annual-payment-options" role="radiogroup" aria-label="Forma de pagamento">
             <button
               type="button"
-              className="paywall-plan__select"
+              className={`annual-payment-option${payment === 'upfront' ? ' is-selected' : ''}`}
               role="radio"
-              aria-checked={plan === 'annual'}
-              onClick={() => setPlan('annual')}
+              aria-checked={payment === 'upfront'}
+              onClick={() => setPayment('upfront')}
             >
-              <span className="paywall-radio" aria-hidden="true" />
-              <span>
-                <small>Melhor escolha</small>
-                <strong>Papazilla Anual</strong>
-                <em>Economize até 55% comparado ao mensal</em>
-              </span>
-              <b>
-                A partir de
-                <br />
-                <strong>R$ 8,99/mês</strong>
-              </b>
+              <span aria-hidden="true" />
+              <p>
+                <strong>{formatBRL(ANNUAL_PRICE)} à vista</strong>
+                <small>Pagamento único por 12 meses de acesso</small>
+              </p>
             </button>
-            <div className="annual-payment-options" role="radiogroup" aria-label="Forma de pagamento anual">
-              <button
-                type="button"
-                className={`annual-payment-option${annualPayment === 'upfront' ? ' is-selected' : ''}`}
-                role="radio"
-                aria-checked={annualPayment === 'upfront'}
-                onClick={() => selectAnnualPayment('upfront')}
-              >
-                <span aria-hidden="true" />
-                <p>
-                  <strong>R$ 107,90 à vista</strong>
-                  <small>Pagamento antecipado por 12 meses · 10% a menos</small>
-                </p>
-              </button>
-              <button
-                type="button"
-                className={`annual-payment-option${annualPayment === 'installments' ? ' is-selected' : ''}`}
-                role="radio"
-                aria-checked={annualPayment === 'installments'}
-                onClick={() => selectAnnualPayment('installments')}
-              >
-                <span aria-hidden="true" />
-                <p>
-                  <strong>12 pagamentos de R$ 9,99</strong>
-                  <small>Total de R$ 119,88</small>
-                </p>
-              </button>
-            </div>
-            <p className="annual-commitment">{annualCommitment}</p>
-          </section>
-
-          <button
-            type="button"
-            className={`paywall-plan paywall-plan--monthly${plan === 'monthly' ? ' is-selected' : ''}`}
-            role="radio"
-            aria-checked={plan === 'monthly'}
-            onClick={() => setPlan('monthly')}
-          >
-            <span className="paywall-radio" aria-hidden="true" />
-            <span>
-              <strong>Papazilla Mensal</strong>
-              <em>Flexibilidade para cancelar quando quiser</em>
-            </span>
-            <b>
-              <strong>R$ 19,90</strong>
-              <br />
-              por mês
-            </b>
-          </button>
-        </div>
+            <button
+              type="button"
+              className={`annual-payment-option${payment === 'installments' ? ' is-selected' : ''}`}
+              role="radio"
+              aria-checked={payment === 'installments'}
+              onClick={() => setPayment('installments')}
+            >
+              <span aria-hidden="true" />
+              <p>
+                <strong>
+                  Em até {INSTALLMENTS_COUNT}x de {formatBRL(INSTALLMENT_PRICE)}
+                </strong>
+                <small>Sem juros no cartão</small>
+              </p>
+            </button>
+          </div>
+          <p className="annual-commitment">{commitment}</p>
+        </section>
 
         <button type="button" className="pz-button pz-button--primary wide paywall-cta" onClick={subscribe}>
           {ctaLabel}

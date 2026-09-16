@@ -11,15 +11,20 @@ import infoIcon from '../assets/icons/info.png';
 import excluirIcon from '../assets/icons/excluir.png';
 import { listPets } from '../lib/petsStore.js';
 import { describePet, joinPt } from '../lib/petLabel.js';
-import { getSubscription } from '../lib/subscription.js';
+import {
+  ANNUAL_PRICE,
+  formatBRL,
+  getSubscription,
+  INSTALLMENT_PRICE,
+  INSTALLMENTS_COUNT,
+} from '../lib/subscription.js';
 import { setAuthenticated } from '../lib/session.js';
 import { getUserProfile } from '../lib/userProfile.js';
 
-const PLAN_NAME = { annual: 'Papazilla Anual', monthly: 'Papazilla Mensal' } as const;
+const PLAN_NAME = { annual: 'Papazilla Anual' } as const;
 const PLAN_PAYMENT = {
-  upfront: 'R$ 107,90 à vista',
-  installments: '12 pagamentos de R$ 9,99',
-  monthly: 'R$ 19,90 por mês',
+  upfront: `${formatBRL(ANNUAL_PRICE)} à vista`,
+  installments: `Em até ${INSTALLMENTS_COUNT}x de ${formatBRL(INSTALLMENT_PRICE)}`,
 } as const;
 
 /**
@@ -66,7 +71,7 @@ export function ContaScreen() {
   const planDescription = subscription
     ? 'Receitas personalizadas para toda a matilha, salvas e disponíveis em qualquer aparelho.'
     : 'Cadastre seus pets e explore os conteúdos. Assine para criar receitas personalizadas.';
-  const valueLabel = subscription ? (subscription.plan === 'monthly' ? 'Renovação mensal' : 'Pagamento') : 'Receitas';
+  const valueLabel = subscription ? 'Pagamento' : 'Receitas';
   const planValue = subscription ? PLAN_PAYMENT[subscription.payment] : 'Benefício premium';
 
   function goManagePlan() {
