@@ -1219,7 +1219,8 @@
   color: var(--pz-ink-muted);
   font: 700 0.72rem / 1.2 var(--pz-font-body);
 }
-.profile-field input {
+.profile-field input,
+.profile-field select {
   width: 100%;
   min-width: 0;
   height: 48px;
@@ -1227,6 +1228,19 @@
   border: 1.5px solid var(--pz-border-strong);
   border-radius: 12px;
   background: #fff;
+  font: 600 0.8rem / 1.2 var(--pz-font-body);
+  color: var(--pz-ink);
+}
+.profile-field select {
+  appearance: none;
+  padding-right: 2.1rem;
+  background-image: linear-gradient(45deg, transparent 50%, var(--pz-ink-label) 50%),
+    linear-gradient(135deg, var(--pz-ink-label) 50%, transparent 50%);
+  background-position:
+    calc(100% - 1.15rem) center,
+    calc(100% - 0.8rem) center;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
 }
 .input-suffix {
   position: relative;

@@ -116,10 +116,14 @@ function buildEditState(pet: StoredPet): { singles: Singles; inputs: Inputs; mul
   if (pet.lastVet) singles.lastVet = pet.lastVet;
   if (pet.bloodTests) singles.bloodTests = pet.bloodTests;
   if (pet.preferredMeals) singles.preferredMeals = pet.preferredMeals;
+  // Raça virou dropdown (`BREED_OPTIONS`) — pets com uma raça fora da lista
+  // (cadastrados quando o campo era texto livre) caem em "Outra" com o
+  // texto original preservado em `breedOther`.
+  if (pet.breed) singles.breed = BREED_OPTIONS.includes(pet.breed) ? pet.breed : 'Outra';
 
   const inputs: Inputs = {
     name: pet.name,
-    breed: pet.breed,
+    breedOther: BREED_OPTIONS.includes(pet.breed) ? '' : pet.breed,
     age: pet.age,
     weight: pet.weight,
     idealWeight: pet.idealWeight,
@@ -147,6 +151,49 @@ function buildEditState(pet: StoredPet): { singles: Singles; inputs: Inputs; mul
   return { singles, inputs, multi };
 }
 
+/**
+ * Raça (Passo 1) — dropdown em vez de texto livre: melhora a usabilidade
+ * (busca nativa do `<select>`) e a manutenção dos dados no banco (valores
+ * consistentes em vez de grafias variadas do mesmo nome). As 30 mais comuns
+ * no Brasil (ordem de popularidade aproximada, fontes como CBKC/registros de
+ * clínicas) + SRD + Outra, que abre um campo de texto livre pra não perder
+ * nenhum caso.
+ */
+const BREED_OPTIONS = [
+  'Shih Tzu',
+  'Poodle',
+  'Lhasa Apso',
+  'Yorkshire Terrier',
+  'Golden Retriever',
+  'Labrador Retriever',
+  'Bulldog Francês',
+  'Pinscher',
+  'Maltês',
+  'Pug',
+  'Border Collie',
+  'Rottweiler',
+  'Pastor Alemão',
+  'Beagle',
+  'Dachshund (Salsicha)',
+  'Chihuahua',
+  'Cocker Spaniel',
+  'Husky Siberiano',
+  'Boxer',
+  'Dálmata',
+  'Akita',
+  'Bulldog Inglês',
+  'Fox Paulistinha',
+  'Spitz Alemão (Lulu da Pomerânia)',
+  'Basset Hound',
+  'Schnauzer',
+  'Bull Terrier',
+  'Pit Bull',
+  'Dogue Alemão',
+  'Chow Chow',
+  'SRD (Sem Raça Definida)',
+  'Outra',
+];
+
 const HEALTH_COMPLEMENTS = ['Pancreatite', 'Cálculos ou cristais urinários', 'Doença renal'];
 const DECIMAL_KEYS = ['weight', 'idealWeight', 'previousWeight', 'currentAmount'];
 
@@ -169,6 +216,11 @@ const PAPAZILLA_ROLE_NOTE =
 
 function filled(value: string | undefined): boolean {
   return Boolean((value ?? '').trim());
+}
+
+/** Valor final da raça: a opção do dropdown, ou o texto livre quando for "Outra". */
+function breedValue(singles: Singles, inputs: Inputs): string {
+  return singles.breed === 'Outra' ? (inputs.breedOther ?? '').trim() : singles.breed ?? '';
 }
 
 /**
@@ -388,6 +440,40 @@ function Field({
   );
 }
 
+function Select({
+  id,
+  label,
+  ctx,
+  options,
+  placeholder = 'Selecione',
+}: {
+  id: string;
+  label: string;
+  ctx: Ctx;
+  options: string[];
+  placeholder?: string;
+}) {
+  return (
+    <label className="profile-field profile-field--full">
+      <span>{label}</span>
+      <select
+        data-profile-input={id}
+        value={ctx.singles[id] ?? ''}
+        onChange={(e) => ctx.setSingle(id, e.target.value)}
+      >
+        <option value="" disabled>
+          {placeholder}
+        </option>
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 function Textarea({
   id,
   label,
@@ -454,10 +540,13 @@ const STEPS: Step[] = [
         </button>
         <div className="form-grid">
           <Field id="name" label="Nome do cão" ctx={ctx} />
-          <Field id="breed" label="Raça" ctx={ctx} />
           <Field id="age" label="Data de nascimento ou idade" ctx={ctx} />
           <Field id="weight" label="Peso atual" ctx={ctx} suffix="kg" />
         </div>
+        <Select id="breed" label="Raça" ctx={ctx} options={BREED_OPTIONS} />
+        <ConditionalPanel show={ctx.singles.breed === 'Outra'}>
+          <Field id="breedOther" label="Qual raça?" ctx={ctx} />
+        </ConditionalPanel>
         <Question title="Sexo">
           <Pills name="sex" options={['Macho', 'Fêmea']} ctx={ctx} />
         </Question>
@@ -1096,7 +1185,7 @@ const STEPS: Step[] = [
     intro: 'Última etapa. Depois disso, você poderá revisar e atualizar tudo pela área Pets.',
     body: (ctx) => {
       const health = [...(ctx.multi.health ?? [])];
-      const identity = [ctx.inputs.breed, ctx.inputs.age, ctx.inputs.weight ? `${ctx.inputs.weight} kg` : '']
+      const identity = [breedValue(ctx.singles, ctx.inputs), ctx.inputs.age, ctx.inputs.weight ? `${ctx.inputs.weight} kg` : '']
         .filter(Boolean)
         .join(' · ');
       const goal =
@@ -1273,7 +1362,7 @@ export function AnamneseScreen() {
           singles.activityTime ?? '',
           singles.activityType ?? '',
         ),
-        breed: inputs.breed?.trim() || '',
+        breed: breedValue(singles, inputs),
         age: inputs.age?.trim() || '',
         weight: inputs.weight?.trim() || '',
         goal,
