@@ -18,13 +18,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const { data: row, error } = await admin
       .from('subscriptions')
-      .select('asaas_subscription_id')
+      .select('status, asaas_subscription_id')
       .eq('user_id', user.id)
       .maybeSingle();
     if (error) throw error;
-    if (!row?.asaas_subscription_id) throw new HttpError(400, 'Nenhuma assinatura ativa encontrada.');
+    if (row?.status !== 'active') throw new HttpError(400, 'Nenhuma assinatura ativa encontrada.');
 
-    await asaasFetch(`/subscriptions/${row.asaas_subscription_id}`, { method: 'DELETE' });
+    // Modo demonstração (ver checkout-create.ts): sem assinatura de verdade
+    // no Asaas pra cancelar, só marca localmente.
+    if (row.asaas_subscription_id) {
+      await asaasFetch(`/subscriptions/${row.asaas_subscription_id}`, { method: 'DELETE' });
+    }
 
     const { error: updateError } = await admin.from('subscriptions').update({ status: 'canceled' }).eq('user_id', user.id);
     if (updateError) throw updateError;
