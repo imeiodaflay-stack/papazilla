@@ -13,6 +13,7 @@ import { CuriosidadesScreen } from './routes/CuriosidadesScreen.js';
 import { CuriosidadeDetalheScreen } from './routes/CuriosidadeDetalheScreen.js';
 import { ReceitasScreen } from './routes/ReceitasScreen.js';
 import { RecipeDetailScreen } from './routes/RecipeDetailScreen.js';
+import { RecipeShareScreen } from './routes/RecipeShareScreen.js';
 import { RecipeCookLogScreen } from './routes/RecipeCookLogScreen.js';
 import { RecipeHistoryScreen } from './routes/RecipeHistoryScreen.js';
 import { ContaScreen } from './routes/ContaScreen.js';
@@ -64,6 +65,7 @@ export const router = createBrowserRouter([
   { path: '/curiosidades/:curiosidadeId', element: <CuriosidadeDetalheScreen /> },
   { path: '/receitas', element: <ReceitasScreen /> },
   { path: '/receitas/:recipeId', element: <RecipeDetailScreen /> },
+  { path: '/receitas/:recipeId/compartilhar', element: <RecipeShareScreen /> },
   { path: '/receitas/:recipeId/preparo', element: <RecipeCookLogScreen /> },
   { path: '/receitas/:recipeId/historico', element: <RecipeHistoryScreen /> },
   {

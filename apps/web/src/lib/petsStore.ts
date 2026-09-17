@@ -264,14 +264,21 @@ export async function loadPetsForOwner(userId: string | null): Promise<void> {
   writeLocalPets(cachedPets);
 }
 
+const pendingPetWrites = new Set<Promise<void>>();
+
+/** Garante que uma receita nova leia no servidor o perfil recém-cadastrado/editado. */
+export async function waitForPendingPetWrites(): Promise<void> {
+  await Promise.all([...pendingPetWrites]);
+}
+
 function persistPet(pet: StoredPet): void {
   if (!isSupabaseConfigured || !supabase || !ownerId) return;
-  void supabase
-    .from('pets')
-    .upsert(toRow(pet, ownerId))
+  const write = Promise.resolve(supabase.from('pets').upsert(toRow(pet, ownerId)))
     .then(({ error }) => {
-      if (error) console.error('[petsStore] Falha ao salvar o pet no Supabase', error);
+      if (error) throw new Error(`Falha ao salvar ${pet.name} antes de criar a receita.`);
     });
+  pendingPetWrites.add(write);
+  void write.catch((error) => console.error('[petsStore]', error)).finally(() => pendingPetWrites.delete(write));
 }
 
 function persistDelete(id: string): void {

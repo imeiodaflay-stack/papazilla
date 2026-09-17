@@ -17,7 +17,7 @@ papazilla/
 │   ├── domain/               Tipos de pet, anamnese (20 seções) e receita; ponte anamnese→motor
 │   ├── design-system/        Tokens (CSS + TS) e reset
 │   └── validation/           Schemas Zod compartilhados app ↔ API
-├── supabase/                 migrations/ e tests/ (RLS) — a preencher
+├── supabase/                 migrations versionadas (perfis, pets, assinatura, receitas, fotos)
 └── prototypes/               Referência congelada dos protótipos do Codex
 ```
 
@@ -53,10 +53,20 @@ Supabase (projeto dev). Sem chaves, o app roda em modo desconectado.
 - `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` — públicas, no bundle.
 - `SUPABASE_SERVICE_ROLE_KEY` — só servidor (Vercel Functions), nunca no bundle.
 
-## Próximas fatias
+## Estado atual e próximos passos
 
-1. Supabase dev/prod: migrations + RLS para `profiles` e `pets`; Auth (Google, magic link).
-2. App: autenticação real, onboarding, cadastro de pet + anamnese com persistência.
-3. `/api/recipes/calculate` na Vercel usando `@papazilla/nutrition-engine`.
-4. Persistir receitas, itens e preparos. Compartilhável.
-5. Capacitor quando o fluxo web estiver estável.
+O app já usa Supabase para Auth, pets e leitura de assinatura. A criação de
+receitas passa por `api/recipes-create.ts`, que calcula e salva o resultado
+no servidor. O detalhe usa snapshots imutáveis; fornalhas ficam em
+`recipe_preparations`. Compartilhamento imprimível e exclusão da conta estão
+implementados em código. O modo desconectado ainda usa dados locais.
+
+Em dev, as tabelas, colunas, políticas e privilégios foram conferidos. A
+migration `supabase/migrations/20260917160000_data_api_grants.sql` foi aplicada
+**somente em dev**. Um teste integrado com duas contas descartáveis passou:
+criação da receita pelo handler local com Supabase real, RLS, snapshot após
+edição do pet, proteção do cálculo e registro de preparo. As contas e os dados
+de teste foram removidos. Ainda faltam o deploy em Preview, o fluxo visual
+com sessão real e a integração Asaas no sandbox; produção não recebeu estas
+migrations de receitas. Capacitor vem quando o fluxo web estiver estável.
+Ver `../HANDOVER.md` para o estado mais recente.

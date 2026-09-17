@@ -75,12 +75,10 @@ export function getSubscription(): Subscription | null {
  * acesso do período corrente — mesma promessa que já fazíamos na Fase 0).
  */
 export function hasActiveAccess(subscription: Subscription | null): boolean {
-  if (!subscription) return false;
-  if (subscription.status === 'active') return true;
-  if (subscription.status === 'canceled' && subscription.currentPeriodEnd) {
-    return new Date(subscription.currentPeriodEnd).getTime() > Date.now();
-  }
-  return false;
+  return Boolean(
+    subscription && ['active', 'canceled'].includes(subscription.status) &&
+    subscription.currentPeriodEnd && new Date(subscription.currentPeriodEnd).getTime() > Date.now(),
+  );
 }
 
 export function formatRenewalDate(subscription: Subscription): string {

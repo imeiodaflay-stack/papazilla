@@ -5,7 +5,7 @@ import potinhoIcon from '../assets/icons/potinho.png';
 import sucessoIcon from '../assets/icons/sucesso.png';
 import infoIcon from '../assets/icons/info.png';
 import { getPet } from '../lib/petsStore.js';
-import { deleteRecipe, getRecipe, renameRecipe, setRecipeFavorite } from '../lib/recipesStore.js';
+import { deleteRecipe, getRecipe, renameRecipe, setRecipeFavorite } from '../lib/recipeRepository.js';
 import { derivePredominantProtein } from '../lib/engineMapping.js';
 import { buildPetPlan, buildSharedRecipe } from '../lib/recipeEngine.js';
 import { displayRecipeTitle, formatGrams, formatRowAmount, orderDisclaimers, recipeIngredientSummary } from '../lib/recipeDisplay.js';
@@ -15,8 +15,7 @@ import { RecipePreparationSteps } from '../components/RecipePreparationSteps.js'
 
 /**
  * Detalhe de uma receita salva — fiel à tela "recipe-detail" de
- * `papazilla-prototype`, mas com números reais (recalculados na hora com o
- * mesmo motor do wizard, a partir do que foi persistido em `recipesStore`) e
+ * `papazilla-prototype`, com o resultado congelado no momento do salvamento e
  * "•••" de verdade: Renomear, Favoritar/Desfavoritar e Excluir (no protótipo
  * era só um toast).
  *
@@ -50,33 +49,40 @@ export function RecipeDetailScreen() {
 
   if (!storedRecipe) return <Navigate to="/receitas" replace />;
 
-  function toggleFavorite() {
-    setRecipeFavorite(storedRecipe!.id, !storedRecipe!.favorite);
-    setShowMore(false);
-    toast(storedRecipe!.favorite ? 'Removida dos favoritos.' : 'Adicionada aos favoritos.');
+  async function toggleFavorite() {
+    try {
+      const next = !storedRecipe!.favorite;
+      await setRecipeFavorite(storedRecipe!.id, next);
+      setShowMore(false);
+      toast(next ? 'Adicionada aos favoritos.' : 'Removida dos favoritos.');
+    } catch (error) { toast(error instanceof Error ? error.message : 'Não foi possível atualizar.'); }
   }
 
-  function saveRename() {
-    renameRecipe(storedRecipe!.id, titleInput);
-    setRenaming(false);
-    setShowMore(false);
-    toast('Receita renomeada.');
+  async function saveRename() {
+    try {
+      await renameRecipe(storedRecipe!.id, titleInput);
+      setRenaming(false);
+      setShowMore(false);
+      toast('Receita renomeada.');
+    } catch (error) { toast(error instanceof Error ? error.message : 'Não foi possível renomear.'); }
   }
 
-  function confirmDelete() {
-    deleteRecipe(storedRecipe!.id);
-    navigate('/receitas', { replace: true });
+  async function confirmDelete() {
+    try {
+      await deleteRecipe(storedRecipe!.id);
+      navigate('/receitas', { replace: true });
+    } catch (error) { toast(error instanceof Error ? error.message : 'Não foi possível excluir.'); }
   }
 
-  const pets = storedRecipe.petIds.map((id) => getPet(id)).filter((p): p is NonNullable<typeof p> => Boolean(p));
+  const pets = storedRecipe.petPlans?.map(({ pet }) => pet) ?? storedRecipe.petIds.map((id) => getPet(id)).filter((p): p is NonNullable<typeof p> => Boolean(p));
   if (pets.length === 0) return <Navigate to="/receitas" replace />;
 
   const predominantProtein = derivePredominantProtein(
     storedRecipe.selection.proteins.map((id) => findItem(id)).filter((it): it is NonNullable<typeof it> => Boolean(it)),
   );
   const choices = { formulation: storedRecipe.formulation, supplement: storedRecipe.supplement, predominantProtein };
-  const petPlans = pets.map((pet) => ({ pet, plan: buildPetPlan(pet, choices) }));
-  const recipe = buildSharedRecipe(petPlans.map((p) => p.plan), storedRecipe.selection, storedRecipe.days);
+  const petPlans = storedRecipe.petPlans ?? pets.map((pet) => ({ pet, plan: buildPetPlan(pet, choices) }));
+  const recipe = storedRecipe.result ?? buildSharedRecipe(petPlans.map((p) => p.plan), storedRecipe.selection, storedRecipe.days);
   const { ordered: orderedDisclaimers, clinicalRequired } = orderDisclaimers(petPlans);
 
   const cookCount = storedRecipe.cookLogs.length;
@@ -131,7 +137,7 @@ export function RecipeDetailScreen() {
             >
               Renomear
             </button>
-            <button type="button" className="more-menu__item" onClick={toggleFavorite}>
+            <button type="button" className="more-menu__item" onClick={() => { void toggleFavorite(); }}>
               {storedRecipe.favorite ? 'Desfavoritar' : 'Favoritar'}
             </button>
             <button
@@ -157,7 +163,7 @@ export function RecipeDetailScreen() {
               <button type="button" className="pz-button pz-button--outline" onClick={() => setRenaming(false)}>
                 Cancelar
               </button>
-              <button type="button" className="pz-button pz-button--primary" disabled={!titleInput.trim()} onClick={saveRename}>
+              <button type="button" className="pz-button pz-button--primary" disabled={!titleInput.trim()} onClick={() => { void saveRename(); }}>
                 Salvar
               </button>
             </div>
@@ -177,7 +183,7 @@ export function RecipeDetailScreen() {
               <button type="button" className="pz-button pz-button--outline" onClick={() => setConfirmingDelete(false)}>
                 Cancelar
               </button>
-              <button type="button" className="pz-button pz-button--primary" onClick={confirmDelete}>
+              <button type="button" className="pz-button pz-button--primary" onClick={() => { void confirmDelete(); }}>
                 Sim, excluir
               </button>
             </div>
@@ -300,6 +306,9 @@ export function RecipeDetailScreen() {
       </div>
 
       <footer className="flow-footer flow-footer--single">
+        <button type="button" className="pz-button pz-button--outline wide" onClick={() => navigate(`/receitas/${storedRecipe.id}/compartilhar`)}>
+          {clinicalRequired ? 'Compartilhar para revisão veterinária' : 'Compartilhar receita'}
+        </button>
         <button
           type="button"
           className="pz-button pz-button--primary wide"

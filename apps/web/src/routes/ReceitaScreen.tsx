@@ -11,7 +11,7 @@ import { getSubscription, hasActiveAccess } from '../lib/subscription.js';
 import { derivePredominantProtein } from '../lib/engineMapping.js';
 import { hasSignificantMuscleLoss } from '../lib/muscleCondition.js';
 import { buildPetPlan, buildSharedRecipe } from '../lib/recipeEngine.js';
-import { addRecipe } from '../lib/recipesStore.js';
+import { saveRecipe } from '../lib/recipeRepository.js';
 import { clearRecipeDraft, peekRecipeDraft, saveRecipeDraft } from '../lib/recipeDraft.js';
 import {
   FORMULATION_LABELS,
@@ -85,6 +85,7 @@ export function ReceitaScreen() {
   const [customSelected, setCustomSelected] = useState(false);
   const [format, setFormat] = useState(() => draft?.format ?? 'Os dois');
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<number>();
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -190,19 +191,24 @@ export function ReceitaScreen() {
     (step === 3 && carbs.size === 0) ||
     (step === 4 && vegetables.size === 0);
 
-  function onNext() {
+  async function onNext() {
     if (isResultStep) {
-      addRecipe({
-        petIds: [...selectedPetIds],
-        formulation,
-        supplement,
-        selection: { proteins: [...proteins], organs: [...organs], carbs: [...carbs], vegetables: [...vegetables], herbs: [] },
-        days,
-        format,
-      });
-      setSaved(true);
-      toast('Receita salva para futuras fornalhas!');
-      window.setTimeout(() => navigate('/receitas'), 900);
+      if (!recipe || saving) return;
+      setSaving(true);
+      try {
+        await saveRecipe({
+          petIds: [...selectedPetIds], formulation, supplement,
+          selection: { proteins: [...proteins], organs: [...organs], carbs: [...carbs], vegetables: [...vegetables], herbs: [] },
+          days, format, result: recipe, petPlans,
+        });
+        setSaved(true);
+        toast('Receita salva para futuras fornalhas!');
+        window.setTimeout(() => navigate('/receitas'), 900);
+      } catch (error) {
+        toast(error instanceof Error ? error.message : 'Não foi possível salvar a receita.');
+      } finally {
+        setSaving(false);
+      }
       return;
     }
     goToStep(step + 1);
@@ -531,8 +537,8 @@ export function ReceitaScreen() {
         <button type="button" className="pz-button pz-button--outline" onClick={onBack}>
           {step === 0 ? 'Cancelar' : 'Voltar'}
         </button>
-        <button type="button" className="pz-button pz-button--primary" disabled={nextDisabled || saved} onClick={onNext}>
-          {isResultStep ? 'Salvar receita' : step === STEPS_COUNT - 2 ? 'Ver receita →' : 'Continuar →'}
+        <button type="button" className="pz-button pz-button--primary" disabled={nextDisabled || saved || saving} onClick={() => { void onNext(); }}>
+          {isResultStep ? saving ? 'Salvando…' : 'Salvar receita' : step === STEPS_COUNT - 2 ? 'Ver receita →' : 'Continuar →'}
         </button>
       </footer>
 

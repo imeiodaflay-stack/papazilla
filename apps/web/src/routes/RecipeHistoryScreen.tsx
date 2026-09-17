@@ -10,7 +10,7 @@ import { joinPt } from '../lib/petLabel.js';
  * protótipo (lá "Ver todas" era só um toast "entra na próxima rodada").
  * Lista todo `cookLogs` real da receita, mais recente primeiro.
  */
-export function RecipeHistorySyncedScreen() {
+export function RecipeHistoryScreen() {
   const navigate = useNavigate();
   const { recipeId } = useParams();
   const storedRecipe = recipeId ? getRecipe(recipeId) : undefined;

@@ -21,7 +21,7 @@ const RATING_CAPTIONS: Record<number, string> = {
  * Preparo real: quem provou, avaliação, nota e foto entram de fato no
  * histórico persistido da receita (`recipeRepository.addCookLog`).
  */
-export function RecipeCookLogSyncedScreen() {
+export function RecipeCookLogScreen() {
   const navigate = useNavigate();
   const { recipeId } = useParams();
   const storedRecipe = recipeId ? getRecipe(recipeId) : undefined;

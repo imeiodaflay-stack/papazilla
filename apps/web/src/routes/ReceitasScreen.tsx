@@ -4,15 +4,15 @@ import buscaIcon from '../assets/icons/busca.png';
 import potinhoIcon from '../assets/icons/potinho.png';
 import { AppNav } from '../components/AppNav.js';
 import { listPets } from '../lib/petsStore.js';
-import { listRecipes } from '../lib/recipesStore.js';
+import { listRecipes } from '../lib/recipeRepository.js';
 import { joinPt } from '../lib/petLabel.js';
 import { displayRecipeTitle, relativeTimeLabel } from '../lib/recipeDisplay.js';
 
 /**
  * Receitas salvas — fiel à tela "saved-recipes" de `papazilla-prototype`,
  * mas 100% com dados reais: nenhuma foto, contagem de preparo ou avaliação
- * é inventada. `recipesStore.ts` só guarda o que o wizard e o registro de
- * fornalha (`RecipeCookLogScreen`) realmente gravaram.
+ * é inventada. `recipeRepository.ts` só mostra o que o wizard e o registro de
+ * fornalha realmente gravaram.
  *
  * Diferença consciente: o protótipo mostrava fotos ilustrativas e "Feita 4
  * vezes"/"♥ 5" fixos. Aqui toda receita nova aparece sem foto (estado
@@ -85,7 +85,7 @@ export function ReceitasScreen() {
 
               <div className="saved-recipe-list">
                 {visible.map((recipe) => {
-                  const recipePets = pets.filter((p) => recipe.petIds.includes(p.id));
+                  const recipePets = recipe.petPlans?.map(({ pet }) => pet) ?? pets.filter((p) => recipe.petIds.includes(p.id));
                   const petNames = recipePets.length > 0 ? joinPt(recipePets.map((p) => p.name)) : 'matilha';
                   const cookCount = recipe.cookLogs.length;
                   const ratings = recipe.cookLogs.map((l) => l.rating).filter((r) => r > 0);

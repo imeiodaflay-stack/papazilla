@@ -20,6 +20,7 @@ import { supabase } from './supabase.js';
 import { syncProfileFromAuthUser } from './userProfile.js';
 import { listPets, loadPetsForOwner } from './petsStore.js';
 import { loadSubscriptionForOwner } from './subscription.js';
+import { loadRecipesForOwner } from './recipeRepository.js';
 
 const AUTH_KEY = 'papazilla.authenticated';
 const ONBOARDING_KEY = 'papazilla.seenOnboarding';
@@ -30,7 +31,7 @@ let initPromise: Promise<void> | null = null;
 async function applySession(user: User | null): Promise<void> {
   cachedUser = user;
   if (user) syncProfileFromAuthUser(user);
-  await Promise.all([loadPetsForOwner(user?.id ?? null), loadSubscriptionForOwner(user?.id ?? null)]);
+  await Promise.all([loadPetsForOwner(user?.id ?? null), loadSubscriptionForOwner(user?.id ?? null), loadRecipesForOwner(user?.id ?? null)]);
 }
 
 /**
@@ -93,6 +94,7 @@ export function setAuthenticated(value: boolean): void {
     if (!value) {
       cachedUser = null;
       void loadPetsForOwner(null);
+      void loadRecipesForOwner(null);
       void supabase.auth.signOut();
     }
     return;
