@@ -25,6 +25,7 @@ import { AssinaturaScreen } from './routes/AssinaturaScreen.js';
 import { GerenciarAssinaturaScreen } from './routes/GerenciarAssinaturaScreen.js';
 import { AnamneseScreen } from './routes/AnamneseScreen.js';
 import { SucessoScreen } from './routes/SucessoScreen.js';
+import { BeneficiosScreen } from './routes/BeneficiosScreen.js';
 import { ReceitaScreen } from './routes/ReceitaScreen.js';
 
 /**
@@ -42,6 +43,7 @@ export const router = createBrowserRouter([
   { path: '/onboarding', element: <OnboardingScreen /> },
   { path: '/anamnese', element: <AnamneseScreen /> },
   { path: '/sucesso', element: <SucessoScreen /> },
+  { path: '/beneficios', element: <BeneficiosScreen /> },
   { path: '/receita', element: <ReceitaScreen /> },
   { path: '/conta', element: <ContaScreen /> },
   { path: '/conta/editar', element: <UserProfileEditScreen /> },
