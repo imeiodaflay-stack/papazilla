@@ -3,7 +3,7 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import zillaIcon from '../assets/icons/zilla.png';
 import { getPet, updatePet } from '../lib/petsStore.js';
 import { describePet } from '../lib/petLabel.js';
-import { fileToDataUrl, PhotoUploadError, uploadPetPhoto } from '../lib/petPhoto.js';
+import { fileToDataUrl, PhotoUploadError, uploadPhoto } from '../lib/photoUpload.js';
 
 const GOAL_OPTIONS = [
   'Manter o peso atual',
@@ -58,7 +58,7 @@ export function PetEditScreen() {
     setPhotoUploading(true);
     try {
       setPhotoPath(await fileToDataUrl(file));
-      setPhotoPath(await uploadPetPhoto(file));
+      setPhotoPath(await uploadPhoto('pet-photos', file));
     } catch (err) {
       toast(err instanceof PhotoUploadError ? err.message : 'Não foi possível carregar a foto.');
     } finally {
@@ -149,7 +149,10 @@ export function PetEditScreen() {
           </label>
           <label className="profile-field">
             <span>Idade</span>
-            <input value={age} onChange={(e) => setAge(e.target.value)} autoComplete="off" />
+            <div className="input-suffix">
+              <input value={age} onChange={(e) => setAge(e.target.value)} inputMode="decimal" autoComplete="off" />
+              <span>anos</span>
+            </div>
           </label>
           <label className="profile-field">
             <span>Peso atual</span>

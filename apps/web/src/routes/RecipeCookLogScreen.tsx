@@ -4,8 +4,9 @@ import potinhoIcon from '../assets/icons/potinho.png';
 import addIcon from '../assets/icons/adicionar.png';
 import zillaIcon from '../assets/icons/zilla.png';
 import { getPet } from '../lib/petsStore.js';
-import { addCookLog, getRecipe } from '../lib/recipesStore.js';
+import { addCookLog, getRecipe } from '../lib/recipeRepository.js';
 import { recipeTitle } from '../lib/recipeDisplay.js';
+import { fileToDataUrl, PhotoUploadError, uploadPhoto } from '../lib/photoUpload.js';
 
 const RATING_CAPTIONS: Record<number, string> = {
   1: 'Não foi a favorita desta vez.',
@@ -17,21 +18,24 @@ const RATING_CAPTIONS: Record<number, string> = {
 
 /**
  * Registrar fornalha — fiel à tela "cook-log" de `papazilla-prototype`.
- * Preparo real: quem provou, avaliação e nota entram de fato no histórico
- * da receita (`recipesStore.addCookLog`). Foto fica só como toast — a
- * captura real de câmera/galeria não existe em nenhuma outra tela do app.
+ * Preparo real: quem provou, avaliação, nota e foto entram de fato no
+ * histórico persistido da receita (`recipeRepository.addCookLog`).
  */
-export function RecipeCookLogScreen() {
+export function RecipeCookLogSyncedScreen() {
   const navigate = useNavigate();
   const { recipeId } = useParams();
   const storedRecipe = recipeId ? getRecipe(recipeId) : undefined;
-  const pets = storedRecipe?.petIds.map((id) => getPet(id)).filter((p): p is NonNullable<typeof p> => Boolean(p)) ?? [];
+  const pets = storedRecipe?.petPlans?.map(({ pet }) => pet) ?? storedRecipe?.petIds.map((id) => getPet(id)).filter((p): p is NonNullable<typeof p> => Boolean(p)) ?? [];
 
   const [selectedPetIds, setSelectedPetIds] = useState<Set<string>>(() => new Set(pets.map((p) => p.id)));
   const [rating, setRating] = useState(0);
   const [note, setNote] = useState('');
+  const [photoPath, setPhotoPath] = useState('');
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<number>();
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   function toast(message: string) {
     window.clearTimeout(toastTimer.current);
@@ -50,19 +54,47 @@ export function RecipeCookLogScreen() {
     });
   }
 
-  function save() {
-    addCookLog(storedRecipe!.id, {
-      date: new Date().toISOString(),
-      petIds: [...selectedPetIds],
-      rating,
-      note: note.trim(),
-    });
-    toast('Preparo salvo com sucesso!');
-    window.setTimeout(() => navigate(`/receitas/${storedRecipe!.id}`, { replace: true }), 900);
+  async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setPhotoUploading(true);
+    try {
+      setPhotoPath(await fileToDataUrl(file));
+      setPhotoPath(await uploadPhoto('cook-photos', file));
+    } catch (err) {
+      setPhotoPath('');
+      toast(err instanceof PhotoUploadError ? err.message : 'Não foi possível carregar a foto.');
+    } finally {
+      setPhotoUploading(false);
+    }
+  }
+
+  async function save() {
+    if (saving || photoUploading || selectedPetIds.size === 0) return;
+    setSaving(true);
+    try {
+      await addCookLog(storedRecipe!.id, {
+        date: new Date().toISOString(), petIds: [...selectedPetIds],
+        rating, note: note.trim().slice(0, 1000), photoPath,
+      });
+      toast('Preparo salvo com sucesso!');
+      window.setTimeout(() => navigate(`/receitas/${storedRecipe!.id}`, { replace: true }), 900);
+    } catch (error) {
+      toast(error instanceof Error ? error.message : 'Não foi possível registrar a fornalha.');
+      setSaving(false);
+    }
   }
 
   return (
     <div className="flow-screen cook-log-view">
+      <input
+        ref={photoInputRef}
+        type="file"
+        accept="image/*"
+        style={{ display: 'none' }}
+        onChange={handlePhotoChange}
+      />
       <header className="flow-header">
         <button
           type="button"
@@ -95,12 +127,17 @@ export function RecipeCookLogScreen() {
         <button
           type="button"
           className="finished-photo-picker"
-          onClick={() => toast('A câmera ou a galeria será aberta aqui.')}
+          onClick={() => photoInputRef.current?.click()}
+          disabled={photoUploading}
         >
           <span>
-            <img src={addIcon} alt="" />
+            {photoPath ? (
+              <img src={photoPath} alt="" className="photo-picker__preview" />
+            ) : (
+              <img src={addIcon} alt="" />
+            )}
           </span>
-          <strong>Adicionar foto do prato</strong>
+          <strong>{photoUploading ? 'Enviando...' : photoPath ? 'Trocar foto do prato' : 'Adicionar foto do prato'}</strong>
           <small>Tirar foto ou escolher da galeria · opcional</small>
         </button>
 
@@ -160,8 +197,8 @@ export function RecipeCookLogScreen() {
         <button type="button" className="pz-button pz-button--outline" onClick={() => navigate(`/receitas/${storedRecipe.id}`)}>
           Agora não
         </button>
-        <button type="button" className="pz-button pz-button--primary" disabled={rating === 0} onClick={save}>
-          Salvar preparo
+        <button type="button" className="pz-button pz-button--primary" disabled={rating === 0 || saving || photoUploading || selectedPetIds.size === 0} onClick={() => { void save(); }}>
+          {saving ? 'Salvando…' : 'Salvar preparo'}
         </button>
       </footer>
 

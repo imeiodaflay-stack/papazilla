@@ -1,7 +1,7 @@
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import sheetIcon from '../assets/icons/sheet.png';
 import { getPet } from '../lib/petsStore.js';
-import { getRecipe } from '../lib/recipesStore.js';
+import { getRecipe } from '../lib/recipeRepository.js';
 import { displayRecipeTitle } from '../lib/recipeDisplay.js';
 import { joinPt } from '../lib/petLabel.js';
 
@@ -10,7 +10,7 @@ import { joinPt } from '../lib/petLabel.js';
  * protótipo (lá "Ver todas" era só um toast "entra na próxima rodada").
  * Lista todo `cookLogs` real da receita, mais recente primeiro.
  */
-export function RecipeHistoryScreen() {
+export function RecipeHistorySyncedScreen() {
   const navigate = useNavigate();
   const { recipeId } = useParams();
   const storedRecipe = recipeId ? getRecipe(recipeId) : undefined;
@@ -48,9 +48,12 @@ export function RecipeHistoryScreen() {
 
         <div className="cook-history-list">
           {logs.map((log) => {
-            const petNames = joinPt(log.petIds.map((id) => getPet(id)?.name).filter((n): n is string => Boolean(n)));
+            const petNames = joinPt(log.petIds.map((id) => storedRecipe.petPlans?.find(({ pet }) => pet.id === id)?.pet.name ?? getPet(id)?.name).filter((n): n is string => Boolean(n)));
             return (
               <article key={log.id} className="cook-history-entry">
+                {log.photoPath ? (
+                  <img src={log.photoPath} alt="" className="cook-history-entry__photo" />
+                ) : null}
                 <div className="cook-history-entry__top">
                   <strong>
                     {new Date(log.date).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}

@@ -5,7 +5,7 @@ import addIcon from '../assets/icons/adicionar.png';
 import infoIcon from '../assets/icons/info.png';
 import { addPet, getPet, updatePet, type StoredPet } from '../lib/petsStore.js';
 import { deriveWeightTendency } from '../lib/weightTendency.js';
-import { fileToDataUrl, PhotoUploadError, uploadPetPhoto } from '../lib/petPhoto.js';
+import { fileToDataUrl, PhotoUploadError, uploadPhoto } from '../lib/photoUpload.js';
 
 /**
  * Anamnese do Monstrinho — fiel à tela "profile" de `papazilla-prototype`.
@@ -97,6 +97,12 @@ function buildEditState(pet: StoredPet): { singles: Singles; inputs: Inputs; mul
     avoidVegetable: pet.avoidVegetable || (pet.avoidVegetableName ? 'Sim' : 'Não'),
     intolerance: pet.intolerance || (pet.intoleranceName ? 'Sim' : 'Não'),
   };
+  // "Fase de vida" virou uma pergunta só (Filhote/Adulto/Idoso) que por trás
+  // ainda alimenta os dois campos que o motor espera (`lifeStage`, `senior`
+  // — ver `recipeEngine.ts`), sem migrar esses dois campos no banco.
+  if (pet.lifeStage === 'Filhote') singles.ageStage = 'Filhote';
+  else if (pet.senior === 'Sim') singles.ageStage = 'Idoso';
+  else if (pet.lifeStage === 'Adulto') singles.ageStage = 'Adulto';
   if (pet.puppyAgeBand) singles.puppyAgeBand = pet.puppyAgeBand;
   if (pet.expectedAdultSize) singles.expectedAdultSize = pet.expectedAdultSize;
   // Pets cadastrados antes de um campo existir não têm essa resposta salva —
@@ -228,7 +234,7 @@ const BREED_OPTIONS = [
 ];
 
 const HEALTH_COMPLEMENTS = ['Pancreatite', 'Cálculos ou cristais urinários', 'Doença renal'];
-const DECIMAL_KEYS = ['weight', 'idealWeight', 'previousWeight', 'currentAmount'];
+const DECIMAL_KEYS = ['age', 'weight', 'idealWeight', 'previousWeight', 'currentAmount'];
 
 /**
  * Orientação específica por condição — sugestão pro tutor conversar com o
@@ -272,9 +278,9 @@ function isStepComplete(
 ): boolean {
   switch (step) {
     case 0: {
-      if (!filled(inputs.name) || !filled(inputs.weight)) return false;
-      if (!singles.sex || !singles.neutered || !singles.senior || !singles.lifeStage) return false;
-      if (singles.lifeStage === 'Filhote' && (!singles.puppyAgeBand || !singles.expectedAdultSize)) return false;
+      if (!filled(inputs.name) || !filled(inputs.age) || !filled(inputs.weight)) return false;
+      if (!singles.sex || !singles.neutered || !singles.ageStage) return false;
+      if (singles.ageStage === 'Filhote' && (!singles.puppyAgeBand || !singles.expectedAdultSize)) return false;
       return true;
     }
     case 1:
@@ -582,7 +588,7 @@ const STEPS: Step[] = [
         </button>
         <div className="form-grid">
           <Field id="name" label="Nome do cão" ctx={ctx} />
-          <Field id="age" label="Data de nascimento ou idade" ctx={ctx} />
+          <Field id="age" label="Idade" ctx={ctx} placeholder="Ex.: 3" suffix="anos" />
           <Field id="weight" label="Peso atual" ctx={ctx} suffix="kg" />
         </div>
         <Select id="breed" label="Raça" ctx={ctx} options={BREED_OPTIONS} />
@@ -595,13 +601,10 @@ const STEPS: Step[] = [
         <Question title="É castrado?">
           <Pills name="neutered" options={['Sim', 'Não']} ctx={ctx} />
         </Question>
-        <Question title="É idoso(a)?">
-          <Pills name="senior" options={['Sim', 'Não']} ctx={ctx} />
-        </Question>
         <Question title="Fase de vida">
-          <Pills name="lifeStage" options={['Adulto', 'Filhote']} ctx={ctx} />
+          <Pills name="ageStage" options={['Filhote', 'Adulto', 'Idoso']} ctx={ctx} />
         </Question>
-        {ctx.singles.lifeStage === 'Filhote' ? (
+        {ctx.singles.ageStage === 'Filhote' ? (
           <>
             <Question title="Faixa etária do filhote">
               <SingleCards
@@ -1335,7 +1338,7 @@ export function AnamneseScreen() {
     setPhotoUploading(true);
     try {
       setPhotoPath(await fileToDataUrl(file));
-      setPhotoPath(await uploadPetPhoto(file));
+      setPhotoPath(await uploadPhoto('pet-photos', file));
     } catch (err) {
       toast(err instanceof PhotoUploadError ? err.message : 'Não foi possível carregar a foto.');
     } finally {
@@ -1413,16 +1416,23 @@ export function AnamneseScreen() {
       const bodyTop = singles.bodyTop ?? '';
       const ribs = singles.ribs ?? '';
       const belly = singles.belly ?? '';
+      // "Fase de vida" é uma pergunta só na UI (Filhote/Adulto/Idoso), mas o
+      // motor (`recipeEngine.ts`) ainda espera `lifeStage` ('Adulto'/'Filhote')
+      // e `senior` ('Sim'/'Não') como dois sinais independentes — "Idoso" vira
+      // Adulto + senior.
+      const isFilhote = singles.ageStage === 'Filhote';
+      const lifeStage = isFilhote ? 'Filhote' : 'Adulto';
+      const senior = singles.ageStage === 'Idoso' ? 'Sim' : 'Não';
 
       const petPatch = {
         name,
         photoPath,
         sex,
         neutered: singles.neutered ?? '',
-        senior: singles.senior ?? '',
-        lifeStage: singles.lifeStage ?? '',
-        puppyAgeBand: singles.lifeStage === 'Filhote' ? singles.puppyAgeBand ?? '' : '',
-        expectedAdultSize: singles.lifeStage === 'Filhote' ? singles.expectedAdultSize ?? '' : '',
+        senior,
+        lifeStage,
+        puppyAgeBand: isFilhote ? singles.puppyAgeBand ?? '' : '',
+        expectedAdultSize: isFilhote ? singles.expectedAdultSize ?? '' : '',
         weightTendency: deriveWeightTendency(
           bodyTop,
           ribs,
