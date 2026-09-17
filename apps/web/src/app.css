@@ -1154,6 +1154,16 @@
   width: 25px;
   height: 25px;
 }
+.photo-picker__preview {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.photo-picker:disabled,
+.pet-photo-editor:disabled {
+  opacity: 0.7;
+}
 .photo-picker strong {
   align-self: end;
   font: 800 0.85rem / 1.2 var(--pz-font-support);

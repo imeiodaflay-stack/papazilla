@@ -30,6 +30,8 @@ const ACTIVE_PET_KEY = 'papazilla.activePetId';
 export interface StoredPet {
   id: string;
   name: string;
+  /** URL pública da foto no bucket `pet-photos` (Storage) — ou uma data URL local quando não há Supabase/sessão. */
+  photoPath: string;
   sex: string;
   neutered: string;
   /** "Sim"/"Não" — junto de `neutered`, alimenta o ajuste percentual do motor. */
@@ -125,6 +127,7 @@ interface PetRow {
   sex: string | null;
   neutered: boolean | null;
   life_stage: string | null;
+  photo_path: string | null;
   anamnesis_snapshot: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
@@ -154,6 +157,7 @@ function rowToStoredPet(row: PetRow): StoredPet {
   return {
     id: row.id,
     name: row.name,
+    photoPath: row.photo_path ?? '',
     breed: row.breed ?? '',
     sex: row.sex ?? '',
     neutered: row.neutered === null ? '' : row.neutered ? 'Sim' : 'Não',
@@ -216,11 +220,23 @@ function rowToStoredPet(row: PetRow): StoredPet {
 }
 
 function toRow(pet: StoredPet, owner: string): Omit<PetRow, 'created_at' | 'updated_at'> {
-  const { id, name, breed, sex, neutered, lifeStage, createdAt: _createdAt, updatedAt: _updatedAt, ...snapshot } = pet;
+  const {
+    id,
+    name,
+    photoPath,
+    breed,
+    sex,
+    neutered,
+    lifeStage,
+    createdAt: _createdAt,
+    updatedAt: _updatedAt,
+    ...snapshot
+  } = pet;
   return {
     id,
     owner_id: owner,
     name,
+    photo_path: photoPath || null,
     breed: breed || null,
     sex: sex || null,
     neutered: neutered === '' ? null : neutered === 'Sim',

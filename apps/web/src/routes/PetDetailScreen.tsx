@@ -96,7 +96,7 @@ export function PetDetailScreen() {
         <div className="pets-content">
           <section className="pet-hero-card">
             <div className="pet-hero-card__portrait">
-              <img src={zillaIcon} alt="" />
+              <img src={pet.photoPath || zillaIcon} alt="" className={pet.photoPath ? 'photo-picker__preview' : undefined} />
               <span aria-hidden="true">♥</span>
             </div>
             <div className="pet-hero-card__identity">

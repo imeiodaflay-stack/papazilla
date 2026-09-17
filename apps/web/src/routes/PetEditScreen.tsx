@@ -3,6 +3,7 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import zillaIcon from '../assets/icons/zilla.png';
 import { getPet, updatePet } from '../lib/petsStore.js';
 import { describePet } from '../lib/petLabel.js';
+import { fileToDataUrl, PhotoUploadError, uploadPetPhoto } from '../lib/petPhoto.js';
 
 const GOAL_OPTIONS = [
   'Manter o peso atual',
@@ -22,8 +23,7 @@ const ACTIVITY_TIME_OPTIONS = ['Menos de 20 minutos', '20 a 40 minutos', '40 a 6
  *
  * Escopo igual ao protótipo: nome, raça, idade, peso, atividade diária e
  * objetivo — não é o questionário completo (isso é "Editar respostas",
- * outra tela, ainda não fatiada). Foto continua toast (sem câmera real em
- * nenhuma tela do app ainda).
+ * outra tela, ainda não fatiada).
  */
 export function PetEditScreen() {
   const { petId } = useParams<{ petId: string }>();
@@ -37,8 +37,11 @@ export function PetEditScreen() {
   const [idealWeight, setIdealWeight] = useState(pet?.idealWeight ?? '');
   const [activityTime, setActivityTime] = useState(pet?.activityTime ?? '');
   const [goal, setGoal] = useState(pet?.goal ?? '');
+  const [photoPath, setPhotoPath] = useState(pet?.photoPath ?? '');
+  const [photoUploading, setPhotoUploading] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<number>();
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   if (!pet) return <Navigate to="/zilla" replace />;
 
@@ -48,12 +51,28 @@ export function PetEditScreen() {
     toastTimer.current = window.setTimeout(() => setToastMsg(null), 2600);
   }
 
+  async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setPhotoUploading(true);
+    try {
+      setPhotoPath(await fileToDataUrl(file));
+      setPhotoPath(await uploadPetPhoto(file));
+    } catch (err) {
+      toast(err instanceof PhotoUploadError ? err.message : 'Não foi possível carregar a foto.');
+    } finally {
+      setPhotoUploading(false);
+    }
+  }
+
   const missingIdealWeight = goal === 'Emagrecer' && !idealWeight.trim();
   const saveDisabled = !name.trim() || !weight.trim() || missingIdealWeight;
 
   function save() {
     updatePet(pet!.id, {
       name: name.trim(),
+      photoPath,
       breed: breed.trim(),
       age: age.trim(),
       weight: weight.trim(),
@@ -66,6 +85,13 @@ export function PetEditScreen() {
 
   return (
     <div className="flow-screen pet-edit-view">
+      <input
+        ref={photoInputRef}
+        type="file"
+        accept="image/*"
+        style={{ display: 'none' }}
+        onChange={handlePhotoChange}
+      />
       <header className="flow-header">
         <button
           type="button"
@@ -98,12 +124,17 @@ export function PetEditScreen() {
         <button
           type="button"
           className="pet-photo-editor"
-          onClick={() => toast('A câmera ou a galeria será aberta aqui.')}
+          onClick={() => photoInputRef.current?.click()}
+          disabled={photoUploading}
         >
           <span>
-            <img src={zillaIcon} alt="" />
+            {photoPath ? (
+              <img src={photoPath} alt="" className="photo-picker__preview" />
+            ) : (
+              <img src={zillaIcon} alt="" />
+            )}
           </span>
-          <strong>Alterar foto</strong>
+          <strong>{photoUploading ? 'Enviando...' : 'Alterar foto'}</strong>
           <small>Opcional</small>
         </button>
 

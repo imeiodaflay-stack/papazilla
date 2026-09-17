@@ -5,6 +5,7 @@ import addIcon from '../assets/icons/adicionar.png';
 import infoIcon from '../assets/icons/info.png';
 import { addPet, getPet, updatePet, type StoredPet } from '../lib/petsStore.js';
 import { deriveWeightTendency } from '../lib/weightTendency.js';
+import { fileToDataUrl, PhotoUploadError, uploadPetPhoto } from '../lib/petPhoto.js';
 
 /**
  * Anamnese do Monstrinho — fiel à tela "profile" de `papazilla-prototype`.
@@ -72,7 +73,7 @@ function defaultMulti(): Multi {
  * só com o que `StoredPet` de fato guarda. Ver nota de edição no topo do
  * arquivo sobre as perguntas que não têm resposta persistida pra recuperar.
  */
-function buildEditState(pet: StoredPet): { singles: Singles; inputs: Inputs; multi: Multi } {
+function buildEditState(pet: StoredPet): { singles: Singles; inputs: Inputs; multi: Multi; photoPath: string } {
   const singles: Singles = {
     ...DEFAULT_SINGLES,
     sex: pet.sex,
@@ -148,7 +149,7 @@ function buildEditState(pet: StoredPet): { singles: Singles; inputs: Inputs; mul
     carbs: pet.carbs.length > 0 ? new Set(pet.carbs) : new Set(['Tanto faz (escolham por mim)']),
   };
 
-  return { singles, inputs, multi };
+  return { singles, inputs, multi, photoPath: pet.photoPath || '' };
 }
 
 /**
@@ -349,12 +350,15 @@ interface Ctx {
   inputs: Inputs;
   multi: Multi;
   consent: boolean;
+  photoPath: string;
+  photoUploading: boolean;
   setSingle: (key: string, value: string) => void;
   setInput: (key: string, value: string) => void;
   toggleMulti: (key: string, value: string) => void;
   setConsent: (value: boolean) => void;
   goToStep: (index: number) => void;
   toast: (message: string) => void;
+  pickPhoto: () => void;
 }
 
 interface Step {
@@ -563,11 +567,17 @@ const STEPS: Step[] = [
     intro: 'Comece pelas informações que ajudam a gente a reconhecer e calcular o perfil dele.',
     body: (ctx) => (
       <>
-        <button type="button" className="photo-picker" onClick={() => ctx.toast('A seleção de foto abrirá a câmera ou a galeria.')}>
+        <button type="button" className="photo-picker" onClick={ctx.pickPhoto} disabled={ctx.photoUploading}>
           <span>
-            <img src={addIcon} alt="" />
+            {ctx.photoPath ? (
+              <img src={ctx.photoPath} alt="" className="photo-picker__preview" />
+            ) : (
+              <img src={addIcon} alt="" />
+            )}
           </span>
-          <strong>Adicionar uma fotinho</strong>
+          <strong>
+            {ctx.photoUploading ? 'Enviando...' : ctx.photoPath ? 'Trocar fotinho' : 'Adicionar uma fotinho'}
+          </strong>
           <small>Opcional · JPG ou PNG</small>
         </button>
         <div className="form-grid">
@@ -1229,7 +1239,11 @@ const STEPS: Step[] = [
           <div className="profile-review profile-review--compact">
             <div className="profile-review__pet">
               <span>
-                <img src={zillaIcon} alt="" />
+                {ctx.photoPath ? (
+                  <img src={ctx.photoPath} alt="" className="photo-picker__preview" />
+                ) : (
+                  <img src={zillaIcon} alt="" />
+                )}
               </span>
               <div>
                 <strong>{ctx.inputs.name || 'Seu Monstrinho'}</strong>
@@ -1307,9 +1321,27 @@ export function AnamneseScreen() {
   const [inputs, setInputs] = useState<Inputs>(() => editState?.inputs ?? {});
   const [multi, setMulti] = useState<Multi>(() => editState?.multi ?? defaultMulti());
   const [consent, setConsent] = useState(Boolean(editingPet));
+  const [photoPath, setPhotoPath] = useState<string>(() => editState?.photoPath ?? '');
+  const [photoUploading, setPhotoUploading] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<number>();
   const bodyRef = useRef<HTMLDivElement>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
+  async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setPhotoUploading(true);
+    try {
+      setPhotoPath(await fileToDataUrl(file));
+      setPhotoPath(await uploadPetPhoto(file));
+    } catch (err) {
+      toast(err instanceof PhotoUploadError ? err.message : 'Não foi possível carregar a foto.');
+    } finally {
+      setPhotoUploading(false);
+    }
+  }
 
   if (isEditing && !editingPet) return <Navigate to="/zilla" replace />;
 
@@ -1338,6 +1370,9 @@ export function AnamneseScreen() {
       inputs,
       multi,
       consent,
+      photoPath,
+      photoUploading,
+      pickPhoto: () => photoInputRef.current?.click(),
       setSingle: (key, value) => setSingles((p) => ({ ...p, [key]: value })),
       setInput: (key, value) => setInputs((p) => ({ ...p, [key]: value })),
       toggleMulti: (key, value) =>
@@ -1359,7 +1394,7 @@ export function AnamneseScreen() {
       goToStep,
       toast,
     }),
-    [singles, inputs, multi, consent],
+    [singles, inputs, multi, consent, photoPath, photoUploading],
   );
 
   const nextDisabled = !isStepComplete(step, { singles, inputs, multi, consent });
@@ -1381,6 +1416,7 @@ export function AnamneseScreen() {
 
       const petPatch = {
         name,
+        photoPath,
         sex,
         neutered: singles.neutered ?? '',
         senior: singles.senior ?? '',
@@ -1479,6 +1515,13 @@ export function AnamneseScreen() {
 
   return (
     <div className="flow-screen">
+      <input
+        ref={photoInputRef}
+        type="file"
+        accept="image/*"
+        style={{ display: 'none' }}
+        onChange={handlePhotoChange}
+      />
       <header className="flow-header">
         <button
           type="button"
