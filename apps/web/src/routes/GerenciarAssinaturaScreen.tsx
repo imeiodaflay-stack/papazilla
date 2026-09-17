@@ -1,47 +1,52 @@
 import { useRef, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import patinhaIcon from '../assets/icons/patinha.png';
-import {
-  ANNUAL_PRICE,
-  formatBRL,
-  formatRenewalDate,
-  getSubscription,
-  INSTALLMENT_PRICE,
-  INSTALLMENTS_COUNT,
-} from '../lib/subscription.js';
+import { ANNUAL_PRICE, cancelSubscription, formatBRL, formatRenewalDate, getSubscription, hasActiveAccess } from '../lib/subscription.js';
 
-const PLAN_NAME = { annual: 'Papazilla Anual' } as const;
-const PLAN_PAYMENT = {
-  upfront: `${formatBRL(ANNUAL_PRICE)} à vista`,
-  installments: `Em até ${INSTALLMENTS_COUNT}x de ${formatBRL(INSTALLMENT_PRICE)}`,
-} as const;
+const STATUS_LABEL: Record<string, string> = {
+  active: 'Ativo',
+  canceled: 'Cancelado',
+  past_due: 'Pagamento pendente',
+};
 
 /**
- * Gerenciar assinatura — fiel à tela "subscription" de `papazilla-prototype`.
- * Só acessível com uma assinatura ativa (sem ela, redireciona pra oferta).
- * "Ver outras formas de pagamento" reabre a oferta; restaurar/cancelar ainda
- * avisam por toast (Fase 0, sem provedor de pagamento real).
+ * Gerenciar assinatura — fiel à tela "subscription" de `papazilla-prototype`,
+ * agora com dados e ações de verdade: "Cancelar renovação" chama o Asaas de
+ * verdade (`/api/subscription-cancel`), não só um toast.
  */
 export function GerenciarAssinaturaScreen() {
   const navigate = useNavigate();
   const subscription = getSubscription();
+  const [canceling, setCanceling] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<number>();
 
-  if (!subscription) {
+  if (!subscription || !hasActiveAccess(subscription)) {
     return <Navigate to="/assinatura" state={{ returnTo: 'conta' }} replace />;
   }
 
   function toast(message: string) {
     window.clearTimeout(toastTimer.current);
     setToastMsg(message);
-    toastTimer.current = window.setTimeout(() => setToastMsg(null), 2600);
+    toastTimer.current = window.setTimeout(() => setToastMsg(null), 3200);
   }
 
-  const isInstallments = subscription.payment === 'installments';
-  const renewalCopy = isInstallments
-    ? `Depois dos ${INSTALLMENTS_COUNT} pagamentos, a assinatura inicia um novo período até você cancelar a renovação.`
-    : 'A próxima cobrança anual acontece na data indicada acima.';
+  const isCanceled = subscription.status === 'canceled';
+  const renewalCopy = isCanceled
+    ? 'A renovação foi cancelada — seu acesso continua até a data acima, sem novas cobranças depois disso.'
+    : 'A próxima cobrança anual acontece automaticamente no cartão, na data acima.';
+
+  async function handleCancel() {
+    setCanceling(true);
+    try {
+      await cancelSubscription();
+      toast('Renovação cancelada. Seu acesso continua até o fim do período já pago.');
+    } catch (err) {
+      toast(err instanceof Error ? err.message : 'Não foi possível cancelar agora. Tente de novo.');
+    } finally {
+      setCanceling(false);
+    }
+  }
 
   return (
     <div className="user-profile-view">
@@ -69,18 +74,18 @@ export function GerenciarAssinaturaScreen() {
             </span>
             <div>
               <small>Plano atual</small>
-              <h2>{PLAN_NAME[subscription.plan]}</h2>
+              <h2>Papazilla Anual</h2>
             </div>
-            <b>Ativo</b>
+            <b>{STATUS_LABEL[subscription.status] ?? subscription.status}</b>
           </div>
           <p>Receitas personalizadas para toda a matilha, salvas e disponíveis em qualquer aparelho.</p>
           <div className="subscription-price">
             <span>
               <small>Forma de pagamento</small>
-              <strong>{PLAN_PAYMENT[subscription.payment]}</strong>
+              <strong>{formatBRL(ANNUAL_PRICE)}/ano no cartão</strong>
             </span>
             <span>
-              <small>Próxima renovação</small>
+              <small>{isCanceled ? 'Acesso até' : 'Próxima renovação'}</small>
               <strong>{formatRenewalDate(subscription)}</strong>
             </span>
           </div>
@@ -98,36 +103,20 @@ export function GerenciarAssinaturaScreen() {
           <div>
             <span aria-hidden="true">↻</span>
             <p>
-              <strong>Renovação automática</strong>
+              <strong>{isCanceled ? 'Renovação cancelada' : 'Renovação automática'}</strong>
               <small>{renewalCopy}</small>
             </p>
           </div>
         </section>
 
-        <button
-          type="button"
-          className="subscription-action"
-          onClick={() => navigate('/assinatura', { state: { returnTo: 'conta' } })}
-        >
-          Ver outras formas de pagamento <span aria-hidden="true">›</span>
-        </button>
-        <button
-          type="button"
-          className="subscription-action"
-          onClick={() => toast('Sua compra está ativa neste aparelho.')}
-        >
-          Restaurar compra <span aria-hidden="true">›</span>
-        </button>
-        <button
-          type="button"
-          className="subscription-cancel"
-          onClick={() => toast('A confirmação de cancelamento será exibida antes de concluir.')}
-        >
-          Cancelar renovação
-        </button>
+        {!isCanceled ? (
+          <button type="button" className="subscription-cancel" onClick={handleCancel} disabled={canceling}>
+            {canceling ? 'Cancelando…' : 'Cancelar renovação'}
+          </button>
+        ) : null}
         <p className="subscription-help">
-          O cancelamento evita a próxima renovação. Seu acesso e eventuais pagamentos do período
-          contratado continuam até o final.
+          O cancelamento evita a próxima renovação. Seu acesso e eventuais pagamentos do período contratado
+          continuam até o final.
         </p>
       </div>
 

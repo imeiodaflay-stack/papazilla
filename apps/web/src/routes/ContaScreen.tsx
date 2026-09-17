@@ -11,21 +11,9 @@ import infoIcon from '../assets/icons/info.png';
 import excluirIcon from '../assets/icons/excluir.png';
 import { listPets } from '../lib/petsStore.js';
 import { describePet, joinPt } from '../lib/petLabel.js';
-import {
-  ANNUAL_PRICE,
-  formatBRL,
-  getSubscription,
-  INSTALLMENT_PRICE,
-  INSTALLMENTS_COUNT,
-} from '../lib/subscription.js';
+import { ANNUAL_PRICE, formatBRL, getSubscription, hasActiveAccess } from '../lib/subscription.js';
 import { setAuthenticated } from '../lib/session.js';
 import { getUserProfile } from '../lib/userProfile.js';
-
-const PLAN_NAME = { annual: 'Papazilla Anual' } as const;
-const PLAN_PAYMENT = {
-  upfront: `${formatBRL(ANNUAL_PRICE)} à vista`,
-  installments: `Em até ${INSTALLMENTS_COUNT}x de ${formatBRL(INSTALLMENT_PRICE)}`,
-} as const;
 
 /**
  * Minha conta — fiel à tela "user-profile" de `papazilla-prototype`: identidade,
@@ -67,15 +55,16 @@ export function ContaScreen() {
       ? `Tutor(a) de ${joinPt(pets.map((p) => describePet(p).displayName))}`
       : 'Ainda sem Monstrinhos cadastrados';
 
-  const planName = subscription ? PLAN_NAME[subscription.plan] : 'Acesso gratuito';
-  const planDescription = subscription
+  const isActive = hasActiveAccess(subscription);
+  const planName = isActive ? 'Papazilla Anual' : 'Acesso gratuito';
+  const planDescription = isActive
     ? 'Receitas personalizadas para toda a matilha, salvas e disponíveis em qualquer aparelho.'
     : 'Cadastre seus pets e explore os conteúdos. Assine para criar receitas personalizadas.';
-  const valueLabel = subscription ? 'Pagamento' : 'Receitas';
-  const planValue = subscription ? PLAN_PAYMENT[subscription.payment] : 'Benefício premium';
+  const valueLabel = isActive ? 'Pagamento' : 'Receitas';
+  const planValue = isActive ? `${formatBRL(ANNUAL_PRICE)}/ano no cartão` : 'Benefício premium';
 
   function goManagePlan() {
-    if (subscription) navigate('/assinatura/gerenciar');
+    if (isActive) navigate('/assinatura/gerenciar');
     else navigate('/assinatura', { state: { returnTo: 'conta' } });
   }
 
@@ -139,7 +128,7 @@ export function ContaScreen() {
               <small>Seu plano</small>
               <strong>{planName}</strong>
             </div>
-            <b>{subscription ? 'Ativo' : 'Grátis'}</b>
+            <b>{isActive ? 'Ativo' : 'Grátis'}</b>
           </div>
           <p>{planDescription}</p>
           <div className="user-plan-card__bottom">
@@ -148,7 +137,7 @@ export function ContaScreen() {
               <strong>{planValue}</strong>
             </span>
             <button type="button" onClick={goManagePlan}>
-              {subscription ? 'Gerenciar plano →' : 'Conhecer planos →'}
+              {isActive ? 'Gerenciar plano →' : 'Conhecer planos →'}
             </button>
           </div>
         </section>

@@ -3,29 +3,20 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import zillaFrente from '../assets/zilla-frente.png';
 import { getActivePet } from '../lib/petsStore.js';
 import { describePet } from '../lib/petLabel.js';
-import {
-  ANNUAL_ORIGINAL_PRICE,
-  ANNUAL_PRICE,
-  formatBRL,
-  INSTALLMENT_PRICE,
-  INSTALLMENTS_COUNT,
-  setSubscription,
-  type SubscriptionPayment,
-} from '../lib/subscription.js';
+import { ANNUAL_PRICE, createCheckoutSession, formatBRL } from '../lib/subscription.js';
 
 /**
  * Oferta de assinatura — fiel à tela "paywall" de `papazilla-prototype`,
- * com uma mudança de produto (Flay, 2026-09): oferta única, sem plano
- * mensal. Preço "de/por" com desconto por tempo limitado — `ANNUAL_ORIGINAL_PRICE`
- * é só um valor de referência pra ancorar o desconto, não veio de um plano
- * anterior de fato cobrado; ajuste ali (`subscription.ts`) se o valor "de"
- * mudar. Aberta a partir de Papá (1ª receita, sem assinatura) ou de Minha
- * conta ("Conhecer planos" / "Gerenciar plano"); `location.state.returnTo`
- * diz pra onde voltar ao fechar ou depois de assinar.
+ * com duas mudanças de produto (Flay, 2026-09):
+ * 1. Oferta única, sem plano mensal.
+ * 2. Cobrança recorrente automática só no cartão, sem parcelamento — o
+ *    Asaas não parcela cobrança recorrente (ver handover). A versão anterior
+ *    desta tela ("à vista ou 6x") ficou pra trás por causa dessa decisão.
  *
- * Fase 0: sem provedor de pagamento (`arquitetura-tecnica.md` deixa isso em
- * aberto). Assinar só grava o plano localmente, como o protótipo — nenhuma
- * cobrança acontece de verdade.
+ * "Assinar" agora cria uma sessão de Checkout de verdade no Asaas
+ * (`/api/checkout-create`) e redireciona pra lá — nada é liberado aqui, só
+ * o webhook (`/api/webhooks-asaas`) confirma o pagamento de verdade. Ver
+ * `ConfirmandoAssinaturaScreen` pra onde o Asaas manda a pessoa de volta.
  */
 type ReturnTo = 'papa' | 'conta' | 'recipe';
 
@@ -39,51 +30,35 @@ function closePath(returnTo: ReturnTo | undefined): string {
   return '/papa';
 }
 
-/** Pra onde ir depois de assinar. Só "recipe" segue direto pro wizard, como no protótipo. */
-function subscribedPath(returnTo: ReturnTo | undefined): string {
-  if (returnTo === 'recipe') return '/receita';
-  return closePath(returnTo);
-}
-
 export function AssinaturaScreen() {
   const navigate = useNavigate();
   const location = useLocation();
   const returnTo = (location.state as PaywallState | null)?.returnTo;
   const backTo = closePath(returnTo);
-  const afterSubscribe = subscribedPath(returnTo);
 
   const activePet = getActivePet();
   const { preposition, displayName } = describePet(activePet);
 
-  const [payment, setPayment] = useState<SubscriptionPayment>('upfront');
+  const [loading, setLoading] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<number>();
 
   function toast(message: string) {
     window.clearTimeout(toastTimer.current);
     setToastMsg(message);
-    toastTimer.current = window.setTimeout(() => setToastMsg(null), 2600);
+    toastTimer.current = window.setTimeout(() => setToastMsg(null), 3200);
   }
 
-  const ctaLabel =
-    payment === 'installments'
-      ? `Assinar em ${INSTALLMENTS_COUNT}x de ${formatBRL(INSTALLMENT_PRICE)}`
-      : `Assinar por ${formatBRL(ANNUAL_PRICE)}`;
-
-  const disclosure =
-    payment === 'installments'
-      ? `${INSTALLMENTS_COUNT} pagamentos de ${formatBRL(INSTALLMENT_PRICE)} sem juros · total de ${formatBRL(ANNUAL_PRICE)} por 12 meses de acesso. A renovação inicia um novo período de compromisso.`
-      : `${formatBRL(ANNUAL_PRICE)} cobrados por 12 meses de acesso. Renovação anual automática; cancele a próxima renovação quando quiser.`;
-
-  const commitment =
-    payment === 'installments'
-      ? 'Compromisso de 12 meses. Você pode cancelar a renovação a qualquer momento; os pagamentos do período contratado continuam até o final.'
-      : 'Pagamento anual antecipado. A assinatura renova por mais 12 meses até você cancelar a renovação.';
-
-  function subscribe() {
-    setSubscription({ plan: 'annual', payment });
-    toast('Plano ativado. Boa fornalha!');
-    window.setTimeout(() => navigate(afterSubscribe, { replace: true }), 900);
+  async function subscribe() {
+    if (loading) return;
+    setLoading(true);
+    try {
+      const url = await createCheckoutSession(returnTo ?? 'papa');
+      window.location.href = url;
+    } catch (err) {
+      setLoading(false);
+      toast(err instanceof Error ? err.message : 'Não foi possível iniciar o pagamento. Tente de novo.');
+    }
   }
 
   return (
@@ -93,13 +68,7 @@ export function AssinaturaScreen() {
           ←
         </button>
         <span>Assinatura Papazilla</span>
-        <button
-          type="button"
-          className="paywall-restore"
-          onClick={() => toast('Nenhuma compra anterior foi encontrada nesta demonstração.')}
-        >
-          Restaurar
-        </button>
+        <span aria-hidden="true" />
       </header>
 
       <div className="paywall-content">
@@ -141,53 +110,25 @@ export function AssinaturaScreen() {
         </ul>
 
         <section className="paywall-offer">
-          <span className="paywall-offer__badge">⏳ Por tempo limitado</span>
           <div className="paywall-offer__price">
-            <span className="paywall-offer__was">de {formatBRL(ANNUAL_ORIGINAL_PRICE)}</span>
             <strong>
               {formatBRL(ANNUAL_PRICE)}
               <small>/ano</small>
             </strong>
-            <span className="paywall-offer__hint">Preço especial para os primeiros acessos</span>
+            <span className="paywall-offer__hint">Cobrança recorrente automática no cartão</span>
           </div>
-
-          <div className="annual-payment-options" role="radiogroup" aria-label="Forma de pagamento">
-            <button
-              type="button"
-              className={`annual-payment-option${payment === 'upfront' ? ' is-selected' : ''}`}
-              role="radio"
-              aria-checked={payment === 'upfront'}
-              onClick={() => setPayment('upfront')}
-            >
-              <span aria-hidden="true" />
-              <p>
-                <strong>{formatBRL(ANNUAL_PRICE)} à vista</strong>
-                <small>Pagamento único por 12 meses de acesso</small>
-              </p>
-            </button>
-            <button
-              type="button"
-              className={`annual-payment-option${payment === 'installments' ? ' is-selected' : ''}`}
-              role="radio"
-              aria-checked={payment === 'installments'}
-              onClick={() => setPayment('installments')}
-            >
-              <span aria-hidden="true" />
-              <p>
-                <strong>
-                  Em até {INSTALLMENTS_COUNT}x de {formatBRL(INSTALLMENT_PRICE)}
-                </strong>
-                <small>Sem juros no cartão</small>
-              </p>
-            </button>
-          </div>
-          <p className="annual-commitment">{commitment}</p>
+          <p className="annual-commitment">
+            Renovação anual automática. Cancele quando quiser — o acesso continua até o fim do período já pago.
+          </p>
         </section>
 
-        <button type="button" className="pz-button pz-button--primary wide paywall-cta" onClick={subscribe}>
-          {ctaLabel}
+        <button type="button" className="pz-button pz-button--primary wide paywall-cta" onClick={subscribe} disabled={loading}>
+          {loading ? 'Abrindo pagamento…' : `Assinar por ${formatBRL(ANNUAL_PRICE)}/ano`}
         </button>
-        <p className="paywall-disclosure">{disclosure}</p>
+        <p className="paywall-disclosure">
+          Pagamento processado pelo Asaas. {formatBRL(ANNUAL_PRICE)} cobrados no cartão a cada 12 meses até você
+          cancelar a renovação.
+        </p>
         <div className="paywall-links">
           <button type="button" onClick={() => toast('Termos de Uso será aberta aqui.')}>
             Termos de Uso

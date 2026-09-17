@@ -22,6 +22,7 @@ import { TermosPrivacidadeScreen } from './routes/TermosPrivacidadeScreen.js';
 import { AccountDataScreen } from './routes/AccountDataScreen.js';
 import { AjudaScreen } from './routes/AjudaScreen.js';
 import { AssinaturaScreen } from './routes/AssinaturaScreen.js';
+import { ConfirmandoAssinaturaScreen } from './routes/ConfirmandoAssinaturaScreen.js';
 import { GerenciarAssinaturaScreen } from './routes/GerenciarAssinaturaScreen.js';
 import { AnamneseScreen } from './routes/AnamneseScreen.js';
 import { SucessoScreen } from './routes/SucessoScreen.js';
@@ -52,6 +53,7 @@ export const router = createBrowserRouter([
   { path: '/conta/dados', element: <AccountDataScreen /> },
   { path: '/ajuda', element: <AjudaScreen /> },
   { path: '/assinatura', element: <AssinaturaScreen /> },
+  { path: '/assinatura/confirmando', element: <ConfirmandoAssinaturaScreen /> },
   { path: '/assinatura/gerenciar', element: <GerenciarAssinaturaScreen /> },
   { path: '/zilla', element: <ZillaRoute /> },
   { path: '/zilla/:petId', element: <PetDetailScreen /> },

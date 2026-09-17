@@ -19,6 +19,7 @@ import { isSupabaseConfigured } from './env.js';
 import { supabase } from './supabase.js';
 import { syncProfileFromAuthUser } from './userProfile.js';
 import { listPets, loadPetsForOwner } from './petsStore.js';
+import { loadSubscriptionForOwner } from './subscription.js';
 
 const AUTH_KEY = 'papazilla.authenticated';
 const ONBOARDING_KEY = 'papazilla.seenOnboarding';
@@ -29,7 +30,7 @@ let initPromise: Promise<void> | null = null;
 async function applySession(user: User | null): Promise<void> {
   cachedUser = user;
   if (user) syncProfileFromAuthUser(user);
-  await loadPetsForOwner(user?.id ?? null);
+  await Promise.all([loadPetsForOwner(user?.id ?? null), loadSubscriptionForOwner(user?.id ?? null)]);
 }
 
 /**
@@ -59,6 +60,11 @@ void initAuth();
 /** Provedor usado no login real (`google`, `apple`, `email`...), ou `null` sem sessão/Supabase configurado. */
 export function getAuthProvider(): string | null {
   return cachedUser?.app_metadata?.provider ?? null;
+}
+
+/** Id do usuário autenticado, ou `null` sem sessão — usado por quem precisa recarregar dados próprios (ex.: `subscription.ts`). */
+export function getUserId(): string | null {
+  return cachedUser?.id ?? null;
 }
 
 function read(key: string): boolean {

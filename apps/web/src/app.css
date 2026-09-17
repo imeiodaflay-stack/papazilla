@@ -2476,16 +2476,6 @@
   font: 800 0.68rem / 1 var(--pz-font-support);
   text-align: center;
 }
-.paywall-restore {
-  min-height: 44px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--pz-accent-ink);
-  font: 800 0.61rem / 1 var(--pz-font-support);
-  text-align: right;
-}
-
 .paywall-content {
   flex: 1;
   min-height: 0;
@@ -2584,26 +2574,10 @@
   box-shadow: 0 0 0 2px rgb(113 106 17 / 8%);
   color: var(--pz-ink);
 }
-.paywall-offer__badge {
-  display: inline-flex;
-  margin: 0.75rem 0 0 0.75rem;
-  padding: 0.3rem 0.55rem;
-  border-radius: 999px;
-  background: var(--pz-success-bg);
-  color: var(--pz-secondary-ink);
-  font: 800 0.56rem / 1 var(--pz-font-support);
-  letter-spacing: 0.02em;
-}
 .paywall-offer__price {
   display: grid;
   gap: 0.2rem;
-  padding: 0.6rem 0.9rem 0.85rem;
-}
-.paywall-offer__was {
-  color: var(--pz-ink-label);
-  font: 700 0.62rem / 1 var(--pz-font-support);
-  text-decoration: line-through;
-  text-decoration-color: var(--pz-coral);
+  padding: 0.9rem 0.9rem 0.85rem;
 }
 .paywall-offer__price > strong {
   display: flex;
@@ -2622,54 +2596,8 @@
   font: 700 0.58rem / 1.3 var(--pz-font-support);
 }
 
-.annual-payment-options {
-  display: grid;
-  gap: 0.4rem;
-  padding: 0.6rem 0.75rem 0.1rem;
-  border-top: 1px solid var(--pz-border);
-}
-.annual-payment-option {
-  display: grid;
-  grid-template-columns: 15px 1fr;
-  gap: 0.45rem;
-  align-items: center;
-  width: 100%;
-  min-height: 45px;
-  padding: 0.45rem 0.55rem;
-  border: 1px solid transparent;
-  border-radius: 12px;
-  background: var(--pz-bg);
-  color: var(--pz-ink);
-  text-align: left;
-}
-.annual-payment-option > span {
-  width: 14px;
-  height: 14px;
-  border: 1.5px solid var(--pz-border-strong);
-  border-radius: 50%;
-}
-.annual-payment-option.is-selected {
-  border-color: var(--pz-verde);
-  background: var(--pz-success-bg);
-}
-.annual-payment-option.is-selected > span {
-  border: 4px solid var(--pz-verde-strong);
-}
-.annual-payment-option p {
-  display: grid;
-  gap: 0.08rem;
-  margin: 0;
-}
-.annual-payment-option strong {
-  font: 800 0.6rem / 1.2 var(--pz-font-support);
-}
-.annual-payment-option small {
-  color: var(--pz-ink-label);
-  font-size: 0.5rem;
-  line-height: 1.25;
-}
 .annual-commitment {
-  margin: 0.4rem 0.75rem 0.7rem;
+  margin: 0 0.9rem 0.85rem;
   color: var(--pz-ink-label);
   font-size: 0.5rem;
   line-height: 1.35;

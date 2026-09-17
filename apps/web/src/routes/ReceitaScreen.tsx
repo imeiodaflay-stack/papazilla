@@ -7,7 +7,7 @@ import potinhoIcon from '../assets/icons/potinho.png';
 import infoIcon from '../assets/icons/info.png';
 import { getActivePet, getActivePetId, listPets } from '../lib/petsStore.js';
 import { describePet, joinPt } from '../lib/petLabel.js';
-import { getSubscription } from '../lib/subscription.js';
+import { getSubscription, hasActiveAccess } from '../lib/subscription.js';
 import { derivePredominantProtein } from '../lib/engineMapping.js';
 import { hasSignificantMuscleLoss } from '../lib/muscleCondition.js';
 import { buildPetPlan, buildSharedRecipe } from '../lib/recipeEngine.js';
@@ -124,7 +124,7 @@ export function ReceitaScreen() {
   );
 
   if (pets.length === 0) return <Navigate to="/zilla" replace />;
-  if (!subscription) return <Navigate to="/assinatura" state={{ returnTo: 'recipe' }} replace />;
+  if (!hasActiveAccess(subscription)) return <Navigate to="/assinatura" state={{ returnTo: 'recipe' }} replace />;
 
   const STEPS_COUNT = 9;
   const isResultStep = step === STEPS_COUNT - 1;
