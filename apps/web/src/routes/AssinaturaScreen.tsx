@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import zillaFrente from '../assets/zilla-frente.png';
 import { getActivePet } from '../lib/petsStore.js';
 import { describePet } from '../lib/petLabel.js';
-import { ANNUAL_PRICE, createCheckoutSession, formatBRL } from '../lib/subscription.js';
+import { ANNUAL_PRICE, formatBRL } from '../lib/subscription.js';
 
 /**
  * Oferta de assinatura — fiel à tela "paywall" de `papazilla-prototype`,
@@ -13,10 +13,13 @@ import { ANNUAL_PRICE, createCheckoutSession, formatBRL } from '../lib/subscript
  *    Asaas não parcela cobrança recorrente (ver handover). A versão anterior
  *    desta tela ("à vista ou 6x") ficou pra trás por causa dessa decisão.
  *
- * "Assinar" agora cria uma sessão de Checkout de verdade no Asaas
- * (`/api/checkout-create`) e redireciona pra lá — nada é liberado aqui, só
- * o webhook (`/api/webhooks-asaas`) confirma o pagamento de verdade. Ver
- * `ConfirmandoAssinaturaScreen` pra onde o Asaas manda a pessoa de volta.
+ * "Assinar" é PROPOSITALMENTE FAKE por enquanto (Flay, 2026-09-17): o Asaas
+ * é uma das últimas peças do MVP e ela quer poder demonstrar a experiência
+ * de compra — ver a oferta, clicar, cair no wizard — sem esperar o sandbox
+ * estar pronto. Não cria checkout, não grava assinatura em lugar nenhum, só
+ * navega. Quando o Asaas entrar, trocar de volta pra `createCheckoutSession`
+ * (`lib/subscription.ts`) + `/api/checkout-create`, que continuam existindo
+ * e intactos pra isso.
  */
 type ReturnTo = 'papa' | 'conta' | 'recipe';
 
@@ -30,6 +33,13 @@ function closePath(returnTo: ReturnTo | undefined): string {
   return '/papa';
 }
 
+/** Pra onde a oferta fake leva depois de "assinar". Mesmo mapeamento que `ConfirmandoAssinaturaScreen` usaria com o Asaas de verdade. */
+function destinationFor(returnTo: ReturnTo | undefined): string {
+  if (returnTo === 'recipe') return '/receita';
+  if (returnTo === 'conta') return '/conta';
+  return '/papa';
+}
+
 export function AssinaturaScreen() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -39,7 +49,6 @@ export function AssinaturaScreen() {
   const activePet = getActivePet();
   const { preposition, displayName } = describePet(activePet);
 
-  const [loading, setLoading] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<number>();
 
@@ -49,16 +58,8 @@ export function AssinaturaScreen() {
     toastTimer.current = window.setTimeout(() => setToastMsg(null), 3200);
   }
 
-  async function subscribe() {
-    if (loading) return;
-    setLoading(true);
-    try {
-      const url = await createCheckoutSession(returnTo ?? 'papa');
-      window.location.href = url;
-    } catch (err) {
-      setLoading(false);
-      toast(err instanceof Error ? err.message : 'Não foi possível iniciar o pagamento. Tente de novo.');
-    }
+  function subscribe() {
+    navigate(destinationFor(returnTo), { replace: true });
   }
 
   return (
@@ -122,8 +123,8 @@ export function AssinaturaScreen() {
           </p>
         </section>
 
-        <button type="button" className="pz-button pz-button--primary wide paywall-cta" onClick={subscribe} disabled={loading}>
-          {loading ? 'Abrindo pagamento…' : `Assinar por ${formatBRL(ANNUAL_PRICE)}/ano`}
+        <button type="button" className="pz-button pz-button--primary wide paywall-cta" onClick={subscribe}>
+          Assinar por {formatBRL(ANNUAL_PRICE)}/ano
         </button>
         <p className="paywall-disclosure">
           Pagamento processado pelo Asaas. {formatBRL(ANNUAL_PRICE)} cobrados no cartão a cada 12 meses até você
