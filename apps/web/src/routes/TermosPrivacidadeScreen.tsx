@@ -29,7 +29,7 @@ const TERMOS_SECTIONS: { heading: string; body: string }[] = [
   },
   {
     heading: '3. Sua conta',
-    body: 'Você pode criar conta com Google, Apple ou e-mail (link ou código de uso único, sem senha). Você é responsável por manter o acesso à sua conta seguro. Pode excluir sua conta e todos os dados associados a qualquer momento em Minha conta → Dados da conta — a exclusão é permanente.',
+    body: 'Você pode criar conta com Google, Apple ou e-mail (link ou código de uso único, sem senha). Você é responsável por manter o acesso à sua conta seguro. Pode solicitar a exclusão da conta e dos dados do aplicativo em Minha conta → Dados da conta. A renovação da assinatura é cancelada antes da exclusão.',
   },
   {
     heading: '4. As receitas e o cálculo nutricional',
@@ -84,11 +84,11 @@ const PRIVACIDADE_SECTIONS: { heading: string; body: string }[] = [
   },
   {
     heading: '6. Seus direitos (LGPD)',
-    body: 'A qualquer momento, em Minha conta → Dados da conta, você pode baixar uma cópia de todos os seus dados guardados no Papazilla ou excluir permanentemente sua conta e os dados associados. Você também pode corrigir dados incorretos editando seu perfil e os perfis dos seus cães diretamente no app, ou entrando em contato pelo e-mail abaixo.',
+    body: 'Em Minha conta → Dados da conta, você pode baixar um arquivo com os dados estruturados da conta e as referências às fotos ou solicitar a exclusão da conta e dos dados do aplicativo. O arquivo não inclui as imagens em si. Você também pode corrigir dados incorretos editando seu perfil e os perfis dos seus cães diretamente no app, ou entrando em contato pelo e-mail abaixo.',
   },
   {
     heading: '7. Por quanto tempo guardamos seus dados',
-    body: 'Guardamos seus dados enquanto sua conta estiver ativa. Ao excluir sua conta, os dados associados são apagados permanentemente, exceto quando a lei exigir retenção por período maior.',
+    body: 'Guardamos os dados do aplicativo enquanto sua conta estiver ativa. Ao excluir a conta, removemos os registros e fotos do aplicativo. Registros financeiros mantidos pelo processador de pagamentos podem seguir prazos de retenção próprios ou exigidos por lei.',
   },
   {
     heading: '8. Menores de idade',

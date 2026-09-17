@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import excluirIcon from '../assets/icons/excluir.png';
 import infoIcon from '../assets/icons/info.png';
-import { deleteAccountData, downloadAccountData } from '../lib/accountData.js';
+import { deleteAccount, downloadAccountData } from '../lib/accountData.js';
 import { setAuthenticated } from '../lib/session.js';
 
 /**
@@ -15,6 +15,7 @@ import { setAuthenticated } from '../lib/session.js';
 export function AccountDataScreen() {
   const navigate = useNavigate();
   const [confirming, setConfirming] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<number>();
 
@@ -24,15 +25,25 @@ export function AccountDataScreen() {
     toastTimer.current = window.setTimeout(() => setToastMsg(null), 2600);
   }
 
-  function download() {
-    downloadAccountData();
-    toast('Seus dados foram baixados.');
+  async function download() {
+    setBusy(true);
+    try {
+      await downloadAccountData();
+      toast('Seus dados foram baixados.');
+    } catch (error) { toast(error instanceof Error ? error.message : 'Não foi possível baixar os dados.'); }
+    finally { setBusy(false); }
   }
 
-  function confirmDelete() {
-    deleteAccountData();
-    setAuthenticated(false);
-    navigate('/entrar', { replace: true });
+  async function confirmDelete() {
+    setBusy(true);
+    try {
+      await deleteAccount();
+      setAuthenticated(false);
+      navigate('/entrar', { replace: true });
+    } catch (error) {
+      toast(error instanceof Error ? error.message : 'Não foi possível excluir a conta.');
+      setBusy(false);
+    }
   }
 
   return (
@@ -54,7 +65,7 @@ export function AccountDataScreen() {
         <div className="flow-intro">
           <p className="eyebrow">Seus dados, com você</p>
           <h1>Baixar ou excluir seus dados</h1>
-          <p>Tudo o que o Papazilla guarda neste aparelho: pets, respostas, receitas e assinatura simulada.</p>
+          <p>Baixe os dados da sua conta ou solicite a exclusão permanente.</p>
         </div>
 
         <section className="pet-section">
@@ -64,9 +75,9 @@ export function AccountDataScreen() {
               <h2>Baixar meus dados</h2>
             </div>
           </div>
-          <p className="profile-question__hint">Gera um arquivo .json com tudo cadastrado neste aparelho.</p>
-          <button type="button" className="pz-button pz-button--outline wide" onClick={download}>
-            Baixar meus dados
+          <p className="profile-question__hint">Gera um arquivo .json com seus dados cadastrados.</p>
+          <button type="button" className="pz-button pz-button--outline wide" disabled={busy} onClick={() => { void download(); }}>
+            {busy ? 'Aguarde…' : 'Baixar meus dados'}
           </button>
         </section>
 
@@ -78,7 +89,7 @@ export function AccountDataScreen() {
             </div>
           </div>
           <p className="profile-question__hint">
-            Apaga pets, respostas, receitas e assinatura simulada deste aparelho e volta para a tela de entrada.
+            Cancela a renovação da assinatura e exclui a conta, pets, respostas, receitas e fotos dos nossos servidores. Essa ação não pode ser desfeita.
           </p>
 
           {confirming ? (
@@ -96,8 +107,8 @@ export function AccountDataScreen() {
               <button type="button" className="pz-button pz-button--outline" onClick={() => setConfirming(false)}>
                 Cancelar
               </button>
-              <button type="button" className="pz-button pz-button--primary" onClick={confirmDelete}>
-                Sim, excluir tudo
+              <button type="button" className="pz-button pz-button--primary" disabled={busy} onClick={() => { void confirmDelete(); }}>
+                {busy ? 'Excluindo…' : 'Sim, excluir tudo'}
               </button>
             </div>
           ) : (

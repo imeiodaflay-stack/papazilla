@@ -1,9 +1,7 @@
-/**
- * Exportar/excluir os dados locais da conta (Fase 0 — tudo vive em
- * `localStorage`, nada em Supabase ainda). Opera em qualquer chave prefixada
- * com `papazilla.`, então acompanha automaticamente novos módulos que
- * passarem a guardar dados aqui — não é uma lista fixa que fica desatualizada.
- */
+import { isSupabaseConfigured } from './env.js';
+import { supabase } from './supabase.js';
+
+/** Dados locais continuam exportáveis no modo de demonstração desconectado. */
 function papazillaKeys(): string[] {
   const keys: string[] = [];
   for (let i = 0; i < localStorage.length; i += 1) {
@@ -26,9 +24,26 @@ export function collectAccountData(): Record<string, unknown> {
   return data;
 }
 
-/** Baixa um .json com todos os dados locais da conta. */
-export function downloadAccountData(): void {
-  const data = collectAccountData();
+async function authedRequest(path: string, method: 'GET' | 'POST'): Promise<Record<string, unknown>> {
+  if (!supabase) throw new Error('Supabase não configurado.');
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  if (!token) throw new Error('Sua sessão expirou. Entre novamente.');
+  const response = await fetch(path, {
+    method,
+    headers: { Authorization: `Bearer ${token}`, ...(method === 'POST' ? { 'Content-Type': 'application/json' } : {}) },
+    ...(method === 'POST' ? { body: JSON.stringify({ confirm: true }) } : {}),
+  });
+  const body = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(body?.error || 'Não foi possível concluir a solicitação.');
+  return body as Record<string, unknown>;
+}
+
+/** Baixa um .json da conta remota, ou dos dados locais no modo desconectado. */
+export async function downloadAccountData(): Promise<void> {
+  const data = isSupabaseConfigured
+    ? { ...(await authedRequest('/api/account-export', 'GET')), nesteAparelho: collectAccountData() }
+    : collectAccountData();
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -40,7 +55,13 @@ export function downloadAccountData(): void {
   URL.revokeObjectURL(url);
 }
 
-/** Apaga todos os dados locais da conta (pets, receitas, assinatura, sessão, perfil). Irreversível. */
+/** Apaga apenas o cache deste aparelho, depois que o servidor confirmou a exclusão. */
 export function deleteAccountData(): void {
   for (const key of papazillaKeys()) localStorage.removeItem(key);
+}
+
+export async function deleteAccount(): Promise<void> {
+  if (isSupabaseConfigured) await authedRequest('/api/account-delete', 'POST');
+  deleteAccountData();
+  if (supabase) await supabase.auth.signOut({ scope: 'local' }).catch(() => undefined);
 }
