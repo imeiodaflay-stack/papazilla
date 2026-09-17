@@ -15,6 +15,8 @@ export interface CookLog {
   petIds: string[];
   rating: number;
   note: string;
+  /** URL da foto do prato (bucket `cook-photos`), ou data URL local sem Supabase/sessão. Vazio se não tirou foto. */
+  photoPath: string;
 }
 
 export interface StoredRecipe {
@@ -40,7 +42,7 @@ function readRecipes(): StoredRecipe[] {
     if (!Array.isArray(parsed)) return [];
     return (parsed as StoredRecipe[]).map((r) => ({
       ...r,
-      cookLogs: Array.isArray(r.cookLogs) ? r.cookLogs : [],
+      cookLogs: Array.isArray(r.cookLogs) ? r.cookLogs.map((log) => ({ ...log, photoPath: log.photoPath ?? '' })) : [],
       favorite: r.favorite === true,
     }));
   } catch {

@@ -2,22 +2,25 @@ import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import perfilIcon from '../assets/icons/perfil.png';
 import { getUserProfile, setUserProfile } from '../lib/userProfile.js';
+import { fileToDataUrl, PhotoUploadError, uploadPhoto } from '../lib/photoUpload.js';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
  * Dados pessoais — sem tela equivalente no protótipo (lá "Editar" só mostrava
- * um toast). Nome e e-mail são reais: gravados em `userProfile.ts` e
- * refletidos no card de identidade de Minha conta. Foto continua toast — sem
- * captura de câmera/galeria em nenhuma tela do app ainda.
+ * um toast). Nome, e-mail e foto são reais: gravados em `userProfile.ts` e
+ * refletidos no card de identidade de Minha conta.
  */
 export function UserProfileEditScreen() {
   const navigate = useNavigate();
   const current = getUserProfile();
   const [name, setName] = useState(current?.name ?? '');
   const [email, setEmail] = useState(current?.email ?? '');
+  const [avatarUrl, setAvatarUrl] = useState(current?.avatarUrl ?? '');
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<number>();
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   function toast(message: string) {
     window.clearTimeout(toastTimer.current);
@@ -25,11 +28,26 @@ export function UserProfileEditScreen() {
     toastTimer.current = window.setTimeout(() => setToastMsg(null), 2600);
   }
 
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setAvatarUploading(true);
+    try {
+      setAvatarUrl(await fileToDataUrl(file));
+      setAvatarUrl(await uploadPhoto('avatars', file));
+    } catch (err) {
+      toast(err instanceof PhotoUploadError ? err.message : 'Não foi possível carregar a foto.');
+    } finally {
+      setAvatarUploading(false);
+    }
+  }
+
   const emailValid = !email.trim() || EMAIL_PATTERN.test(email.trim());
   const saveDisabled = !name.trim() || !email.trim() || !emailValid;
 
   function save() {
-    setUserProfile({ name: name.trim(), email: email.trim() });
+    setUserProfile({ name: name.trim(), email: email.trim(), avatarUrl: avatarUrl || undefined });
     navigate('/conta', { state: { toast: 'Dados pessoais atualizados.' } });
   }
 
@@ -55,11 +73,27 @@ export function UserProfileEditScreen() {
           <p>Nome e e-mail aparecem em Minha conta e nas comunicações do Papazilla.</p>
         </div>
 
-        <button type="button" className="pet-photo-editor" onClick={() => toast('A câmera ou a galeria será aberta aqui.')}>
+        <input
+          ref={avatarInputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={handleAvatarChange}
+        />
+        <button
+          type="button"
+          className="pet-photo-editor"
+          onClick={() => avatarInputRef.current?.click()}
+          disabled={avatarUploading}
+        >
           <span>
-            <img src={perfilIcon} alt="" />
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="" className="photo-picker__preview" />
+            ) : (
+              <img src={perfilIcon} alt="" />
+            )}
           </span>
-          <strong>Alterar foto</strong>
+          <strong>{avatarUploading ? 'Enviando...' : 'Alterar foto'}</strong>
           <small>Opcional</small>
         </button>
 

@@ -12,6 +12,8 @@ const PROFILE_KEY = 'papazilla.userProfile';
 export interface UserProfile {
   name: string;
   email: string;
+  /** URL pública da foto no bucket `avatars`, ou data URL local sem Supabase/sessão. */
+  avatarUrl?: string;
 }
 
 export function getUserProfile(): UserProfile | null {
@@ -20,7 +22,7 @@ export function getUserProfile(): UserProfile | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<UserProfile>;
     if (typeof parsed.name !== 'string' || typeof parsed.email !== 'string') return null;
-    return { name: parsed.name, email: parsed.email };
+    return { name: parsed.name, email: parsed.email, avatarUrl: parsed.avatarUrl || undefined };
   } catch {
     return null;
   }
@@ -34,6 +36,12 @@ export function setUserProfile(profile: UserProfile): void {
   }
 }
 
+/** Só a foto — preserva nome/e-mail já salvos em vez de pedir o objeto inteiro de volta. */
+export function setUserAvatar(avatarUrl: string): void {
+  const current = getUserProfile();
+  setUserProfile({ name: current?.name ?? '', email: current?.email ?? '', avatarUrl });
+}
+
 /** Copia nome/e-mail reais do provedor de login pra cá. Nunca apaga um valor já preenchido com um vazio. */
 export function syncProfileFromAuthUser(user: User): void {
   const providerName =
@@ -43,5 +51,5 @@ export function syncProfileFromAuthUser(user: User): void {
   const email = user.email || current?.email || '';
   if (!name && !email) return;
   if (current?.name === name && current?.email === email) return;
-  setUserProfile({ name, email });
+  setUserProfile({ name, email, avatarUrl: current?.avatarUrl });
 }

@@ -13,7 +13,8 @@ import { listPets } from '../lib/petsStore.js';
 import { describePet, joinPt } from '../lib/petLabel.js';
 import { ANNUAL_PRICE, formatBRL, getSubscription, hasActiveAccess } from '../lib/subscription.js';
 import { setAuthenticated } from '../lib/session.js';
-import { getUserProfile } from '../lib/userProfile.js';
+import { getUserProfile, setUserAvatar } from '../lib/userProfile.js';
+import { fileToDataUrl, PhotoUploadError, uploadPhoto } from '../lib/photoUpload.js';
 
 /**
  * Minha conta — fiel à tela "user-profile" de `papazilla-prototype`: identidade,
@@ -33,8 +34,28 @@ export function ContaScreen() {
   const pets = listPets();
   const userProfile = getUserProfile();
   const [notifications, setNotifications] = useState(true);
+  const [avatarUrl, setAvatarUrl] = useState(userProfile?.avatarUrl ?? '');
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<number>();
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setAvatarUploading(true);
+    try {
+      setAvatarUrl(await fileToDataUrl(file));
+      const url = await uploadPhoto('avatars', file);
+      setAvatarUrl(url);
+      setUserAvatar(url);
+    } catch (err) {
+      toast(err instanceof PhotoUploadError ? err.message : 'Não foi possível carregar a foto.');
+    } finally {
+      setAvatarUploading(false);
+    }
+  }
 
   function toast(message: string) {
     window.clearTimeout(toastTimer.current);
@@ -98,14 +119,26 @@ export function ContaScreen() {
       </header>
 
       <div className="user-profile-content">
+        <input
+          ref={avatarInputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={handleAvatarChange}
+        />
         <section className="user-identity-card">
           <button
             type="button"
             className="user-avatar-large"
             aria-label="Alterar foto do perfil"
-            onClick={() => toast('A câmera ou a galeria será aberta aqui.')}
+            onClick={() => avatarInputRef.current?.click()}
+            disabled={avatarUploading}
           >
-            <span>F</span>
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="" className="photo-picker__preview" />
+            ) : (
+              <span>{(userProfile?.name || 'F').charAt(0).toUpperCase()}</span>
+            )}
             <i aria-hidden="true">＋</i>
           </button>
           <div>
