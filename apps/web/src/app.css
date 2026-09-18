@@ -3186,6 +3186,13 @@
   font-size: 0.875rem;
   line-height: 1.35;
 }
+/* Mesmo inset da caixa "Proporção escolhida" (.recipe-preset-result) — só
+   aqui, porque .clinical-warning é reaproveitado em telas fora do card de
+   receita (Anamnese, exclusão de receita etc.) que já têm seu próprio
+   espaçamento (Flay, 2026-09). */
+.recipe-result-card .clinical-warning {
+  margin: 0.75rem;
+}
 .recipe-pet-choice {
   width: 100%;
   min-height: 88px;
