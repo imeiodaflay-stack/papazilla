@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CARBS, PROTEINS, VEGETABLES } from '@papazilla/nutrition-engine';
-import { validateBody } from './recipes-create.js';
+import { validateBody } from '../api/recipes-create.js';
 
 const petId = '123e4567-e89b-42d3-a456-426614174000';
 function validRequest() {
