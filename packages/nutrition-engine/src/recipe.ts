@@ -70,7 +70,7 @@ function buildNotes(proteins: CatalogItem[], vegetables: CatalogItem[]): RecipeN
     notes.push({
       code: 'LOOSENS_INTESTINE',
       text:
-        'Abóbora, quiabo, berinjela e jiló ajudam a soltar o intestino: use no máximo 5% da porção ' +
+        'Abóbora e quiabo ajudam a soltar o intestino: use no máximo 5% da porção ' +
         'diária de vegetais com esses itens.',
     });
   }

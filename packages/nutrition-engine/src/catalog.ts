@@ -105,21 +105,22 @@ export const CARBS: readonly CatalogItem[] = [
 ];
 
 export const VEGETABLES: readonly CatalogItem[] = [
-  { id: 'espinafre', label: 'Espinafre', common: true, vegAlert: true, rawGroup: 'folhosa' },
-  { id: 'repolho', label: 'Repolho', common: true, rawGroup: 'folhosa' },
-  { id: 'aipo', label: 'Aipo (talo do salsão)', common: true, rawGroup: 'legume' },
-  { id: 'ervilha', label: 'Ervilha', common: true, rawGroup: 'legume' },
-  { id: 'cenoura', label: 'Cenoura', common: true, rawGroup: 'legume' },
   { id: 'abobora', label: 'Abóbora', common: true, vegLoosens: true, rawGroup: 'legume' },
-  { id: 'pepino', label: 'Pepino', common: true, rawGroup: 'legume' },
+  { id: 'cenoura', label: 'Cenoura', common: true, rawGroup: 'legume' },
   { id: 'abobrinha', label: 'Abobrinha', common: true, rawGroup: 'legume' },
   { id: 'chuchu', label: 'Chuchu', common: true, rawGroup: 'legume' },
-  { id: 'berinjela', label: 'Berinjela', common: true, vegLoosens: true, rawGroup: 'legume' },
-  { id: 'brocolis', label: 'Brócolis', common: true, rawGroup: 'legume' },
-  { id: 'couveflor', label: 'Couve-flor', common: true, rawGroup: 'legume' },
   { id: 'vagem', label: 'Vagem', common: true, rawGroup: 'legume' },
-  { id: 'quiabo', label: 'Quiabo', common: true, vegLoosens: true, rawGroup: 'legume' },
-  { id: 'jilo', label: 'Jiló', common: true, vegLoosens: true, rawGroup: 'legume' },
+  { id: 'brocolis', label: 'Brócolis', common: false, rawGroup: 'legume' },
+  { id: 'couveflor', label: 'Couve-flor', common: false, rawGroup: 'legume' },
+  { id: 'couve', label: 'Couve', common: false, rawGroup: 'folhosa' },
+  { id: 'espinafre', label: 'Espinafre', common: false, vegAlert: true, rawGroup: 'folhosa' },
+  { id: 'beterraba', label: 'Beterraba', common: false, rawGroup: 'legume' },
+  { id: 'pepino', label: 'Pepino', common: false, rawGroup: 'legume' },
+  { id: 'ervilha', label: 'Ervilha fresca', common: false, rawGroup: 'legume' },
+  { id: 'pimentao', label: 'Pimentão', common: false, rawGroup: 'legume' },
+  { id: 'quiabo', label: 'Quiabo', common: false, vegLoosens: true, rawGroup: 'legume' },
+  { id: 'nabo', label: 'Nabo', common: false, rawGroup: 'legume' },
+  { id: 'aipo', label: 'Aipo/salsão', common: false, rawGroup: 'legume' },
 ];
 
 /** Ervas e especiarias — 100% opcionais, não entram no cálculo de gramas. */

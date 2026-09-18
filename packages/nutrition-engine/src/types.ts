@@ -134,7 +134,7 @@ export interface CatalogItem {
   highFat?: boolean;
   /** Vegetal com alerta específico (espinafre / ácido oxálico). */
   vegAlert?: boolean;
-  /** Vegetal que solta o intestino (abóbora, quiabo, berinjela, jiló). */
+  /** Vegetal que solta o intestino (abóbora, quiabo). */
   vegLoosens?: boolean;
   /** Erva com dose de referência na fonte. */
   sourced?: boolean;
