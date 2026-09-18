@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import zillaFrente from '../assets/zilla-frente.png';
 import { getActivePet } from '../lib/petsStore.js';
 import { describePet } from '../lib/petLabel.js';
-import { ANNUAL_PRICE, formatBRL } from '../lib/subscription.js';
+import { ANNUAL_PRICE, formatBRL, markDemoUnlocked } from '../lib/subscription.js';
 
 /**
  * Oferta de assinatura — fiel à tela "paywall" de `papazilla-prototype`,
@@ -59,6 +59,7 @@ export function AssinaturaScreen() {
   }
 
   function subscribe() {
+    markDemoUnlocked();
     navigate(destinationFor(returnTo), { replace: true });
   }
 

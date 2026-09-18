@@ -81,6 +81,30 @@ export function hasActiveAccess(subscription: Subscription | null): boolean {
   );
 }
 
+const DEMO_UNLOCK_KEY = 'papazilla.demoUnlocked';
+
+/**
+ * Marca que a oferta fake (ver `AssinaturaScreen.tsx`) foi "aceita" nesta
+ * aba — só sessionStorage, nada no servidor nem no Supabase. Some sozinho
+ * ao fechar a aba/janela. Trocar por assinatura de verdade quando o Asaas
+ * entrar: essa função e `isDemoUnlocked` somem junto com o botão fake.
+ */
+export function markDemoUnlocked(): void {
+  try {
+    sessionStorage.setItem(DEMO_UNLOCK_KEY, '1');
+  } catch {
+    // Sem sessionStorage (modo privado etc.): a demonstração some, sem quebrar o app.
+  }
+}
+
+export function isDemoUnlocked(): boolean {
+  try {
+    return sessionStorage.getItem(DEMO_UNLOCK_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
 export function formatRenewalDate(subscription: Subscription): string {
   if (!subscription.currentPeriodEnd) return '—';
   return new Date(subscription.currentPeriodEnd).toLocaleDateString('pt-BR', {
