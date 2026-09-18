@@ -19,7 +19,7 @@ export function RecipePreparationSteps({
   days: number;
 }) {
   return (
-    <details className="recipe-preparation" open>
+    <details className="recipe-preparation">
       <summary>
         <span>
           <img src={receitaIcon} alt="" />

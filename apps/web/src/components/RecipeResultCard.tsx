@@ -5,15 +5,9 @@ import type { StoredPet } from '../lib/petsStore.js';
 import { joinPt } from '../lib/petLabel.js';
 import { matchDietPreferences } from '../lib/dietPreferences.js';
 import { digestionContextFor, hasDigestiveSensitivity } from '../lib/digestionSensitivity.js';
-import {
-  FORMULATION_LABELS,
-  formatGrams,
-  formatRowAmount,
-  formulationSummary,
-  mealSize,
-  orderDisclaimers,
-} from '../lib/recipeDisplay.js';
+import { FORMULATION_LABELS, formatGrams, formulationSummary, mealSize, orderDisclaimers } from '../lib/recipeDisplay.js';
 import { RecipeFinalizers } from './RecipeFinalizers.js';
+import { RecipeIngredientTable } from './RecipeIngredientTable.js';
 import { RecipePreparationSteps } from './RecipePreparationSteps.js';
 
 /**
@@ -21,6 +15,12 @@ import { RecipePreparationSteps } from './RecipePreparationSteps.js';
  * suplementos/finalização por pet, modo de preparo e disclaimers.
  * Compartilhado entre a última etapa do wizard (`ReceitaScreen`) e a tela
  * de detalhe de uma receita já salva (`RecipeDetailScreen`).
+ *
+ * "O que pesar" e "Por dia/refeição" ficam sempre visíveis — são a
+ * informação mais acionável. Tudo que é contexto/observação (gostos do
+ * pet, limite de petiscos, notas educacionais) vai pra dentro de um único
+ * acordeão fechado por padrão, pra tela não competir com o que importa
+ * (Flay, 2026-09).
  */
 export function RecipeResultCard({
   recipe,
@@ -79,78 +79,7 @@ export function RecipeResultCard({
           ))}
         </div>
       ) : null}
-      <div className="result-group">
-        <h3>O que pesar</h3>
-        {recipe.groups
-          .filter((g) => g.key !== 'herbs')
-          .map((group) => (
-            <div key={group.key}>
-              <span>{group.rows.map((r) => r.label).join(', ')}</span>
-              <strong>{group.rows.map((r) => formatRowAmount(r, format)).join(' + ')}</strong>
-            </div>
-          ))}
-      </div>
-      {dietPreferenceNotes.length > 0 ? (
-        <div className="result-group">
-          <h3>Gostos do seu monstrinho</h3>
-          {dietPreferenceNotes.map(({ pet, liked, avoided }) => (
-            <div key={pet.id} className="shared-recipe-note">
-              <img src={infoIcon} alt="" />
-              <p>
-                {liked.length > 0 ? (
-                  <>
-                    Você contou que {pet.name} adora {joinPt(liked)} — essa receita tem!{' '}
-                  </>
-                ) : null}
-                {avoided.length > 0 ? (
-                  <>
-                    Fique de olho: essa receita tem {joinPt(avoided)}, que você marcou como algo que{' '}
-                    {pet.name} não deveria comer. Vale revisar antes de preparar.
-                  </>
-                ) : null}
-              </p>
-            </div>
-          ))}
-        </div>
-      ) : null}
-      <div className="result-group">
-        <h3>Limite de petiscos</h3>
-        <div>
-          <span>Petiscos e mimos por fora da receita</span>
-          <strong>até {formatGrams(treatsMin)}–{formatGrams(treatsMax)}/dia</strong>
-        </div>
-        <p className="pz-note">10% a 15% do total diário — inclui petiscos, comida da família e qualquer coisa fora do potinho.</p>
-        {petsWithFrequentExtras.length > 0 ? (
-          <div className="shared-recipe-note">
-            <img src={infoIcon} alt="" />
-            <p>
-              Você contou na Anamnese que {joinPt(petsWithFrequentExtras.map((p) => p.name))}{' '}
-              {petsWithFrequentExtras.length > 1 ? 'recebem' : 'recebe'} petiscos ou comida da família com
-              frequência — vale medir ou contar o quanto isso já soma antes de completar com essa receita, pra
-              não passar do limite.
-            </p>
-          </div>
-        ) : null}
-      </div>
-      {recipe.notes.length > 0 ? (
-        <div className="result-group">
-          <h3>Vale saber</h3>
-          {recipe.notes.map((note) => {
-            const context = digestionContextFor(note, sensitivePetNames);
-            return (
-              <div key={note.code} className="shared-recipe-note">
-                <img src={infoIcon} alt="" />
-                <p>
-                  {note.text}
-                  {context ? <><br />{context}</> : null}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-      ) : null}
-      <RecipeFinalizers petPlans={petPlans} />
-      <RecipePreparationSteps petPlans={petPlans} days={days} />
+      <RecipeIngredientTable groups={recipe.groups} format={format} />
       {selectedPets.length > 1 ? (
         <div className="portion-row">
           {petPlans.map(({ pet, plan }) => (
@@ -173,12 +102,86 @@ export function RecipeResultCard({
           </span>
         </div>
       )}
-      {orderedDisclaimers.map((text, i) => (
-        <div key={i} className={i === 0 && clinicalRequired ? 'clinical-warning' : 'shared-recipe-note'}>
+      {clinicalRequired && orderedDisclaimers[0] ? (
+        <div className="clinical-warning">
           <img src={infoIcon} alt="" />
-          <p>{text}</p>
+          <p>{orderedDisclaimers[0]}</p>
         </div>
-      ))}
+      ) : null}
+      <RecipeFinalizers petPlans={petPlans} />
+      <RecipePreparationSteps petPlans={petPlans} days={days} />
+      <details className="recipe-detail-section recipe-more-info">
+        <summary>
+          Mais sobre esta receita <span>⌄</span>
+        </summary>
+        <div>
+          {dietPreferenceNotes.length > 0 ? (
+            <div className="result-group">
+              <h3>Gostos do seu monstrinho</h3>
+              {dietPreferenceNotes.map(({ pet, liked, avoided }) => (
+                <div key={pet.id} className="shared-recipe-note">
+                  <img src={infoIcon} alt="" />
+                  <p>
+                    {liked.length > 0 ? (
+                      <>
+                        Você contou que {pet.name} adora {joinPt(liked)} — essa receita tem!{' '}
+                      </>
+                    ) : null}
+                    {avoided.length > 0 ? (
+                      <>
+                        Fique de olho: essa receita tem {joinPt(avoided)}, que você marcou como algo que{' '}
+                        {pet.name} não deveria comer. Vale revisar antes de preparar.
+                      </>
+                    ) : null}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : null}
+          <div className="result-group">
+            <h3>Limite de petiscos</h3>
+            <div>
+              <span>Petiscos e mimos por fora da receita</span>
+              <strong>até {formatGrams(treatsMin)}–{formatGrams(treatsMax)}/dia</strong>
+            </div>
+            <p className="pz-note">10% a 15% do total diário — inclui petiscos, comida da família e qualquer coisa fora do potinho.</p>
+            {petsWithFrequentExtras.length > 0 ? (
+              <div className="shared-recipe-note">
+                <img src={infoIcon} alt="" />
+                <p>
+                  Você contou na Anamnese que {joinPt(petsWithFrequentExtras.map((p) => p.name))}{' '}
+                  {petsWithFrequentExtras.length > 1 ? 'recebem' : 'recebe'} petiscos ou comida da família com
+                  frequência — vale medir ou contar o quanto isso já soma antes de completar com essa receita, pra
+                  não passar do limite.
+                </p>
+              </div>
+            ) : null}
+          </div>
+          {recipe.notes.length > 0 ? (
+            <div className="result-group">
+              <h3>Vale saber</h3>
+              {recipe.notes.map((note) => {
+                const context = digestionContextFor(note, sensitivePetNames);
+                return (
+                  <div key={note.code} className="shared-recipe-note">
+                    <img src={infoIcon} alt="" />
+                    <p>
+                      {note.text}
+                      {context ? <><br />{context}</> : null}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          ) : null}
+          {orderedDisclaimers.slice(clinicalRequired ? 1 : 0).map((text, i) => (
+            <div key={i} className="shared-recipe-note">
+              <img src={infoIcon} alt="" />
+              <p>{text}</p>
+            </div>
+          ))}
+        </div>
+      </details>
     </div>
   );
 }

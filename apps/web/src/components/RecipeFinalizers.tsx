@@ -65,7 +65,7 @@ export function RecipeFinalizers({ petPlans }: { petPlans: { pet: StoredPet; pla
                 </span>
                 <b>{plan.fishOil.dose}</b>
               </p>
-              <p className="pet-finalizer-card__salt">
+              <p>
                 <span>
                   <strong>Sal integral</strong>
                   <small>{plan.saltGuidance}</small>

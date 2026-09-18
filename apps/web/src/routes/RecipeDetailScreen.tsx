@@ -8,9 +8,10 @@ import { getPet } from '../lib/petsStore.js';
 import { deleteRecipe, getRecipe, renameRecipe, setRecipeFavorite } from '../lib/recipeRepository.js';
 import { derivePredominantProtein } from '../lib/engineMapping.js';
 import { buildPetPlan, buildSharedRecipe } from '../lib/recipeEngine.js';
-import { displayRecipeTitle, formatGrams, formatRowAmount, orderDisclaimers, recipeIngredientSummary } from '../lib/recipeDisplay.js';
+import { displayRecipeTitle, formatGrams, orderDisclaimers, recipeIngredientSummary } from '../lib/recipeDisplay.js';
 import { describePet, joinPt } from '../lib/petLabel.js';
 import { RecipeFinalizers } from '../components/RecipeFinalizers.js';
+import { RecipeIngredientTable } from '../components/RecipeIngredientTable.js';
 import { RecipePreparationSteps } from '../components/RecipePreparationSteps.js';
 
 /**
@@ -26,9 +27,6 @@ import { RecipePreparationSteps } from '../components/RecipePreparationSteps.js'
  * - "Já virou tradição" só aparece quando há pelo menos um preparo
  *   registrado; sem preparo nenhum, mostra um convite pra registrar o
  *   primeiro em vez de inventar um histórico.
- * - Ingredientes aparecem um por um (não agrupados por carne/carboidrato/
- *   vegetal como no resultado do wizard) — mais perto do que o protótipo
- *   mostrava na tela de detalhe.
  */
 export function RecipeDetailScreen() {
   const navigate = useNavigate();
@@ -89,8 +87,6 @@ export function RecipeDetailScreen() {
   const ratings = storedRecipe.cookLogs.map((l) => l.rating).filter((r) => r > 0);
   const avgRating = ratings.length > 0 ? ratings.reduce((s, r) => s + r, 0) / ratings.length : null;
   const lastLog = [...storedRecipe.cookLogs].sort((a, b) => b.date.localeCompare(a.date))[0];
-
-  const flatRows = recipe.groups.filter((g) => g.key !== 'herbs').flatMap((g) => g.rows);
 
   const headerTitle = pets.length > 1 ? `Para ${joinPt(pets.map((p) => p.name))}` : `Para ${describePet(pets[0]).article} ${pets[0]!.name}`;
   const eyebrowTitle =
@@ -241,19 +237,7 @@ export function RecipeDetailScreen() {
           </span>
         </div>
 
-        <details className="recipe-detail-section" open>
-          <summary>
-            Ingredientes e quantidades <span>⌄</span>
-          </summary>
-          <div>
-            {flatRows.map((row) => (
-              <p key={row.id}>
-                <span>{row.label}</span>
-                <strong>{formatRowAmount(row, storedRecipe.format)}</strong>
-              </p>
-            ))}
-          </div>
-        </details>
+        <RecipeIngredientTable groups={recipe.groups} format={storedRecipe.format} />
 
         {recipe.notes.length > 0 ? (
           <div className="result-group">
