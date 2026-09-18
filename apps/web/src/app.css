@@ -3852,6 +3852,13 @@
 .prep-step--temperature p {
   color: var(--pz-info-ink) !important;
 }
+/* A caixa em si não tem border-top (removida acima), mas o item seguinte da
+   lista tinha a sua — só embaixo, deixando o respiro inferior visualmente
+   diferente do superior. Tira essa borda pra sobrar o mesmo respiro dos dois
+   lados (Flay, 2026-09). */
+.prep-step--temperature + li {
+  border-top: 0;
+}
 .prep-footnote {
   margin: 0.4rem 0 0.7rem !important;
   color: var(--pz-ink-label);
