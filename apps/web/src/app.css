@@ -3630,40 +3630,6 @@
   text-align: right;
   font: 800 0.875rem / 1.4 var(--pz-font-support);
 }
-.supplement-result {
-  padding: 0.8rem 1rem;
-  border-top: 1px solid var(--pz-border);
-}
-.supplement-result__title {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-}
-.supplement-result__title img {
-  width: 34px;
-  height: 34px;
-  padding: 0.42rem;
-  background: var(--pz-success-bg);
-  border-radius: 10px;
-  object-fit: contain;
-}
-.supplement-result__title span {
-  display: grid;
-  gap: 0.1rem;
-}
-.supplement-result__title small {
-  color: var(--pz-secondary-ink);
-  font-size: 0.875rem;
-}
-.supplement-result__title h3 {
-  margin: 0;
-  font: 800 1.0625rem / 1.3 var(--pz-font-support);
-}
-.supplement-context {
-  margin: 0.45rem 0 0.25rem;
-  color: var(--pz-ink-label);
-  font-size: 0.875rem;
-}
 .pet-finalizers {
   display: grid;
   gap: 0.45rem;
