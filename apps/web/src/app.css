@@ -3835,7 +3835,11 @@
   line-height: 1.45;
 }
 .prep-step--temperature {
-  margin: 0.2rem 0;
+  /* Mantém a borda que separa a caixa do próximo passo (embaixo); ela não
+     existe em cima (a caixa não tem border-top própria), então a margem
+     inferior desconta a espessura dessa borda pra o respiro acima e abaixo
+     da caixa ficar igual — pedido da Flay (2026-09). */
+  margin: 0.2rem 0 calc(0.2rem - 1px);
   padding: 0.65rem !important;
   background: var(--pz-info-bg);
   border: 0 !important;
@@ -3851,13 +3855,6 @@
 }
 .prep-step--temperature p {
   color: var(--pz-info-ink) !important;
-}
-/* A caixa em si não tem border-top (removida acima), mas o item seguinte da
-   lista tinha a sua — só embaixo, deixando o respiro inferior visualmente
-   diferente do superior. Tira essa borda pra sobrar o mesmo respiro dos dois
-   lados (Flay, 2026-09). */
-.prep-step--temperature + li {
-  border-top: 0;
 }
 .prep-footnote {
   margin: 0.4rem 0 0.7rem !important;
