@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import type { DailyPlan, FormulationId, Recipe } from '@papazilla/nutrition-engine';
 import potinhoIcon from '../assets/icons/potinho.png';
+import calendarioIcon from '../assets/icons/calendario.png';
 import infoIcon from '../assets/icons/info.png';
+import zillaMascot from '../assets/zilla-frente.png';
 import type { StoredPet } from '../lib/petsStore.js';
 import { joinPt } from '../lib/petLabel.js';
 import { matchDietPreferences } from '../lib/dietPreferences.js';
@@ -68,12 +70,15 @@ export function RecipeResultCard({
   return (
     <div className="recipe-result-card">
       <div className="recipe-result-card__total">
-        <span>
+        <div className="recipe-result-card__total-text">
           <small>Total da receita</small>
           <strong>{formatGrams(recipe.totalCookedGrams)}</strong>
           <small>prontos</small>
-        </span>
-        <img src={potinhoIcon} alt="" />
+          <p className="recipe-result-card__tagline">
+            Comida boa faz histórias felizes! <span aria-hidden="true">♥</span>
+          </p>
+        </div>
+        <img className="recipe-result-card__mascot" src={zillaMascot} alt="" />
       </div>
       <div className="recipe-share-image">
         <button type="button" className="pz-button pz-button--outline wide" disabled={sharingImage} onClick={() => { void handleShareImage(); }}>
@@ -82,9 +87,14 @@ export function RecipeResultCard({
         {shareImageError ? <p className="recipe-share-image__error">{shareImageError}</p> : null}
       </div>
       <div className="recipe-preset-result">
-        <small>Proporção escolhida</small>
-        <strong>{FORMULATION_LABELS[formulation]}</strong>
-        <span>{formulationSummary(formulation)}</span>
+        <span className="recipe-preset-result__icon">
+          <img src={potinhoIcon} alt="" />
+        </span>
+        <div>
+          <small>Proporção escolhida</small>
+          <strong>{FORMULATION_LABELS[formulation]}</strong>
+          <span>{formulationSummary(formulation)}</span>
+        </div>
       </div>
       {selectedPets.length > 1 ? (
         <div className="pet-portion-breakdown">
@@ -114,15 +124,21 @@ export function RecipeResultCard({
           ))}
         </div>
       ) : (
-        <div className="portion-row">
-          <span>
+        <div className="portion-stats">
+          <div className="portion-stats__card">
+            <span className="portion-stats__icon">
+              <img src={calendarioIcon} alt="" />
+            </span>
             <small>Por dia</small>
             <strong>{formatGrams(petPlans[0]!.plan.totalGramsPerDay)}</strong>
-          </span>
-          <span>
+          </div>
+          <div className="portion-stats__card">
+            <span className="portion-stats__icon">
+              <img src={potinhoIcon} alt="" />
+            </span>
             <small>Por refeição</small>
             <strong>{formatGrams(mealSize(petPlans[0]!.plan, petPlans[0]!.pet))}</strong>
-          </span>
+          </div>
         </div>
       )}
       {clinicalRequired && orderedDisclaimers[0] ? (

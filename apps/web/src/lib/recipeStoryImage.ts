@@ -7,6 +7,9 @@
 import type { DailyPlan, FormulationId, Recipe } from '@papazilla/nutrition-engine';
 import type { StoredPet } from './petsStore.js';
 import wordmarkUrl from '../assets/papazilla-wordmark.png';
+import mascotUrl from '../assets/zilla-frente.png';
+import bowlIconUrl from '../assets/icons/potinho.png';
+import calendarIconUrl from '../assets/icons/calendario.png';
 import { FORMULATION_LABELS, formatGrams, formulationSummary, mealSize } from './recipeDisplay.js';
 
 const WIDTH = 1080;
@@ -47,6 +50,36 @@ async function ensureFontsReady(): Promise<void> {
   }
 }
 
+/** Traço curto e arredondado — os "riscos" decorativos do mockup de referência. */
+function drawDash(ctx: CanvasRenderingContext2D, cx: number, cy: number, len: number, angleDeg: number, color: string): void {
+  const rad = (angleDeg * Math.PI) / 180;
+  const dx = (Math.cos(rad) * len) / 2;
+  const dy = (Math.sin(rad) * len) / 2;
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 7;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(cx - dx, cy - dy);
+  ctx.lineTo(cx + dx, cy + dy);
+  ctx.stroke();
+  ctx.restore();
+}
+
+/** Sublinhado ondulado curto, tipo rabisco, sob "prontos". */
+function drawSquiggle(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, color: string): void {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 7;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.quadraticCurveTo(x + w * 0.25, y - 12, x + w * 0.5, y);
+  ctx.quadraticCurveTo(x + w * 0.75, y + 12, x + w, y);
+  ctx.stroke();
+  ctx.restore();
+}
+
 function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number): void {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
@@ -57,7 +90,8 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
   ctx.closePath();
 }
 
-/** Quebra `text` em linhas que cabem em `maxWidth`; desenha e devolve o y final. */
+/** Quebra `text` em até `maxLines` linhas que cabem em `maxWidth` (a última leva "…" se sobrar
+ * texto); desenha e devolve o y final. */
 function drawWrappedText(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -68,27 +102,31 @@ function drawWrappedText(
   maxLines = Infinity,
 ): number {
   const words = text.split(' ');
+  const lines: string[] = [];
   let line = '';
-  let lines = 0;
-  let cursorY = y;
-  for (let i = 0; i < words.length; i += 1) {
-    const test = line ? `${line} ${words[i]}` : words[i]!;
+  for (const word of words) {
+    const test = line ? `${line} ${word}` : word;
     if (ctx.measureText(test).width > maxWidth && line) {
-      ctx.fillText(line, x, cursorY);
-      line = words[i]!;
-      cursorY += lineHeight;
-      lines += 1;
-      if (lines >= maxLines - 1) {
-        const rest = words.slice(i).join(' ');
-        ctx.fillText(rest.length > 0 ? `${line} ${rest}`.trim() : line, x, cursorY);
-        return cursorY + lineHeight;
-      }
+      lines.push(line);
+      line = word;
     } else {
       line = test;
     }
   }
-  ctx.fillText(line, x, cursorY);
-  return cursorY + lineHeight;
+  if (line) lines.push(line);
+
+  const truncated = lines.length > maxLines;
+  const shown = lines.slice(0, maxLines);
+  if (truncated) {
+    let last = shown[shown.length - 1]!;
+    while (last.length > 0 && ctx.measureText(`${last}…`).width > maxWidth) {
+      last = last.slice(0, -1).trimEnd();
+    }
+    shown[shown.length - 1] = `${last}…`;
+  }
+
+  shown.forEach((l, i) => ctx.fillText(l, x, y + i * lineHeight));
+  return y + shown.length * lineHeight;
 }
 
 export interface RecipeStoryData {
@@ -99,7 +137,12 @@ export interface RecipeStoryData {
 
 export async function generateRecipeStoryImage({ recipe, petPlans, formulation }: RecipeStoryData): Promise<Blob> {
   await ensureFontsReady();
-  const wordmark = await loadImage(wordmarkUrl).catch(() => null);
+  const [wordmark, mascot, bowlIcon, calendarIcon] = await Promise.all([
+    loadImage(wordmarkUrl).catch(() => null),
+    loadImage(mascotUrl).catch(() => null),
+    loadImage(bowlIconUrl).catch(() => null),
+    loadImage(calendarIconUrl).catch(() => null),
+  ]);
 
   const canvas = document.createElement('canvas');
   canvas.width = WIDTH;
@@ -123,14 +166,17 @@ export async function generateRecipeStoryImage({ recipe, petPlans, formulation }
     y += 64;
   }
 
-  // Total da receita — cartão hero em gradiente
-  const heroH = 300;
+  // Total da receita — cartão hero em gradiente, com a Zilla e o potinho
+  const heroH = 460;
   const heroGrad = ctx.createLinearGradient(MARGIN, y, WIDTH - MARGIN, y + heroH);
   heroGrad.addColorStop(0, '#fce6db');
   heroGrad.addColorStop(1, PESSEGO);
   ctx.fillStyle = heroGrad;
   roundRect(ctx, MARGIN, y, CONTENT_WIDTH, heroH, 36);
   ctx.fill();
+
+  drawDash(ctx, WIDTH - MARGIN - 78, y + 46, 34, 60, CORAL);
+  drawDash(ctx, WIDTH - MARGIN - 44, y + 62, 34, 60, CORAL);
 
   ctx.fillStyle = INK_MUTED;
   ctx.font = '700 32px Nunito';
@@ -145,6 +191,26 @@ export async function generateRecipeStoryImage({ recipe, petPlans, formulation }
   ctx.font = '700 32px Nunito';
   ctx.fillText('prontos', MARGIN + 56, y + 258);
 
+  drawSquiggle(ctx, MARGIN + 56, y + 288, 280, CORAL);
+
+  ctx.fillStyle = INK;
+  ctx.font = '700 30px Nunito';
+  drawWrappedText(ctx, 'Comida boa faz histórias felizes! ♥', MARGIN + 56, y + 348, 420, 40, 2);
+
+  if (mascot) {
+    const mascotW = 260;
+    const mascotH = (mascot.height / mascot.width) * mascotW;
+    const mascotX = WIDTH - MARGIN - mascotW - 24;
+    const mascotY = y + heroH - mascotH - 70;
+    ctx.drawImage(mascot, mascotX, mascotY, mascotW, mascotH);
+
+    if (bowlIcon) {
+      const bowlW = 150;
+      const bowlH = (bowlIcon.height / bowlIcon.width) * bowlW;
+      ctx.drawImage(bowlIcon, mascotX + (mascotW - bowlW) / 2, mascotY + mascotH - 46, bowlW, bowlH);
+    }
+  }
+
   y += heroH + 48;
 
   // Proporção escolhida
@@ -153,17 +219,31 @@ export async function generateRecipeStoryImage({ recipe, petPlans, formulation }
   roundRect(ctx, MARGIN, y, CONTENT_WIDTH, presetH, 28);
   ctx.fill();
 
+  const presetIconR = 44;
+  const presetIconCx = MARGIN + 40 + presetIconR;
+  const presetIconCy = y + presetH / 2;
+  ctx.fillStyle = PESSEGO;
+  ctx.beginPath();
+  ctx.arc(presetIconCx, presetIconCy, presetIconR, 0, Math.PI * 2);
+  ctx.fill();
+  if (bowlIcon) {
+    const iconW = 48;
+    const iconH = (bowlIcon.height / bowlIcon.width) * iconW;
+    ctx.drawImage(bowlIcon, presetIconCx - iconW / 2, presetIconCy - iconH / 2, iconW, iconH);
+  }
+
+  const presetTextX = MARGIN + 40 + presetIconR * 2 + 32;
   ctx.fillStyle = INK_LABEL;
   ctx.font = '700 30px Nunito';
-  ctx.fillText('Proporção escolhida', MARGIN + 44, y + 62);
+  ctx.fillText('Proporção escolhida', presetTextX, y + 62);
 
   ctx.fillStyle = INK;
   ctx.font = '800 40px Nunito';
-  ctx.fillText(FORMULATION_LABELS[formulation], MARGIN + 44, y + 108);
+  ctx.fillText(FORMULATION_LABELS[formulation], presetTextX, y + 108);
 
   ctx.fillStyle = INK_MUTED;
-  ctx.font = '400 28px Nunito';
-  drawWrappedText(ctx, formulationSummary(formulation), MARGIN + 44, y + 148, CONTENT_WIDTH - 88, 36, 1);
+  ctx.font = '400 26px Nunito';
+  drawWrappedText(ctx, formulationSummary(formulation), presetTextX, y + 148, WIDTH - MARGIN - 44 - presetTextX, 34, 1);
 
   y += presetH + 48;
 
@@ -175,20 +255,28 @@ export async function generateRecipeStoryImage({ recipe, petPlans, formulation }
   const contentBottom = HEIGHT - FOOTER_RESERVED;
   const GAP = 48;
 
-  const MAX_PETS_SHOWN = 5;
-  const visiblePetPlans = petPlans.slice(0, MAX_PETS_SHOWN);
-  const extraPetsCount = petPlans.length - visiblePetPlans.length;
-  const petRowH = 96;
-  const statH =
-    petPlans.length === 1
-      ? 220
-      : 60 + visiblePetPlans.length * petRowH + (extraPetsCount > 0 ? 56 : 0);
-
   // O que pesar
   const rows = recipe.groups.filter((g) => g.key !== 'herbs').flatMap((g) => g.rows);
   const rowH = 76;
-  const tableBudget = contentBottom - y - GAP - statH;
   const tableHeightFor = (n: number, hasExtra: boolean) => 92 + n * rowH + (hasExtra ? 56 : 0) + 24;
+  const MIN_TABLE_ROWS = Math.min(2, rows.length);
+  const minTableH = rows.length > 0 ? tableHeightFor(MIN_TABLE_ROWS, MIN_TABLE_ROWS < rows.length) : 0;
+
+  // Quantos pets cabem no bloco de estatísticas, reservando ANTES o mínimo pra
+  // tabela de ingredientes — assim uma receita com muitos pets nunca empurra o
+  // rodapé pra fora do canvas (que tem altura fixa, formato story).
+  const petRowH = 96;
+  const statHeightFor = (n: number, hasExtra: boolean) => (petPlans.length === 1 ? 220 : 60 + n * petRowH + (hasExtra ? 56 : 0));
+  const statBudget = contentBottom - y - GAP - minTableH - GAP;
+  let petsShown = petPlans.length === 1 ? 1 : Math.min(5, petPlans.length);
+  while (petsShown > 1 && statHeightFor(petsShown, petsShown < petPlans.length) > statBudget) {
+    petsShown -= 1;
+  }
+  const visiblePetPlans = petPlans.slice(0, petsShown);
+  const extraPetsCount = petPlans.length - visiblePetPlans.length;
+  const statH = statHeightFor(visiblePetPlans.length, extraPetsCount > 0);
+
+  const tableBudget = contentBottom - y - GAP - statH;
   let visibleCount = rows.length;
   while (visibleCount > 0 && tableHeightFor(visibleCount, visibleCount < rows.length) > tableBudget) {
     visibleCount -= 1;
@@ -246,26 +334,40 @@ export async function generateRecipeStoryImage({ recipe, petPlans, formulation }
 
   y += tableH + 48;
 
-  // Por dia / Por refeição
+  // Por dia / Por refeição — dois cartões lado a lado, cada um com seu selo de ícone
   if (petPlans.length === 1) {
     const { pet, plan } = petPlans[0]!;
-    ctx.fillStyle = '#eaf0d4';
-    roundRect(ctx, MARGIN, y, CONTENT_WIDTH, statH, 28);
-    ctx.fill();
-
-    const colW = CONTENT_WIDTH / 2;
-    const stats: [string, string][] = [
-      ['Por dia', formatGrams(plan.totalGramsPerDay)],
-      ['Por refeição', formatGrams(mealSize(plan, pet))],
+    const cardGap = 28;
+    const cardW = (CONTENT_WIDTH - cardGap) / 2;
+    const stats: [string, string, HTMLImageElement | null][] = [
+      ['Por dia', formatGrams(plan.totalGramsPerDay), calendarIcon],
+      ['Por refeição', formatGrams(mealSize(plan, pet)), bowlIcon],
     ];
-    stats.forEach(([label, value], i) => {
-      const cx = MARGIN + colW * i + colW / 2;
+    stats.forEach(([label, value, icon], i) => {
+      const cardX = MARGIN + i * (cardW + cardGap);
+      ctx.fillStyle = '#eaf0d4';
+      roundRect(ctx, cardX, y, cardW, statH, 26);
+      ctx.fill();
+
+      const cx = cardX + cardW / 2;
+      const badgeR = 40;
+      const badgeCy = y + 66;
+      ctx.fillStyle = 'rgb(255 255 255 / 62%)';
+      ctx.beginPath();
+      ctx.arc(cx, badgeCy, badgeR, 0, Math.PI * 2);
+      ctx.fill();
+      if (icon) {
+        const iconW = 42;
+        const iconH = (icon.height / icon.width) * iconW;
+        ctx.drawImage(icon, cx - iconW / 2, badgeCy - iconH / 2, iconW, iconH);
+      }
+
       ctx.textAlign = 'center';
       ctx.fillStyle = '#4c5a16';
-      ctx.font = '700 30px Nunito';
-      ctx.fillText(label, cx, y + 92);
-      ctx.font = '800 64px Fredoka';
-      ctx.fillText(value, cx, y + 168);
+      ctx.font = '700 28px Nunito';
+      ctx.fillText(label, cx, y + 134);
+      ctx.font = '800 56px Fredoka';
+      ctx.fillText(value, cx, y + 196);
       ctx.textAlign = 'left';
     });
   } else {
