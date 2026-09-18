@@ -68,7 +68,7 @@ describe('buildRecipe — com vísceras glandulares e múltiplos dias', () => {
     selection: {
       ...emptySel,
       proteins: ['frango_peito', 'boi_musculo'],
-      organs: ['figado'],
+      organs: ['figado_bovino'],
       carbs: ['arroz_branco'],
       vegetables: ['cenoura'],
     },

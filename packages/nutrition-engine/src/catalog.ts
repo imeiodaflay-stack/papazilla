@@ -45,10 +45,13 @@ export const PROTEINS: readonly CatalogItem[] = [
 ];
 
 export const ORGANS: readonly CatalogItem[] = [
-  { id: 'figado', label: 'Fígado (frango, boi ou porco)', common: true, rawGroup: 'viscera' },
-  { id: 'rim', label: 'Rim (boi ou porco)', common: true, rawGroup: 'viscera' },
-  { id: 'baco', label: 'Baço (boi)', common: true, rawGroup: 'viscera' },
-  { id: 'cerebro', label: 'Cérebro (boi ou porco)', common: true, rawGroup: 'viscera' },
+  { id: 'figado_bovino', label: 'Fígado bovino', common: true, rawGroup: 'viscera' },
+  { id: 'figado_frango', label: 'Fígado de frango', common: true, rawGroup: 'viscera' },
+  { id: 'figado_suino', label: 'Fígado suíno', common: false, rawGroup: 'viscera' },
+  { id: 'rim_bovino', label: 'Rim bovino', common: true, rawGroup: 'viscera' },
+  { id: 'rim_suino', label: 'Rim suíno', common: false, rawGroup: 'viscera' },
+  { id: 'baco_bovino', label: 'Baço bovino', common: true, rawGroup: 'viscera' },
+  { id: 'baco_suino', label: 'Baço suíno', common: false, rawGroup: 'viscera' },
 ];
 
 export const CARBS: readonly CatalogItem[] = [
