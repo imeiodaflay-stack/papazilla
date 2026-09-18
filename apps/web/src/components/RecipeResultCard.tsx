@@ -110,11 +110,15 @@ export function RecipeResultCard({
       ) : null}
       <RecipeFinalizers petPlans={petPlans} />
       <RecipePreparationSteps petPlans={petPlans} days={days} />
-      <details className="recipe-detail-section recipe-more-info">
+      <details className="recipe-preparation">
         <summary>
-          Mais sobre esta receita <span>⌄</span>
+          <span>
+            <img src={infoIcon} alt="" />
+            Mais sobre esta receita
+          </span>
+          <b aria-hidden="true">⌄</b>
         </summary>
-        <div>
+        <div className="recipe-preparation__body recipe-more-info">
           {dietPreferenceNotes.length > 0 ? (
             <div className="result-group">
               <h3>Gostos do seu monstrinho</h3>

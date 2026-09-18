@@ -4422,34 +4422,7 @@
 .recipe-quick-stats strong {
   font: 800 0.875rem / 1.2 var(--pz-font-support);
 }
-.recipe-detail-section {
-  background: #fff;
-  border: 1px solid var(--pz-border);
-  border-radius: 17px;
-  overflow: hidden;
-}
-.recipe-detail-section summary {
-  min-height: 50px;
-  padding: 0.7rem 0.8rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  list-style: none;
-  cursor: pointer;
-  font: 800 0.875rem / 1.2 var(--pz-font-support);
-}
-.recipe-detail-section summary::-webkit-details-marker {
-  display: none;
-}
-.recipe-detail-section summary span {
-  color: var(--pz-ink-label);
-  transition: transform 0.2s ease;
-}
-.recipe-detail-section[open] summary span {
-  transform: rotate(180deg);
-}
-.recipe-detail-section > div {
-  padding: 0.2rem 0.8rem 0.6rem;
+.recipe-more-info {
   display: grid;
   gap: 0.6rem;
 }
