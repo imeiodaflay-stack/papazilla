@@ -3834,53 +3834,6 @@
   font-size: 0.875rem !important;
   line-height: 1.45;
 }
-.prep-step--temperature {
-  /* Mantém a borda que separa a caixa do próximo passo (embaixo); ela não
-     existe em cima (a caixa não tem border-top própria), então a margem
-     inferior desconta a espessura dessa borda pra o respiro acima e abaixo
-     da caixa ficar igual — pedido da Flay (2026-09). */
-  margin: 0.2rem 0 calc(0.2rem - 1px);
-  padding: 0.65rem !important;
-  background: var(--pz-info-bg);
-  border: 0 !important;
-  border-radius: 12px;
-}
-.prep-step--temperature > span:first-child {
-  background: #fff !important;
-}
-.prep-step--temperature img {
-  width: 17px;
-  height: 17px;
-  object-fit: contain;
-}
-.prep-step--temperature p {
-  color: var(--pz-info-ink) !important;
-}
-.prep-footnote {
-  margin: 0.4rem 0 0.7rem !important;
-  color: var(--pz-ink-label);
-  font-size: 0.875rem !important;
-  line-height: 1.4;
-}
-.prep-sources {
-  padding: 0.55rem !important;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.45rem;
-  background: var(--pz-surface-sunken);
-  border-radius: 10px;
-}
-.prep-sources span {
-  flex-basis: 100%;
-  color: var(--pz-ink-label);
-  font-size: 0.875rem;
-}
-.prep-sources a {
-  color: var(--pz-accent-ink);
-  font: 800 0.875rem / 1 var(--pz-font-support);
-  text-decoration: none;
-}
 .portion-row {
   padding: 0.8rem;
   display: grid;

@@ -1,5 +1,4 @@
 import type { DailyPlan } from '@papazilla/nutrition-engine';
-import infoIcon from '../assets/icons/info.png';
 import receitaIcon from '../assets/icons/receita.png';
 import type { StoredPet } from '../lib/petsStore.js';
 import { prepPortionsText } from '../lib/recipeDisplay.js';
@@ -59,15 +58,6 @@ export function RecipePreparationSteps({
               <p>Cozinhe cada grupo separadamente, em água ou no vapor. Não use cebola, alho, molhos ou temperos prontos.</p>
             </div>
           </li>
-          <li className="prep-step--temperature">
-            <span>
-              <img src={infoIcon} alt="" />
-            </span>
-            <div>
-              <strong>Confirme 74&nbsp;°C nas carnes e vísceras</strong>
-              <p>Meça no centro da parte mais espessa. Cor e tempo sozinhos não confirmam um cozimento seguro.</p>
-            </div>
-          </li>
           <li>
             <span>4</span>
             <div>
@@ -97,26 +87,6 @@ export function RecipePreparationSteps({
             </div>
           </li>
         </ol>
-        <p className="prep-footnote">
-          *Estimativa para cubos de 2–3 cm em fervura suave. Quantidade, panela e fogão alteram o tempo; o termômetro
-          define o ponto seguro.
-        </p>
-        <div className="prep-sources">
-          <span>Segurança alimentar</span>
-          <a
-            href="https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/food-safety-basics/safe-temperature-chart"
-            target="_blank"
-            rel="noopener"
-          >
-            Temperatura ↗
-          </a>
-          <a href="https://ask.fsis.usda.gov/article/Is-it-necessary-to-rinse-soak-or-brine-chicken-to-make-it-safe" target="_blank" rel="noopener">
-            Frango ↗
-          </a>
-          <a href="https://www.fda.gov/animal-veterinary/animal-health-literacy/tips-safe-handling-pet-food-and-treats" target="_blank" rel="noopener">
-            Higiene ↗
-          </a>
-        </div>
       </div>
     </details>
   );
