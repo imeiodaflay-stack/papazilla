@@ -138,6 +138,8 @@ export interface CatalogItem {
   vegLoosens?: boolean;
   /** Erva com dose de referência na fonte. */
   sourced?: boolean;
+  /** Nota curta (popularidade + preparo/observação) exibida no card do ingrediente. */
+  note?: string;
 }
 
 export interface RecipeSelection {

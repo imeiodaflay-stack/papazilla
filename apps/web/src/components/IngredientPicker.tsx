@@ -1,7 +1,8 @@
 import type { CatalogItem } from '@papazilla/nutrition-engine';
 
-/** Pequenas notas por ingrediente — só os alertas que já existem no catálogo do motor. */
+/** Pequenas notas por ingrediente — nota própria do catálogo (ex. carboidratos) ou os alertas de sempre. */
 function ingredientHint(item: CatalogItem): string | undefined {
+  if (item.note) return item.note;
   if (item.id === 'peixe') return 'Fonte de ômega-3';
   if (item.highFat) return 'Alto teor de gordura';
   if (item.muscularOrgan) return 'Víscera muscular';

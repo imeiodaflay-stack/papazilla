@@ -52,16 +52,56 @@ export const ORGANS: readonly CatalogItem[] = [
 ];
 
 export const CARBS: readonly CatalogItem[] = [
-  { id: 'batata_doce', label: 'Batata-doce', common: true, rawGroup: 'tuberculo' },
-  { id: 'mandioquinha', label: 'Mandioquinha (batata-baroa)', common: true, rawGroup: 'tuberculo' },
-  { id: 'inhame', label: 'Inhame', common: true, rawGroup: 'tuberculo' },
-  { id: 'cara', label: 'Cará', common: true, rawGroup: 'tuberculo' },
-  { id: 'mandioca', label: 'Mandioca', common: true, rawGroup: 'tuberculo' },
-  { id: 'arroz_integral', label: 'Arroz integral', common: true, rawGroup: 'grao' },
-  { id: 'arroz_branco', label: 'Arroz branco', common: true, rawGroup: 'grao' },
-  { id: 'aveia', label: 'Aveia', common: true, rawGroup: 'grao' },
-  { id: 'quinoa', label: 'Quinoa', common: true, rawGroup: 'grao' },
-  { id: 'lentilha', label: 'Lentilha', common: true, rawGroup: 'grao' },
+  { id: 'arroz_branco', label: 'Arroz branco', common: true, rawGroup: 'grao', note: '⭐ Muito comum · Fácil digestão, sabor neutro' },
+  {
+    id: 'arroz_integral',
+    label: 'Arroz integral',
+    common: false,
+    rawGroup: 'grao',
+    note: '⭐ Comum · Mais fibra; nem sempre ideal para cães sensíveis',
+  },
+  { id: 'batata_inglesa', label: 'Batata inglesa', common: true, rawGroup: 'tuberculo', note: '⭐ Muito comum · Sempre cozida' },
+  { id: 'batata_doce', label: 'Batata-doce', common: true, rawGroup: 'tuberculo', note: '⭐ Muito comum · Boa fonte de amido e fibra' },
+  {
+    id: 'aveia',
+    label: 'Aveia',
+    common: true,
+    rawGroup: 'grao',
+    note: '⭐ Muito comum · Boa fonte de fibra solúvel; oferecer cozida',
+  },
+  {
+    id: 'mandioca',
+    label: 'Mandioca (aipim/macaxeira)',
+    common: false,
+    rawGroup: 'tuberculo',
+    note: 'Comum · Só bem cozida e corretamente preparada',
+  },
+  { id: 'inhame', label: 'Inhame', common: false, rawGroup: 'tuberculo', note: 'Comum · Cozido' },
+  { id: 'cara', label: 'Cará', common: false, rawGroup: 'tuberculo', note: 'Comum · Cozido' },
+  { id: 'milho', label: 'Milho', common: false, rawGroup: 'grao', note: 'Comum · Cozido; não é "vilão" nutricional' },
+  {
+    id: 'fuba_polenta',
+    label: 'Fubá/polenta',
+    common: false,
+    rawGroup: 'grao',
+    note: 'Boa opção · Preparado apenas com água, sem temperos',
+  },
+  { id: 'cevada', label: 'Cevada', common: false, rawGroup: 'grao', note: 'Boa opção · Cozida' },
+  { id: 'quinoa', label: 'Quinoa', common: false, rawGroup: 'grao', note: 'Boa opção · Cozida e bem lavada' },
+  {
+    id: 'trigo_sarraceno',
+    label: 'Trigo-sarraceno',
+    common: false,
+    rawGroup: 'grao',
+    note: 'Boa opção · Não é trigo; pode ser usado cozido',
+  },
+  {
+    id: 'macarrao_simples',
+    label: 'Macarrão simples',
+    common: false,
+    rawGroup: 'grao',
+    note: 'Permitido · Menos interessante nutricionalmente; sem molho/temperos',
+  },
 ];
 
 export const VEGETABLES: readonly CatalogItem[] = [
