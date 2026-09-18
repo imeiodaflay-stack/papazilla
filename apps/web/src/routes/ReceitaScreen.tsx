@@ -234,8 +234,6 @@ export function ReceitaScreen() {
         ? `Receita ${describePet(selectedPets[0]).preposition} ${describePet(selectedPets[0]).displayName}`
         : 'Receita';
 
-  const stepLabel = isResultStep ? 'Receita pronta' : `Etapa ${step + 1} de ${STEPS_COUNT - 1}`;
-
   const eyebrowByStep = [
     'A matilha à mesa',
     'Composição do potinho',
@@ -292,7 +290,7 @@ export function ReceitaScreen() {
         </button>
         <div>
           <span className="flow-header__eyebrow">{contextLabel}</span>
-          <strong>{stepLabel}</strong>
+          {isResultStep ? <strong>Receita pronta</strong> : null}
         </div>
         <span className="flow-header__avatar">
           <img src={potinhoIcon} alt="" />
