@@ -7,9 +7,10 @@
 import type { DailyPlan, FormulationId, Recipe } from '@papazilla/nutrition-engine';
 import type { StoredPet } from './petsStore.js';
 import wordmarkUrl from '../assets/papazilla-wordmark.png';
-import mascotUrl from '../assets/zilla-frente.png';
+import mascotUrl from '../assets/papazilla-lockup.png';
 import bowlIconUrl from '../assets/icons/potinho.png';
 import calendarIconUrl from '../assets/icons/calendario.png';
+import { joinPt } from './petLabel.js';
 import { FORMULATION_LABELS, formatGrams, formulationSummary, mealSize } from './recipeDisplay.js';
 
 const WIDTH = 1080;
@@ -43,6 +44,7 @@ async function ensureFontsReady(): Promise<void> {
       document.fonts.load('800 40px Nunito'),
       document.fonts.load('700 34px Nunito'),
       document.fonts.load('400 32px Nunito'),
+      document.fonts.load('700 44px Caveat'),
     ]);
     await document.fonts.ready;
   } catch {
@@ -133,9 +135,10 @@ export interface RecipeStoryData {
   recipe: Recipe;
   petPlans: { pet: StoredPet; plan: DailyPlan }[];
   formulation: FormulationId;
+  format: string;
 }
 
-export async function generateRecipeStoryImage({ recipe, petPlans, formulation }: RecipeStoryData): Promise<Blob> {
+export async function generateRecipeStoryImage({ recipe, petPlans, formulation, format }: RecipeStoryData): Promise<Blob> {
   await ensureFontsReady();
   const [wordmark, mascot, bowlIcon, calendarIcon] = await Promise.all([
     loadImage(wordmarkUrl).catch(() => null),
@@ -160,7 +163,10 @@ export async function generateRecipeStoryImage({ recipe, petPlans, formulation }
   if (wordmark) {
     const w = 360;
     const h = (wordmark.height / wordmark.width) * w;
+    ctx.save();
+    ctx.globalCompositeOperation = 'multiply';
     ctx.drawImage(wordmark, (WIDTH - w) / 2, y, w, h);
+    ctx.restore();
     y += h + 64;
   } else {
     y += 64;
@@ -178,6 +184,14 @@ export async function generateRecipeStoryImage({ recipe, petPlans, formulation }
   drawDash(ctx, WIDTH - MARGIN - 78, y + 46, 34, 60, CORAL);
   drawDash(ctx, WIDTH - MARGIN - 44, y + 62, 34, 60, CORAL);
 
+  const petNames = petPlans.map(({ pet }) => pet.name);
+  const fornalhaLabel = petNames.length <= 3
+    ? `A fornalha de ${joinPt(petNames)}`
+    : `A fornalha de ${petNames[0]} + ${petNames.length - 1} monstrinhos`;
+  ctx.fillStyle = INK_MUTED;
+  ctx.font = '800 28px Nunito';
+  ctx.fillText(fornalhaLabel, MARGIN + 56, y + 45, 500);
+
   ctx.fillStyle = INK_MUTED;
   ctx.font = '700 32px Nunito';
   ctx.textBaseline = 'alphabetic';
@@ -194,27 +208,19 @@ export async function generateRecipeStoryImage({ recipe, petPlans, formulation }
   drawSquiggle(ctx, MARGIN + 56, y + 288, 280, CORAL);
 
   ctx.fillStyle = INK;
-  ctx.font = '700 30px Nunito';
-  drawWrappedText(ctx, 'Comida boa faz histórias felizes! ♥', MARGIN + 56, y + 348, 420, 40, 2);
+  ctx.font = '700 43px Caveat';
+  drawWrappedText(ctx, 'Comida boa faz histórias felizes! ♥', MARGIN + 56, y + 348, 410, 42, 2);
 
   if (mascot) {
-    const mascotW = 260;
-    const mascotH = (mascot.height / mascot.width) * mascotW;
-    const mascotX = WIDTH - MARGIN - mascotW - 24;
-    const mascotY = y + heroH - mascotH - 70;
-    ctx.drawImage(mascot, mascotX, mascotY, mascotW, mascotH);
-
-    if (bowlIcon) {
-      const bowlW = 150;
-      const bowlH = (bowlIcon.height / bowlIcon.width) * bowlW;
-      ctx.drawImage(bowlIcon, mascotX + (mascotW - bowlW) / 2, mascotY + mascotH - 46, bowlW, bowlH);
-    }
+    // A imagem de marca inclui a Zilla com o potinho na metade superior; o
+    // recorte mantém a ilustração original sem puxar o wordmark de baixo.
+    ctx.drawImage(mascot, 65, 0, 510, 420, WIDTH - MARGIN - 395, y + 95, 395, 330);
   }
 
   y += heroH + 48;
 
   // Proporção escolhida
-  const presetH = 176;
+  const presetH = 190;
   ctx.fillStyle = SURFACE_SOFT;
   roundRect(ctx, MARGIN, y, CONTENT_WIDTH, presetH, 28);
   ctx.fill();
@@ -242,8 +248,8 @@ export async function generateRecipeStoryImage({ recipe, petPlans, formulation }
   ctx.fillText(FORMULATION_LABELS[formulation], presetTextX, y + 108);
 
   ctx.fillStyle = INK_MUTED;
-  ctx.font = '400 26px Nunito';
-  drawWrappedText(ctx, formulationSummary(formulation), presetTextX, y + 148, WIDTH - MARGIN - 44 - presetTextX, 34, 1);
+  ctx.font = '400 25px Nunito';
+  drawWrappedText(ctx, formulationSummary(formulation), presetTextX, y + 145, WIDTH - MARGIN - 44 - presetTextX, 30, 2);
 
   y += presetH + 48;
 
@@ -256,7 +262,7 @@ export async function generateRecipeStoryImage({ recipe, petPlans, formulation }
   const GAP = 48;
 
   // O que pesar
-  const rows = recipe.groups.filter((g) => g.key !== 'herbs').flatMap((g) => g.rows);
+  const rows = recipe.groups.filter((g) => g.key !== 'herbs').flatMap((g) => g.rows.map((row) => ({ ...row, groupKey: g.key })));
   const rowH = 76;
   const tableHeightFor = (n: number, hasExtra: boolean) => 92 + n * rowH + (hasExtra ? 56 : 0) + 24;
   const MIN_TABLE_ROWS = Math.min(2, rows.length);
@@ -296,16 +302,22 @@ export async function generateRecipeStoryImage({ recipe, petPlans, formulation }
   ctx.fillStyle = INK;
   ctx.font = '800 40px Nunito';
   ctx.fillText('O que pesar', MARGIN + 44, y + 68);
+  ctx.fillStyle = INK_LABEL;
+  ctx.font = '700 25px Nunito';
+  ctx.textAlign = 'right';
+  ctx.fillText(format === 'Quantidade dos alimentos crus' ? 'peso cru' : 'peso pronto', WIDTH - MARGIN - 44, y + 68);
+  ctx.textAlign = 'left';
 
   let rowY = y + 92;
   ctx.font = '700 32px Nunito';
   for (const row of visibleRows) {
     rowY += rowH;
-    ctx.strokeStyle = BORDER;
-    ctx.beginPath();
-    ctx.moveTo(MARGIN + 44, rowY - rowH + 20);
-    ctx.lineTo(WIDTH - MARGIN - 44, rowY - rowH + 20);
-    ctx.stroke();
+    ctx.fillStyle = '#fff8f4';
+    roundRect(ctx, MARGIN + 30, rowY - rowH + 4, CONTENT_WIDTH - 60, rowH - 5, 16);
+    ctx.fill();
+    ctx.fillStyle = row.groupKey === 'proteins' ? CORAL : row.groupKey === 'vegetables' ? '#adb047' : row.groupKey === 'carbs' ? '#d3a038' : INK;
+    roundRect(ctx, MARGIN + 30, rowY - rowH + 4, 8, rowH - 5, 4);
+    ctx.fill();
 
     ctx.fillStyle = INK;
     ctx.font = '700 32px Nunito';
@@ -313,12 +325,8 @@ export async function generateRecipeStoryImage({ recipe, petPlans, formulation }
     const label = row.label.length > 30 ? `${row.label.slice(0, 29)}…` : row.label;
     ctx.fillText(label, MARGIN + 44, rowY - 12);
 
-    const amountTxt =
-      row.cookedGrams !== undefined
-        ? `≈ ${formatGrams(row.cookedGrams)}`
-        : row.rawGrams !== undefined
-          ? `≈ ${formatGrams(row.rawGrams)}`
-          : row.note ?? '—';
+    const weight = format === 'Quantidade dos alimentos crus' ? row.rawGrams : row.cookedGrams;
+    const amountTxt = weight !== undefined ? `≈ ${formatGrams(weight)}` : row.note ?? '—';
     ctx.fillStyle = INK;
     ctx.font = '800 32px Nunito';
     ctx.textAlign = 'right';
@@ -411,7 +419,8 @@ export async function generateRecipeStoryImage({ recipe, petPlans, formulation }
   ctx.textAlign = 'center';
   ctx.fillStyle = INK;
   ctx.font = '700 34px Nunito';
-  ctx.fillText('Receita feita no Papazilla.', WIDTH / 2, footerY);
+  const needsClinicalReview = petPlans.some(({ plan }) => plan.clinicalReviewRequired);
+  ctx.fillText(needsClinicalReview ? 'Revisão veterinária recomendada.' : 'Receita feita no Papazilla.', WIDTH / 2, footerY);
   ctx.fillStyle = CORAL;
   ctx.font = '800 34px Nunito';
   ctx.fillText('Baixe o app → papazilla.app', WIDTH / 2, footerY + 52);

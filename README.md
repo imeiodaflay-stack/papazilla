@@ -31,6 +31,10 @@ npm run typecheck      # tsc --noEmit em todos os pacotes
 npm run build          # build de produção do app web
 ```
 
+Prévia visual da receita pronta e da imagem vertical, com dados ilustrativos:
+inicie `npm run dev` e abra `http://localhost:5173/recipe-design-preview.html`.
+Essa página serve para revisão de design e não integra o fluxo do produto.
+
 ## Motor nutricional
 
 `@papazilla/nutrition-engine` é um port fiel de `prototypes/calculadora-an-cozida.html`
@@ -61,12 +65,10 @@ no servidor. O detalhe usa snapshots imutáveis; fornalhas ficam em
 `recipe_preparations`. Compartilhamento imprimível e exclusão da conta estão
 implementados em código. O modo desconectado ainda usa dados locais.
 
-Em dev, as tabelas, colunas, políticas e privilégios foram conferidos. A
-migration `supabase/migrations/20260917160000_data_api_grants.sql` foi aplicada
-**somente em dev**. Um teste integrado com duas contas descartáveis passou:
-criação da receita pelo handler local com Supabase real, RLS, snapshot após
-edição do pet, proteção do cálculo e registro de preparo. As contas e os dados
-de teste foram removidos. Ainda faltam o deploy em Preview, o fluxo visual
-com sessão real e a integração Asaas no sandbox; produção não recebeu estas
-migrations de receitas. Capacitor vem quando o fluxo web estiver estável.
+As migrations de receitas e grants foram aplicadas em dev e produção. Um teste
+integrado com contas descartáveis passou em dev: criação de receita, RLS,
+snapshot após edição do pet e registro de preparo. O empacotamento da API foi
+validado em Preview e publicado em `papazilla.app` em 2026-09-18. A criação de
+uma receita com assinatura ativa em produção e a integração Asaas no sandbox
+ainda precisam de validação. Capacitor vem quando o fluxo web estiver estável.
 Ver `../HANDOVER.md` para o estado mais recente.

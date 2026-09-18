@@ -3,7 +3,7 @@ import type { DailyPlan, FormulationId, Recipe } from '@papazilla/nutrition-engi
 import potinhoIcon from '../assets/icons/potinho.png';
 import calendarioIcon from '../assets/icons/calendario.png';
 import infoIcon from '../assets/icons/info.png';
-import zillaMascot from '../assets/zilla-frente.png';
+import zillaBowl from '../assets/papazilla-lockup.png';
 import type { StoredPet } from '../lib/petsStore.js';
 import { joinPt } from '../lib/petLabel.js';
 import { matchDietPreferences } from '../lib/dietPreferences.js';
@@ -46,7 +46,7 @@ export function RecipeResultCard({
     setSharingImage(true);
     setShareImageError(null);
     try {
-      await shareRecipeStoryImage({ recipe, petPlans, formulation });
+      await shareRecipeStoryImage({ recipe, petPlans, formulation, format });
     } catch {
       setShareImageError('Não foi possível gerar a imagem agora. Tente de novo.');
     } finally {
@@ -71,19 +71,23 @@ export function RecipeResultCard({
     <div className="recipe-result-card">
       <div className="recipe-result-card__total">
         <div className="recipe-result-card__total-text">
-          <small>Total da receita</small>
+          <small className="recipe-result-card__pet">{selectedPets.length === 1 ? `A fornalha de ${selectedPets[0]!.name}` : 'A fornalha da matilha'}</small>
+          <span className="recipe-result-card__label">Total da receita</span>
           <strong>{formatGrams(recipe.totalCookedGrams)}</strong>
-          <small>prontos</small>
+          <small className="recipe-result-card__ready">prontos</small>
           <p className="recipe-result-card__tagline">
             Comida boa faz histórias felizes! <span aria-hidden="true">♥</span>
           </p>
         </div>
-        <img className="recipe-result-card__mascot" src={zillaMascot} alt="" />
+        <div className="recipe-result-card__art" aria-hidden="true">
+          <img src={zillaBowl} alt="" />
+        </div>
       </div>
       <div className="recipe-share-image">
         <button type="button" className="pz-button pz-button--outline wide" disabled={sharingImage} onClick={() => { void handleShareImage(); }}>
-          {sharingImage ? 'Gerando imagem…' : 'Compartilhar imagem da receita'}
+          {sharingImage ? 'Gerando imagem…' : 'Compartilhar imagem para stories'}
         </button>
+        <small>Uma lembrança da fornalha, pronta para postar ou salvar.</small>
         {shareImageError ? <p className="recipe-share-image__error">{shareImageError}</p> : null}
       </div>
       <div className="recipe-preset-result">

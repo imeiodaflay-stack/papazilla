@@ -13,7 +13,7 @@ import { formatGrams } from '../lib/recipeDisplay.js';
  * acordeão, porque é a informação mais acionável da receita (Flay, 2026-09).
  */
 export function RecipeIngredientTable({ groups, format }: { groups: RecipeGroup[]; format: string }) {
-  const rows = groups.filter((g) => g.key !== 'herbs').flatMap((g) => g.rows);
+  const rows = groups.filter((g) => g.key !== 'herbs').flatMap((g) => g.rows.map((row) => ({ ...row, groupKey: g.key })));
   const showRaw = format !== 'Quantidade dos alimentos prontos';
   const showCooked = format !== 'Quantidade dos alimentos crus';
   const columns = (showRaw ? 1 : 0) + (showCooked ? 1 : 0);
@@ -29,7 +29,7 @@ export function RecipeIngredientTable({ groups, format }: { groups: RecipeGroup[
         </div>
       ) : null}
       {rows.map((row) => (
-        <div key={row.id} className={`ingredient-table__row${columns === 1 ? ' ingredient-table__row--single' : ''}`}>
+        <div key={row.id} className={`ingredient-table__row ingredient-table__row--${row.groupKey}${columns === 1 ? ' ingredient-table__row--single' : ''}`}>
           <span>{row.label}</span>
           {showRaw ? <strong>{row.rawGrams !== undefined ? `≈ ${formatGrams(row.rawGrams)}` : '—'}</strong> : null}
           {showCooked ? <strong>{row.cookedGrams !== undefined ? `≈ ${formatGrams(row.cookedGrams)}` : '—'}</strong> : null}
