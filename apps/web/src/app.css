@@ -3166,6 +3166,15 @@
 .preset-legend .is-veg {
   --legend-color: var(--pz-verde);
 }
+.recipe-share-image {
+  margin: 0.75rem 0.75rem 0;
+}
+.recipe-share-image__error {
+  margin: 0.5rem 0 0;
+  color: var(--pz-danger-ink);
+  font-size: 0.8125rem;
+  text-align: center;
+}
 .recipe-preset-result {
   margin: 0.75rem;
   padding: 0.7rem;

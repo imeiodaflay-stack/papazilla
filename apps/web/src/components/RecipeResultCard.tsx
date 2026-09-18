@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { DailyPlan, FormulationId, Recipe } from '@papazilla/nutrition-engine';
 import potinhoIcon from '../assets/icons/potinho.png';
 import infoIcon from '../assets/icons/info.png';
@@ -6,6 +7,7 @@ import { joinPt } from '../lib/petLabel.js';
 import { matchDietPreferences } from '../lib/dietPreferences.js';
 import { digestionContextFor, hasDigestiveSensitivity } from '../lib/digestionSensitivity.js';
 import { FORMULATION_LABELS, formatGrams, formulationSummary, mealSize, orderDisclaimers } from '../lib/recipeDisplay.js';
+import { shareRecipeStoryImage } from '../lib/recipeStoryImage.js';
 import { RecipeFinalizers } from './RecipeFinalizers.js';
 import { RecipeIngredientTable } from './RecipeIngredientTable.js';
 import { RecipePreparationSteps } from './RecipePreparationSteps.js';
@@ -35,6 +37,21 @@ export function RecipeResultCard({
   days: number;
   format: string;
 }) {
+  const [sharingImage, setSharingImage] = useState(false);
+  const [shareImageError, setShareImageError] = useState<string | null>(null);
+
+  async function handleShareImage() {
+    setSharingImage(true);
+    setShareImageError(null);
+    try {
+      await shareRecipeStoryImage({ recipe, petPlans, formulation });
+    } catch {
+      setShareImageError('Não foi possível gerar a imagem agora. Tente de novo.');
+    } finally {
+      setSharingImage(false);
+    }
+  }
+
   const selectedPets = petPlans.map(({ pet }) => pet);
   const { ordered: orderedDisclaimers, clinicalRequired } = orderDisclaimers(petPlans);
   const treatsMin = petPlans.reduce((sum, { plan }) => sum + plan.treatsGramsPerDay.min, 0);
@@ -57,6 +74,12 @@ export function RecipeResultCard({
           <small>prontos</small>
         </span>
         <img src={potinhoIcon} alt="" />
+      </div>
+      <div className="recipe-share-image">
+        <button type="button" className="pz-button pz-button--outline wide" disabled={sharingImage} onClick={() => { void handleShareImage(); }}>
+          {sharingImage ? 'Gerando imagem…' : 'Compartilhar imagem da receita'}
+        </button>
+        {shareImageError ? <p className="recipe-share-image__error">{shareImageError}</p> : null}
       </div>
       <div className="recipe-preset-result">
         <small>Proporção escolhida</small>
