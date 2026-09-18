@@ -3582,7 +3582,7 @@
   padding: 0.7rem 0;
   border-top: 1px solid var(--pz-border);
 }
-.ingredient-table__row:first-child {
+.ingredient-table h3 + .ingredient-table__row {
   border-top: 0;
 }
 .ingredient-table__row--single {
