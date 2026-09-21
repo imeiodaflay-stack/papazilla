@@ -2066,6 +2066,11 @@
   height: 65px;
   object-fit: contain;
 }
+.pet-list-card__portrait .pet-list-card__photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 .pet-list-card__content {
   display: grid;
   min-width: 0;

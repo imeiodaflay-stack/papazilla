@@ -52,7 +52,11 @@ export function PetsListScreen({ pets }: { pets: StoredPet[] }) {
                   onClick={() => openPet(pet)}
                 >
                   <span className="pet-list-card__portrait">
-                    <img src={zillaIcon} alt={`Ilustração de ${displayName}`} />
+                    <img
+                      src={pet.photoPath || zillaIcon}
+                      alt={pet.photoPath ? `Foto de ${displayName}` : `Ilustração de ${displayName}`}
+                      className={pet.photoPath ? 'pet-list-card__photo' : undefined}
+                    />
                   </span>
                   <span className="pet-list-card__content">
                     <strong>{displayName}</strong>
