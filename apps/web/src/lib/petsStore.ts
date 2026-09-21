@@ -275,7 +275,7 @@ function persistPet(pet: StoredPet): void {
   if (!isSupabaseConfigured || !supabase || !ownerId) return;
   const write = Promise.resolve(supabase.from('pets').upsert(toRow(pet, ownerId)))
     .then(({ error }) => {
-      if (error) throw new Error(`Falha ao salvar ${pet.name} antes de criar a receita.`);
+      if (error) throw new Error(`Falha ao salvar ${pet.name} no servidor.`);
     });
   pendingPetWrites.add(write);
   void write.catch((error) => console.error('[petsStore]', error)).finally(() => pendingPetWrites.delete(write));

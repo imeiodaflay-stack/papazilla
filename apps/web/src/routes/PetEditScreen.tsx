@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import zillaIcon from '../assets/icons/zilla.png';
-import { getPet, updatePet } from '../lib/petsStore.js';
+import { getPet, updatePet, waitForPendingPetWrites } from '../lib/petsStore.js';
 import { describePet } from '../lib/petLabel.js';
 import { fileToDataUrl, PhotoUploadError, uploadPhoto } from '../lib/photoUpload.js';
 
@@ -40,6 +40,7 @@ export function PetEditScreen() {
   const [photoPath, setPhotoPath] = useState(pet?.photoPath ?? '');
   const [photoUploading, setPhotoUploading] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const toastTimer = useRef<number>();
   const photoInputRef = useRef<HTMLInputElement>(null);
 
@@ -69,7 +70,7 @@ export function PetEditScreen() {
   const missingIdealWeight = goal === 'Emagrecer' && !idealWeight.trim();
   const saveDisabled = !name.trim() || !weight.trim() || missingIdealWeight;
 
-  function save() {
+  async function save() {
     updatePet(pet!.id, {
       name: name.trim(),
       photoPath,
@@ -80,7 +81,14 @@ export function PetEditScreen() {
       activityTime,
       goal,
     });
-    navigate(`/zilla/${pet!.id}`, { state: { toast: 'Dados principais atualizados.' } });
+    setSaving(true);
+    try {
+      await waitForPendingPetWrites();
+      navigate(`/zilla/${pet!.id}`, { state: { toast: 'Dados principais atualizados.' } });
+    } catch {
+      setSaving(false);
+      toast('Não foi possível salvar agora. Verifique a internet e tente de novo.');
+    }
   }
 
   return (
@@ -220,8 +228,15 @@ export function PetEditScreen() {
         <button type="button" className="pz-button pz-button--outline" onClick={() => navigate(`/zilla/${pet.id}`)}>
           Cancelar
         </button>
-        <button type="button" className="pz-button pz-button--primary" disabled={saveDisabled} onClick={save}>
-          Salvar alterações
+        <button
+          type="button"
+          className="pz-button pz-button--primary"
+          disabled={saveDisabled || saving}
+          onClick={() => {
+            void save();
+          }}
+        >
+          {saving ? 'Salvando…' : 'Salvar alterações'}
         </button>
       </footer>
 

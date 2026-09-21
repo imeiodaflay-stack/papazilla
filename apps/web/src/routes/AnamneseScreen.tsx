@@ -3,7 +3,7 @@ import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import zillaIcon from '../assets/icons/zilla.png';
 import addIcon from '../assets/icons/adicionar.png';
 import infoIcon from '../assets/icons/info.png';
-import { addPet, getPet, updatePet, type StoredPet } from '../lib/petsStore.js';
+import { addPet, getPet, updatePet, waitForPendingPetWrites, type StoredPet } from '../lib/petsStore.js';
 import { deriveWeightTendency } from '../lib/weightTendency.js';
 import { fileToDataUrl, PhotoUploadError, uploadPhoto } from '../lib/photoUpload.js';
 
@@ -1327,6 +1327,7 @@ export function AnamneseScreen() {
   const [photoPath, setPhotoPath] = useState<string>(() => editState?.photoPath ?? '');
   const [photoUploading, setPhotoUploading] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [savingPet, setSavingPet] = useState(false);
   const toastTimer = useRef<number>();
   const bodyRef = useRef<HTMLDivElement>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
@@ -1404,7 +1405,7 @@ export function AnamneseScreen() {
 
   const current = STEPS[step]!;
 
-  function onNext() {
+  async function onNext() {
     if (step < LAST) goToStep(adjacent(1));
     else {
       const name = inputs.name?.trim() || '';
@@ -1495,20 +1496,30 @@ export function AnamneseScreen() {
         preferredMeals: singles.preferredMeals ?? '',
       };
 
+      if (editingPet) updatePet(editingPet.id, petPatch);
+      else addPet(petPatch);
+
+      setSavingPet(true);
+      try {
+        await waitForPendingPetWrites();
+      } catch {
+        setSavingPet(false);
+        toast('Não foi possível salvar agora. Verifique a internet e tente de novo.');
+        return;
+      }
+      setSavingPet(false);
+
       if (editingPet) {
-        updatePet(editingPet.id, petPatch);
         navigate(`/zilla/${editingPet.id}/respostas`, {
           replace: true,
           state: { toast: 'Respostas da anamnese atualizadas.' },
         });
       } else if (returnToRecipe) {
-        addPet(petPatch);
         navigate('/receita', {
           replace: true,
           state: { toast: `${name || 'Novo Monstrinho'} cadastrado! Ele já está disponível para esta receita.` },
         });
       } else {
-        addPet(petPatch);
         navigate('/sucesso', {
           replace: true,
           state: {
@@ -1574,10 +1585,12 @@ export function AnamneseScreen() {
         <button
           type="button"
           className="pz-button pz-button--primary"
-          disabled={nextDisabled}
-          onClick={onNext}
+          disabled={nextDisabled || savingPet}
+          onClick={() => {
+            void onNext();
+          }}
         >
-          {step === LAST ? (editingPet ? 'Salvar alterações' : 'Confirmar cadastro') : 'Continuar →'}
+          {savingPet ? 'Salvando…' : step === LAST ? (editingPet ? 'Salvar alterações' : 'Confirmar cadastro') : 'Continuar →'}
         </button>
       </footer>
 
