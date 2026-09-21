@@ -187,11 +187,25 @@ export function RecipeResultCard({
           ) : null}
           <div className="result-group">
             <h3>Limite de petiscos</h3>
-            <div>
-              <span>Petiscos e mimos por fora da receita</span>
-              <strong>até {formatGrams(treatsMin)}–{formatGrams(treatsMax)}/dia</strong>
-            </div>
-            <p className="pz-note">10% a 15% do total diário — inclui petiscos, comida da família e qualquer coisa fora do potinho.</p>
+            {petPlans.length > 1 ? (
+              petPlans.map(({ pet, plan }) => (
+                <div key={pet.id}>
+                  <span>{pet.name}</span>
+                  <strong>
+                    até {formatGrams(plan.treatsGramsPerDay.min)}–{formatGrams(plan.treatsGramsPerDay.max)}/dia
+                  </strong>
+                </div>
+              ))
+            ) : (
+              <div>
+                <span>Petiscos e mimos por fora da receita</span>
+                <strong>até {formatGrams(treatsMin)}–{formatGrams(treatsMax)}/dia</strong>
+              </div>
+            )}
+            <p className="pz-note">
+              10% a 15% do total diário{petPlans.length > 1 ? ', por pet' : ''} — inclui petiscos, comida da família e
+              qualquer coisa fora do potinho.
+            </p>
             {petsWithFrequentExtras.length > 0 ? (
               <div className="shared-recipe-note">
                 <img src={infoIcon} alt="" />
