@@ -1826,48 +1826,67 @@
   font-size: clamp(1.85rem, 7vw, 2.25rem);
 }
 
-.pet-selector {
-  display: grid;
-  grid-template-columns: 44px 1fr auto;
-  gap: 0.7rem;
-  align-items: center;
-  width: 100%;
-  min-height: 64px;
+/* Tira informativa da matilha — mostra todos os Monstrinhos cadastrados, sem
+   seleção nem navegação (escolher quem entra na receita é o Passo 1 do
+   wizard). Substitui o antigo seletor do pet ativo. */
+.pack-strip {
   margin: 1.1rem 0;
-  padding: 0.55rem 0.75rem;
-  border: 1px solid var(--pz-border);
-  border-radius: 18px;
-  background: #fff;
-  text-align: left;
 }
-.pet-selector__avatar {
+.pack-strip > small {
+  display: block;
+  color: var(--pz-ink-label);
+  font: 600 0.8125rem / 1 var(--pz-font-body);
+}
+.pack-strip > strong {
+  display: block;
+  margin-top: 0.2rem;
+  font: 800 1.0625rem / 1.25 var(--pz-font-support);
+  color: var(--pz-chocolate);
+}
+.pack-strip__list {
+  display: flex;
+  gap: 0.875rem;
+  padding: 0.5rem 0.125rem 0.25rem;
+  margin: 0 -0.125rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.pack-strip__list::-webkit-scrollbar {
+  display: none;
+}
+.pack-strip__pet {
+  flex: 0 0 auto;
+  width: 60px;
+  display: grid;
+  justify-items: center;
+  gap: 0.35rem;
+}
+.pack-strip__avatar {
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 56px;
+  height: 56px;
   overflow: hidden;
   border-radius: 50%;
   background: #eef0d7;
 }
-.pet-selector__avatar img {
+.pack-strip__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pack-strip__avatar--icon img {
   width: 40px;
   height: 40px;
   object-fit: contain;
 }
-.pet-selector span:nth-child(2) {
-  display: grid;
-  gap: 0.12rem;
-}
-.pet-selector small {
-  color: var(--pz-ink-label);
-  font: 600 0.875rem / 1 var(--pz-font-body);
-}
-.pet-selector strong {
-  font: 800 0.9rem / 1.2 var(--pz-font-support);
-}
-.pet-selector__chevron {
-  color: var(--pz-ink-label);
-  font-size: 1.2rem;
+.pack-strip__pet small {
+  max-width: 60px;
+  overflow: hidden;
+  color: var(--pz-chocolate);
+  font: 600 0.75rem / 1.1 var(--pz-font-support);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .create-card {
