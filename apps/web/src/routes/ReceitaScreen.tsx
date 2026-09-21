@@ -7,11 +7,11 @@ import potinhoIcon from '../assets/icons/potinho.png';
 import infoIcon from '../assets/icons/info.png';
 import { getActivePet, getActivePetId, listPets } from '../lib/petsStore.js';
 import { describePet, joinPt } from '../lib/petLabel.js';
-import { getSubscription, hasActiveAccess, isDemoUnlocked } from '../lib/subscription.js';
+import { getSubscription, hasActiveAccess } from '../lib/subscription.js';
 import { derivePredominantProtein } from '../lib/engineMapping.js';
 import { hasSignificantMuscleLoss } from '../lib/muscleCondition.js';
 import { buildPetPlan, buildSharedRecipe } from '../lib/recipeEngine.js';
-import { saveRecipe } from '../lib/recipeRepository.js';
+import { RecipeSaveError, saveRecipe } from '../lib/recipeRepository.js';
 import { clearRecipeDraft, peekRecipeDraft, saveRecipeDraft } from '../lib/recipeDraft.js';
 import {
   FORMULATION_LABELS,
@@ -125,7 +125,7 @@ export function ReceitaScreen() {
   );
 
   if (pets.length === 0) return <Navigate to="/zilla" replace />;
-  if (!hasActiveAccess(subscription) && !isDemoUnlocked()) return <Navigate to="/assinatura" state={{ returnTo: 'recipe' }} replace />;
+  if (!hasActiveAccess(subscription)) return <Navigate to="/assinatura" state={{ returnTo: 'recipe' }} replace />;
 
   const STEPS_COUNT = 9;
   const isResultStep = step === STEPS_COUNT - 1;
@@ -205,6 +205,11 @@ export function ReceitaScreen() {
         toast('Receita salva para futuras fornalhas!');
         window.setTimeout(() => navigate('/receitas'), 900);
       } catch (error) {
+        if (error instanceof RecipeSaveError && error.status === 403) {
+          toast('Sua assinatura precisa estar ativa para salvar a receita.');
+          window.setTimeout(() => navigate('/assinatura', { state: { returnTo: 'recipe' } }), 900);
+          return;
+        }
         toast(error instanceof Error ? error.message : 'Não foi possível salvar a receita.');
       } finally {
         setSaving(false);

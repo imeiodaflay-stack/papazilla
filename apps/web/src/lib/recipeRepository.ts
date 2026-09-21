@@ -16,6 +16,13 @@ export interface SavedRecipe extends StoredRecipe {
   petPlans?: { pet: StoredPet; plan: DailyPlan }[];
 }
 
+export class RecipeSaveError extends Error {
+  constructor(message: string, readonly status: number) {
+    super(message);
+    this.name = 'RecipeSaveError';
+  }
+}
+
 type RecipeInput = Omit<StoredRecipe, 'id' | 'createdAt' | 'cookLogs' | 'favorite'> & {
   result: Recipe;
   petPlans: { pet: StoredPet; plan: DailyPlan }[];
@@ -94,7 +101,9 @@ export async function saveRecipe(input: RecipeInput): Promise<SavedRecipe> {
     }),
   });
   const body = await response.json().catch(() => null);
-  if (!response.ok || !body?.recipe) throw new Error(body?.error || 'Não foi possível salvar a receita.');
+  if (!response.ok || !body?.recipe) {
+    throw new RecipeSaveError(body?.error || 'Não foi possível salvar a receita.', response.status);
+  }
   const recipe = fromRow(body.recipe as RecipeRow);
   cache = [recipe, ...cache];
   return recipe;

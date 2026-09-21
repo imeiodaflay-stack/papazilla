@@ -4,7 +4,8 @@ import potinhoIcon from '../assets/icons/potinho.png';
 import infoIcon from '../assets/icons/info.png';
 import { listPets } from '../lib/petsStore.js';
 import { joinPt } from '../lib/petLabel.js';
-import { getSubscription } from '../lib/subscription.js';
+import { getSubscription, hasActiveAccess, loadSubscriptionForOwner } from '../lib/subscription.js';
+import { getUserId } from '../lib/session.js';
 
 /**
  * Início recorrente — fiel à tela "home" de `papazilla-prototype`: saudação,
@@ -22,8 +23,9 @@ export function HomeScreen() {
   const pets = listPets();
   const packNames = joinPt(pets.map((pet) => pet.name)) || 'sua matilha';
 
-  function createRecipe() {
-    if (getSubscription()) navigate('/receita');
+  async function createRecipe() {
+    await loadSubscriptionForOwner(getUserId());
+    if (hasActiveAccess(getSubscription())) navigate('/receita');
     else navigate('/assinatura', { state: { returnTo: 'recipe' } });
   }
 
@@ -65,7 +67,7 @@ export function HomeScreen() {
           <h2>Vamos montar uma receita?</h2>
           <p>Escolha os ingredientes e a gente calcula as quantidades.</p>
         </div>
-        <button type="button" className="pz-button pz-button--primary wide" onClick={createRecipe}>
+        <button type="button" className="pz-button pz-button--primary wide" onClick={() => { void createRecipe(); }}>
           Criar uma receita <span aria-hidden="true">→</span>
         </button>
       </section>

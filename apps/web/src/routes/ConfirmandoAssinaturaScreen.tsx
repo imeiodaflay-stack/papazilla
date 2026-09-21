@@ -13,6 +13,7 @@ import { getUserId } from '../lib/session.js';
  * pessoa terminou o checkout", não "o pagamento foi confirmado").
  */
 const POLL_INTERVAL_MS = 1500;
+const SLOW_POLL_INTERVAL_MS = 5000;
 const MAX_ATTEMPTS = 12;
 
 function destinationFor(returnTo: string | null): string {
@@ -27,6 +28,7 @@ export function ConfirmandoAssinaturaScreen() {
   const returnTo = searchParams.get('returnTo');
   const [timedOut, setTimedOut] = useState(false);
   const attempts = useRef(0);
+  const timer = useRef<number>();
 
   useEffect(() => {
     let cancelled = false;
@@ -41,14 +43,14 @@ export function ConfirmandoAssinaturaScreen() {
       attempts.current += 1;
       if (attempts.current >= MAX_ATTEMPTS) {
         setTimedOut(true);
-        return;
       }
-      window.setTimeout(poll, POLL_INTERVAL_MS);
+      timer.current = window.setTimeout(poll, attempts.current >= MAX_ATTEMPTS ? SLOW_POLL_INTERVAL_MS : POLL_INTERVAL_MS);
     }
 
     void poll();
     return () => {
       cancelled = true;
+      window.clearTimeout(timer.current);
     };
   }, [navigate, returnTo]);
 
@@ -62,8 +64,8 @@ export function ConfirmandoAssinaturaScreen() {
           <>
             <h1 className="pz-h1">Ainda confirmando o pagamento</h1>
             <p>
-              Pode levar mais alguns minutos pra o banco confirmar. Assim que confirmar, sua assinatura libera
-              sozinha — você já pode continuar usando o app enquanto isso.
+              Pode levar mais alguns minutos pra o banco confirmar. Vamos continuar verificando e seguir
+              automaticamente assim que a assinatura for liberada.
             </p>
           </>
         ) : (

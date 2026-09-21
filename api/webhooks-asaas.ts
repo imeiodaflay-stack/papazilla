@@ -24,7 +24,12 @@ interface AsaasWebhookPayload {
   event?: string;
   checkout?: {
     id?: string;
-    subscription?: string | { id?: string };
+    customer?: string;
+  };
+  subscription?: {
+    id?: string;
+    customer?: string;
+    externalReference?: string | null;
   };
   payment?: {
     subscription?: string;
@@ -47,16 +52,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       case 'CHECKOUT_PAID': {
         const checkoutId = payload.checkout?.id;
         if (!checkoutId) break;
-        const rawSubscription = payload.checkout?.subscription;
-        const subscriptionId = typeof rawSubscription === 'string' ? rawSubscription : rawSubscription?.id;
-        await admin
+        const { error } = await admin
           .from('subscriptions')
           .update({
             status: 'active',
-            asaas_subscription_id: subscriptionId ?? null,
+            asaas_customer_id: payload.checkout?.customer ?? null,
             current_period_end: addYears(new Date(), 1),
           })
           .eq('asaas_checkout_id', checkoutId);
+        if (error) throw error;
+        break;
+      }
+      case 'SUBSCRIPTION_CREATED': {
+        const subscriptionId = payload.subscription?.id;
+        const customerId = payload.subscription?.customer;
+        const externalReference = payload.subscription?.externalReference;
+        if (!subscriptionId) break;
+        let query = admin.from('subscriptions').update({ asaas_subscription_id: subscriptionId });
+        if (externalReference) query = query.eq('user_id', externalReference);
+        else if (customerId) query = query.eq('asaas_customer_id', customerId);
+        else break;
+        const { error } = await query;
+        if (error) throw error;
         break;
       }
       case 'CHECKOUT_CANCELED':
@@ -65,7 +82,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (!checkoutId) break;
         // Só reverte se ainda estava pendente — não desfaz uma assinatura já
         // ativada por outro checkout enquanto este expirava.
-        await admin.from('subscriptions').update({ status: 'none' }).eq('asaas_checkout_id', checkoutId).eq('status', 'pending');
+        const { error } = await admin.from('subscriptions').update({ status: 'none' }).eq('asaas_checkout_id', checkoutId).eq('status', 'pending');
+        if (error) throw error;
         break;
       }
       case 'PAYMENT_RECEIVED':
@@ -74,16 +92,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         // checkout novo, só um pagamento vinculado à subscription do Asaas.
         const subscriptionId = payload.payment?.subscription;
         if (!subscriptionId) break;
-        await admin
+        const { error } = await admin
           .from('subscriptions')
           .update({ status: 'active', current_period_end: addYears(new Date(), 1) })
           .eq('asaas_subscription_id', subscriptionId);
+        if (error) throw error;
         break;
       }
       case 'PAYMENT_OVERDUE': {
         const subscriptionId = payload.payment?.subscription;
         if (!subscriptionId) break;
-        await admin.from('subscriptions').update({ status: 'past_due' }).eq('asaas_subscription_id', subscriptionId);
+        const { error } = await admin.from('subscriptions').update({ status: 'past_due' }).eq('asaas_subscription_id', subscriptionId);
+        if (error) throw error;
         break;
       }
       default:

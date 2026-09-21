@@ -1,9 +1,9 @@
 import { useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import zillaFrente from '../assets/zilla-frente.png';
 import { getActivePet } from '../lib/petsStore.js';
 import { describePet } from '../lib/petLabel.js';
-import { ANNUAL_PRICE, formatBRL, markDemoUnlocked } from '../lib/subscription.js';
+import { ANNUAL_PRICE, createCheckoutSession, formatBRL } from '../lib/subscription.js';
 
 /**
  * Oferta de assinatura — fiel à tela "paywall" de `papazilla-prototype`,
@@ -13,13 +13,9 @@ import { ANNUAL_PRICE, formatBRL, markDemoUnlocked } from '../lib/subscription.j
  *    Asaas não parcela cobrança recorrente (ver handover). A versão anterior
  *    desta tela ("à vista ou 6x") ficou pra trás por causa dessa decisão.
  *
- * "Assinar" é PROPOSITALMENTE FAKE por enquanto (Flay, 2026-09-17): o Asaas
- * é uma das últimas peças do MVP e ela quer poder demonstrar a experiência
- * de compra — ver a oferta, clicar, cair no wizard — sem esperar o sandbox
- * estar pronto. Não cria checkout, não grava assinatura em lugar nenhum, só
- * navega. Quando o Asaas entrar, trocar de volta pra `createCheckoutSession`
- * (`lib/subscription.ts`) + `/api/checkout-create`, que continuam existindo
- * e intactos pra isso.
+ * O botão abre o Checkout hospedado do Asaas. O retorno do navegador nunca
+ * libera acesso sozinho: só o webhook do Asaas pode marcar a assinatura como
+ * ativa no Supabase.
  */
 type ReturnTo = 'papa' | 'conta' | 'recipe';
 
@@ -33,23 +29,20 @@ function closePath(returnTo: ReturnTo | undefined): string {
   return '/papa';
 }
 
-/** Pra onde a oferta fake leva depois de "assinar". Mesmo mapeamento que `ConfirmandoAssinaturaScreen` usaria com o Asaas de verdade. */
-function destinationFor(returnTo: ReturnTo | undefined): string {
-  if (returnTo === 'recipe') return '/receita';
-  if (returnTo === 'conta') return '/conta';
-  return '/papa';
-}
-
 export function AssinaturaScreen() {
   const navigate = useNavigate();
   const location = useLocation();
-  const returnTo = (location.state as PaywallState | null)?.returnTo;
+  const [searchParams] = useSearchParams();
+  const queryReturnTo = searchParams.get('returnTo');
+  const returnTo = (location.state as PaywallState | null)?.returnTo
+    ?? (['papa', 'conta', 'recipe'].includes(queryReturnTo ?? '') ? queryReturnTo as ReturnTo : undefined);
   const backTo = closePath(returnTo);
 
   const activePet = getActivePet();
   const { preposition, displayName } = describePet(activePet);
 
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [subscribing, setSubscribing] = useState(false);
   const toastTimer = useRef<number>();
 
   function toast(message: string) {
@@ -58,9 +51,16 @@ export function AssinaturaScreen() {
     toastTimer.current = window.setTimeout(() => setToastMsg(null), 3200);
   }
 
-  function subscribe() {
-    markDemoUnlocked();
-    navigate(destinationFor(returnTo), { replace: true });
+  async function subscribe() {
+    if (subscribing) return;
+    setSubscribing(true);
+    try {
+      const checkoutUrl = await createCheckoutSession(returnTo ?? 'papa');
+      window.location.assign(checkoutUrl);
+    } catch (error) {
+      toast(error instanceof Error ? error.message : 'Não foi possível iniciar o pagamento.');
+      setSubscribing(false);
+    }
   }
 
   return (
@@ -124,8 +124,8 @@ export function AssinaturaScreen() {
           </p>
         </section>
 
-        <button type="button" className="pz-button pz-button--primary wide paywall-cta" onClick={subscribe}>
-          Assinar por {formatBRL(ANNUAL_PRICE)}/ano
+        <button type="button" className="pz-button pz-button--primary wide paywall-cta" onClick={() => { void subscribe(); }} disabled={subscribing}>
+          {subscribing ? 'Abrindo pagamento…' : `Assinar por ${formatBRL(ANNUAL_PRICE)}/ano`}
         </button>
         <p className="paywall-disclosure">
           Pagamento processado pelo Asaas. {formatBRL(ANNUAL_PRICE)} cobrados no cartão a cada 12 meses até você

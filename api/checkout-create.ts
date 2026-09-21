@@ -6,7 +6,15 @@ const ANNUAL_PRICE = 99.99;
 
 interface AsaasCheckout {
   id: string;
-  link: string;
+}
+
+function asaasDateTimeNow(): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23',
+  }).formatToParts(new Date());
+  const value = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)?.value ?? '';
+  return `${value('year')}-${value('month')}-${value('day')} ${value('hour')}:${value('minute')}:${value('second')}`;
 }
 
 /**
@@ -24,12 +32,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const appUrl = process.env.APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:5173');
     const returnTo = ['papa', 'conta', 'recipe'].includes(req.body?.returnTo) ? req.body.returnTo : 'papa';
 
+    const { data: existing, error: existingError } = await admin.from('subscriptions')
+      .select('status,current_period_end').eq('user_id', user.id).maybeSingle();
+    if (existingError) throw existingError;
+    if (existing && ['active', 'canceled'].includes(existing.status) && existing.current_period_end &&
+        new Date(existing.current_period_end).getTime() > Date.now()) {
+      throw new HttpError(409, 'Sua assinatura já está ativa.');
+    }
+
     const checkout = await asaasFetch<AsaasCheckout>('/checkouts', {
       method: 'POST',
       body: JSON.stringify({
         billingTypes: ['CREDIT_CARD'],
         chargeTypes: ['RECURRENT'],
-        subscription: { cycle: 'YEARLY' },
+        minutesToExpire: 60,
+        subscription: { cycle: 'YEARLY', nextDueDate: asaasDateTimeNow() },
         items: [
           {
             name: 'Papazilla Anual',
@@ -40,7 +57,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         ],
         callback: {
           successUrl: `${appUrl}/assinatura/confirmando?returnTo=${returnTo}`,
-          cancelUrl: `${appUrl}/assinatura`,
+          cancelUrl: `${appUrl}/assinatura?returnTo=${returnTo}`,
+          expiredUrl: `${appUrl}/assinatura?returnTo=${returnTo}`,
         },
         externalReference: user.id,
         ...(user.email ? { customerData: { name: user.user_metadata?.full_name || user.email, email: user.email } } : {}),
@@ -55,7 +73,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       );
     if (error) throw error;
 
-    return res.status(200).json({ url: checkout.link });
+    return res.status(200).json({ url: `https://asaas.com/checkoutSession/show?id=${encodeURIComponent(checkout.id)}` });
   } catch (err) {
     if (err instanceof HttpError) return res.status(err.status).json({ error: err.message });
     console.error('[checkout-create]', err);
