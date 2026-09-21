@@ -5,7 +5,7 @@ import calendarioIcon from '../assets/icons/calendario.png';
 import graficoIcon from '../assets/icons/grafico-barras.png';
 import patinhaIcon from '../assets/icons/patinha.png';
 import sucessoIcon from '../assets/icons/sucesso.png';
-import sheetIcon from '../assets/icons/sheet.png';
+import profileSheetIcon from '../assets/icons/receita.png';
 import infoIcon from '../assets/icons/info.png';
 import { AppNav } from '../components/AppNav.js';
 import { deletePet, getPet, listPets, setActivePetId } from '../lib/petsStore.js';
@@ -188,7 +188,7 @@ export function PetDetailScreen() {
 
           <section className="anamnesis-card">
             <div className="anamnesis-card__icon">
-              <img src={sheetIcon} alt="" />
+              <img src={profileSheetIcon} alt="" />
             </div>
             <div>
               <span className="pz-badge pz-badge--success">Perfil em dia</span>
