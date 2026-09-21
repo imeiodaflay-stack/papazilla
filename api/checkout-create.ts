@@ -6,6 +6,7 @@ const ANNUAL_PRICE = 99.99;
 
 interface AsaasCheckout {
   id: string;
+  link?: string;
 }
 
 function asaasDateTimeNow(): string {
@@ -61,7 +62,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           expiredUrl: `${appUrl}/assinatura?returnTo=${returnTo}`,
         },
         externalReference: user.id,
-        ...(user.email ? { customerData: { name: user.user_metadata?.full_name || user.email, email: user.email } } : {}),
       }),
     });
 
@@ -73,7 +73,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       );
     if (error) throw error;
 
-    return res.status(200).json({ url: `https://asaas.com/checkoutSession/show?id=${encodeURIComponent(checkout.id)}` });
+    return res.status(200).json({
+      url: checkout.link || `https://asaas.com/checkoutSession/show?id=${encodeURIComponent(checkout.id)}`,
+    });
   } catch (err) {
     if (err instanceof HttpError) return res.status(err.status).json({ error: err.message });
     console.error('[checkout-create]', err);

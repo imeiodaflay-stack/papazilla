@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import zillaIcon from '../assets/icons/zilla.png';
 import { getSubscription, hasActiveAccess, loadSubscriptionForOwner } from '../lib/subscription.js';
-import { getUserId } from '../lib/session.js';
+import { getUserId, initAuth } from '../lib/session.js';
 
 /**
  * Pra onde o Asaas redireciona depois do pagamento (`successUrl`). O
@@ -34,6 +34,10 @@ export function ConfirmandoAssinaturaScreen() {
     let cancelled = false;
 
     async function poll() {
+      // Esta rota pode montar antes de a sessão persistida do Supabase ser
+      // restaurada. Sem esperar por ela, getUserId() retorna null e a tela
+      // continuaria consultando uma assinatura vazia mesmo após o webhook.
+      await initAuth();
       await loadSubscriptionForOwner(getUserId());
       if (cancelled) return;
       if (hasActiveAccess(getSubscription())) {

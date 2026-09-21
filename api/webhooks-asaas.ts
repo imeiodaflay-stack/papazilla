@@ -33,6 +33,8 @@ interface AsaasWebhookPayload {
   };
   payment?: {
     subscription?: string;
+    customer?: string;
+    checkoutSession?: string;
   };
 }
 
@@ -88,15 +90,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
       case 'PAYMENT_RECEIVED':
       case 'PAYMENT_CONFIRMED': {
-        // Renovação de um ciclo seguinte da assinatura recorrente — não tem
-        // checkout novo, só um pagamento vinculado à subscription do Asaas.
         const subscriptionId = payload.payment?.subscription;
-        if (!subscriptionId) break;
-        const { error } = await admin
-          .from('subscriptions')
-          .update({ status: 'active', current_period_end: addYears(new Date(), 1) })
-          .eq('asaas_subscription_id', subscriptionId);
-        if (error) throw error;
+        const checkoutId = payload.payment?.checkoutSession;
+        if (!subscriptionId && !checkoutId) break;
+
+        const values = {
+          status: 'active',
+          current_period_end: addYears(new Date(), 1),
+          ...(subscriptionId ? { asaas_subscription_id: subscriptionId } : {}),
+          ...(payload.payment?.customer ? { asaas_customer_id: payload.payment.customer } : {}),
+        };
+
+        // No primeiro pagamento, o Asaas pode enviar PAYMENT_CONFIRMED antes
+        // de SUBSCRIPTION_CREATED. Nesse momento só conhecemos o checkout que
+        // foi salvo ao iniciar a compra. Depois disso, renovações também podem
+        // ser correlacionadas pelo id da assinatura já persistido.
+        let matched = false;
+        if (checkoutId) {
+          const { data, error } = await admin
+            .from('subscriptions')
+            .update(values)
+            .eq('asaas_checkout_id', checkoutId)
+            .select('user_id');
+          if (error) throw error;
+          matched = Boolean(data?.length);
+        }
+        if (!matched && subscriptionId) {
+          const { error } = await admin
+            .from('subscriptions')
+            .update(values)
+            .eq('asaas_subscription_id', subscriptionId);
+          if (error) throw error;
+        }
         break;
       }
       case 'PAYMENT_OVERDUE': {
