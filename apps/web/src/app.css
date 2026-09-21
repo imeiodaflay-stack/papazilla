@@ -1158,7 +1158,7 @@
 .photo-picker__preview {
   width: 100% !important;
   height: 100% !important;
-  object-fit: cover;
+  object-fit: cover !important;
   border-radius: inherit;
 }
 .photo-picker:disabled,
