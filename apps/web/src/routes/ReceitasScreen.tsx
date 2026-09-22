@@ -36,11 +36,6 @@ export function ReceitasScreen() {
   const visible = recipes.filter((recipe) => {
     if (filter === 'all') return true;
     if (filter === 'favorites') return recipe.favorite;
-    if (filter === 'five-hearts') {
-      const ratings = recipe.cookLogs.map((log) => log.rating).filter((rating) => rating > 0);
-      if (ratings.length === 0) return false;
-      return ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length === 5;
-    }
     return recipe.petIds.includes(filter);
   });
 
@@ -91,13 +86,6 @@ export function ReceitasScreen() {
                     onClick={() => setFilter('favorites')}
                   >
                     ★ Favoritas
-                  </button>
-                  <button
-                    type="button"
-                    className={filter === 'five-hearts' ? 'is-selected' : undefined}
-                    onClick={() => setFilter('five-hearts')}
-                  >
-                    ♥ 5 corações
                   </button>
                 </div>
               ) : null}
