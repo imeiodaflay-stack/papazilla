@@ -11,8 +11,9 @@ const STATUS_LABEL: Record<string, string> = {
 
 /**
  * Gerenciar assinatura — fiel à tela "subscription" de `papazilla-prototype`,
- * agora com dados e ações de verdade: "Cancelar renovação" chama o Asaas de
- * verdade (`/api/subscription-cancel`), não só um toast.
+ * agora com dados e ações de verdade: "Cancelar renovação" chama o
+ * processador (`/api/subscription-cancel`), não só um toast. Pix não exibe
+ * cancelamento porque a renovação é manual.
  */
 export function GerenciarAssinaturaScreen() {
   const navigate = useNavigate();
@@ -32,7 +33,10 @@ export function GerenciarAssinaturaScreen() {
   }
 
   const isCanceled = subscription.status === 'canceled';
-  const renewalCopy = isCanceled
+  const isPix = subscription.paymentMethod === 'pix';
+  const renewalCopy = isPix
+    ? 'Ao final do período, você escolhe se quer renovar com um novo Pix.'
+    : isCanceled
     ? 'A renovação foi cancelada — seu acesso continua até a data acima, sem novas cobranças depois disso.'
     : 'A próxima cobrança anual acontece automaticamente no cartão, na data acima.';
 
@@ -82,10 +86,10 @@ export function GerenciarAssinaturaScreen() {
           <div className="subscription-price">
             <span>
               <small>Forma de pagamento</small>
-              <strong>{formatBRL(ANNUAL_PRICE)}/ano no cartão</strong>
+              <strong>{formatBRL(ANNUAL_PRICE)}/ano via {isPix ? 'Pix' : 'cartão'}</strong>
             </span>
             <span>
-              <small>{isCanceled ? 'Acesso até' : 'Próxima renovação'}</small>
+              <small>{isCanceled || isPix ? 'Acesso até' : 'Próxima renovação'}</small>
               <strong>{formatRenewalDate(subscription)}</strong>
             </span>
           </div>
@@ -103,20 +107,21 @@ export function GerenciarAssinaturaScreen() {
           <div>
             <span aria-hidden="true">↻</span>
             <p>
-              <strong>{isCanceled ? 'Renovação cancelada' : 'Renovação automática'}</strong>
+              <strong>{isPix ? 'Renovação manual' : isCanceled ? 'Renovação cancelada' : 'Renovação automática'}</strong>
               <small>{renewalCopy}</small>
             </p>
           </div>
         </section>
 
-        {!isCanceled ? (
+        {!isCanceled && !isPix ? (
           <button type="button" className="subscription-cancel" onClick={handleCancel} disabled={canceling}>
             {canceling ? 'Cancelando…' : 'Cancelar renovação'}
           </button>
         ) : null}
         <p className="subscription-help">
-          O cancelamento evita a próxima renovação. Seu acesso e eventuais pagamentos do período contratado
-          continuam até o final.
+          {isPix
+            ? 'Não há cobrança automática no Pix. Perto do vencimento, você poderá gerar um novo pagamento para continuar.'
+            : 'O cancelamento evita a próxima renovação. Seu acesso e eventuais pagamentos do período contratado continuam até o final.'}
         </p>
       </div>
 

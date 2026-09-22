@@ -27,7 +27,7 @@ export async function asaasFetch<T = any>(path: string, init: RequestInit = {}):
   });
   const body: any = await res.json().catch(() => null);
   if (!res.ok) {
-    const message = body?.errors?.[0]?.description || `Asaas respondeu ${res.status}`;
+    const message = body?.errors?.[0]?.description || `O processamento do pagamento falhou (${res.status}).`;
     throw new Error(message);
   }
   return body as T;

@@ -25,7 +25,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ownRows(admin, 'pets', user.id),
       ownRows(admin, 'recipes', user.id),
       ownRows(admin, 'recipe_preparations', user.id),
-      admin.from('subscriptions').select('status,plan,current_period_end,created_at,updated_at').eq('user_id', user.id).maybeSingle(),
+      admin.from('subscriptions').select('status,plan,payment_method,current_period_end,created_at,updated_at').eq('user_id', user.id).maybeSingle(),
     ]);
     for (const result of [profile, subscription]) {
       if (result.error) throw result.error;

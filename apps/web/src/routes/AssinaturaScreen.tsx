@@ -1,32 +1,57 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import zillaFrente from '../assets/zilla-frente.png';
 import { getActivePet } from '../lib/petsStore.js';
 import { describePet } from '../lib/petLabel.js';
-import { ANNUAL_PRICE, createCheckoutSession, formatBRL } from '../lib/subscription.js';
+import {
+  ANNUAL_PRICE,
+  createTransparentPayment,
+  formatBRL,
+  getSubscription,
+  hasActiveAccess,
+  loadSubscriptionForOwner,
+  type PaymentCreationResult,
+} from '../lib/subscription.js';
+import { getUserId } from '../lib/session.js';
+import { getUserProfile } from '../lib/userProfile.js';
 
-/**
- * Oferta de assinatura — fiel à tela "paywall" de `papazilla-prototype`,
- * com duas mudanças de produto (Flay, 2026-09):
- * 1. Oferta única, sem plano mensal.
- * 2. Cobrança recorrente automática só no cartão, sem parcelamento — o
- *    Asaas não parcela cobrança recorrente (ver handover). A versão anterior
- *    desta tela ("à vista ou 6x") ficou pra trás por causa dessa decisão.
- *
- * O botão abre o Checkout hospedado do Asaas. O retorno do navegador nunca
- * libera acesso sozinho: só o webhook do Asaas pode marcar a assinatura como
- * ativa no Supabase.
- */
 type ReturnTo = 'papa' | 'conta' | 'recipe';
+type PaymentMethod = 'pix' | 'credit_card';
 
 interface PaywallState {
   returnTo?: ReturnTo;
 }
 
-/** Pra onde fechar a oferta sem assinar. "recipe" volta pro Papá (o wizard exige assinatura). */
 function closePath(returnTo: ReturnTo | undefined): string {
   if (returnTo === 'conta') return '/conta';
   return '/papa';
+}
+
+function onlyDigits(value: string, max: number): string {
+  return value.replace(/\D/g, '').slice(0, max);
+}
+
+function formatCpf(value: string): string {
+  const d = onlyDigits(value, 11);
+  return d.replace(/^(\d{3})(\d)/, '$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3').replace(/\.(\d{3})(\d)/, '.$1-$2');
+}
+
+function formatPhone(value: string): string {
+  const d = onlyDigits(value, 11);
+  return d.replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2');
+}
+
+function formatCep(value: string): string {
+  return onlyDigits(value, 8).replace(/(\d{5})(\d)/, '$1-$2');
+}
+
+function formatCard(value: string): string {
+  return onlyDigits(value, 19).replace(/(\d{4})(?=\d)/g, '$1 ');
+}
+
+function formatExpiry(value: string): string {
+  const d = onlyDigits(value, 4);
+  return d.length > 2 ? `${d.slice(0, 2)}/${d.slice(2)}` : d;
 }
 
 export function AssinaturaScreen() {
@@ -37,116 +62,187 @@ export function AssinaturaScreen() {
   const returnTo = (location.state as PaywallState | null)?.returnTo
     ?? (['papa', 'conta', 'recipe'].includes(queryReturnTo ?? '') ? queryReturnTo as ReturnTo : undefined);
   const backTo = closePath(returnTo);
-
+  const profile = getUserProfile();
   const activePet = getActivePet();
   const { preposition, displayName } = describePet(activePet);
 
+  const [method, setMethod] = useState<PaymentMethod>('pix');
+  const [name, setName] = useState(profile?.name ?? '');
+  const [email, setEmail] = useState(profile?.email ?? '');
+  const [cpf, setCpf] = useState('');
+  const [phone, setPhone] = useState('');
+  const [cardHolder, setCardHolder] = useState('');
+  const [cardNumber, setCardNumber] = useState('');
+  const [expiry, setExpiry] = useState('');
+  const [ccv, setCcv] = useState('');
+  const [postalCode, setPostalCode] = useState('');
+  const [addressNumber, setAddressNumber] = useState('');
+  const [pix, setPix] = useState<NonNullable<PaymentCreationResult['pix']> | null>(null);
+  const [processing, setProcessing] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
-  const [subscribing, setSubscribing] = useState(false);
   const toastTimer = useRef<number>();
 
   function toast(message: string) {
     window.clearTimeout(toastTimer.current);
     setToastMsg(message);
-    toastTimer.current = window.setTimeout(() => setToastMsg(null), 3200);
+    toastTimer.current = window.setTimeout(() => setToastMsg(null), 3600);
   }
 
-  async function subscribe() {
-    if (subscribing) return;
-    setSubscribing(true);
+  useEffect(() => {
+    if (!pix) return;
+    let cancelled = false;
+    const timer = window.setInterval(() => {
+      void loadSubscriptionForOwner(getUserId()).then(() => {
+        if (!cancelled && hasActiveAccess(getSubscription())) {
+          navigate(`/assinatura/confirmando?returnTo=${returnTo ?? 'papa'}`, { replace: true });
+        }
+      });
+    }, 2500);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [pix, navigate, returnTo]);
+
+  async function submitPayment(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (processing) return;
+    setProcessing(true);
     try {
-      const checkoutUrl = await createCheckoutSession(returnTo ?? 'papa');
-      window.location.assign(checkoutUrl);
+      const expiryDigits = onlyDigits(expiry, 4);
+      const result = await createTransparentPayment({
+        method,
+        payer: {
+          name,
+          email,
+          cpfCnpj: cpf,
+          mobilePhone: phone,
+          ...(method === 'credit_card' ? { postalCode, addressNumber } : {}),
+        },
+        ...(method === 'credit_card' ? {
+          creditCard: {
+            holderName: cardHolder,
+            number: cardNumber,
+            expiryMonth: expiryDigits.slice(0, 2),
+            expiryYear: expiryDigits.slice(2),
+            ccv,
+          },
+        } : {}),
+      });
+      if (method === 'pix' && result.pix) {
+        setPix(result.pix);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        navigate(`/assinatura/confirmando?returnTo=${returnTo ?? 'papa'}`, { replace: true });
+      }
     } catch (error) {
-      toast(error instanceof Error ? error.message : 'Não foi possível iniciar o pagamento.');
-      setSubscribing(false);
+      toast(error instanceof Error ? error.message : 'Não foi possível processar o pagamento.');
+    } finally {
+      setProcessing(false);
+    }
+  }
+
+  async function copyPix() {
+    if (!pix) return;
+    try {
+      await navigator.clipboard.writeText(pix.payload);
+      toast('Código Pix copiado.');
+    } catch {
+      toast('Selecione e copie o código Pix abaixo.');
     }
   }
 
   return (
     <div className="paywall-view">
       <header className="paywall-header">
-        <button type="button" className="flow-header__back" aria-label="Voltar" onClick={() => navigate(backTo)}>
-          ←
-        </button>
-        <span>Assinatura Papazilla</span>
+        <button type="button" className="flow-header__back" aria-label="Voltar" onClick={() => pix ? setPix(null) : navigate(backTo)}>←</button>
+        <span>{pix ? 'Pague com Pix' : 'Assinatura Papazilla'}</span>
         <span aria-hidden="true" />
       </header>
 
       <div className="paywall-content">
-        <div className="paywall-hero">
-          <span className="paywall-hero__art">
-            <img src={zillaFrente} alt="Zilla pronto para cozinhar" />
-          </span>
-          <div>
-            <p className="eyebrow">
-              {activePet ? `A fornalha ${preposition} ${displayName} começa aqui` : 'Sua próxima fornalha começa aqui'}
-            </p>
-            <h1>Receitas na medida para o seu Monstrinho</h1>
-            <p>Da escolha dos ingredientes à porção no potinho, o Papazilla calcula tudo para vocês.</p>
-          </div>
-        </div>
+        {pix ? (
+          <section className="pix-payment" aria-live="polite">
+            <span className="pix-payment__badge">Pix gerado</span>
+            <h1>Escaneie e pronto</h1>
+            <p>Abra o app do seu banco, escolha Pix e escaneie o código. A liberação acontece automaticamente após o pagamento.</p>
+            <div className="pix-payment__qr"><img src={`data:image/png;base64,${pix.encodedImage}`} alt="QR Code para pagamento via Pix" /></div>
+            <label htmlFor="pix-code">Pix copia e cola</label>
+            <textarea id="pix-code" readOnly value={pix.payload} rows={4} />
+            <button type="button" className="pz-button pz-button--primary wide" onClick={() => { void copyPix(); }}>Copiar código Pix</button>
+            <p className="pix-payment__status"><span aria-hidden="true" /> Aguardando confirmação do pagamento…</p>
+            <small>O código vale para este pagamento anual de {formatBRL(ANNUAL_PRICE)}.</small>
+          </section>
+        ) : (
+          <>
+            <div className="paywall-hero">
+              <span className="paywall-hero__art"><img src={zillaFrente} alt="Zilla pronto para cozinhar" /></span>
+              <div>
+                <p className="eyebrow">{activePet ? `A fornalha ${preposition} ${displayName} começa aqui` : 'Sua próxima fornalha começa aqui'}</p>
+                <h1>Receitas na medida para o seu Monstrinho</h1>
+                <p>Da escolha dos ingredientes à porção no potinho, o Papazilla calcula tudo para vocês.</p>
+              </div>
+            </div>
 
-        <ul className="paywall-benefits" aria-label="Benefícios da assinatura">
-          <li>
-            <span aria-hidden="true">✓</span>
-            <p>
-              <strong>Quantidades personalizadas</strong>
-              <small>Peso, rotina e objetivo entram no cálculo.</small>
-            </p>
-          </li>
-          <li>
-            <span aria-hidden="true">✓</span>
-            <p>
-              <strong>Receita pronta para cozinhar</strong>
-              <small>Ingredientes, suplemento, finalização e preparo.</small>
-            </p>
-          </li>
-          <li>
-            <span aria-hidden="true">✓</span>
-            <p>
-              <strong>Toda a matilha organizada</strong>
-              <small>Receitas salvas e histórico de fornalhas.</small>
-            </p>
-          </li>
-        </ul>
+            <ul className="paywall-benefits" aria-label="Benefícios da assinatura">
+              <li><span aria-hidden="true">✓</span><p><strong>Quantidades personalizadas</strong><small>Peso, rotina e objetivo entram no cálculo.</small></p></li>
+              <li><span aria-hidden="true">✓</span><p><strong>Receita pronta para cozinhar</strong><small>Ingredientes, suplemento, finalização e preparo.</small></p></li>
+              <li><span aria-hidden="true">✓</span><p><strong>Toda a matilha organizada</strong><small>Receitas salvas e histórico de fornalhas.</small></p></li>
+            </ul>
 
-        <section className="paywall-offer">
-          <div className="paywall-offer__price">
-            <strong>
-              {formatBRL(ANNUAL_PRICE)}
-              <small>/ano</small>
-            </strong>
-            <span className="paywall-offer__hint">Cobrança recorrente automática no cartão</span>
-          </div>
-          <p className="annual-commitment">
-            Renovação anual automática. Cancele quando quiser — o acesso continua até o fim do período já pago.
-          </p>
-        </section>
+            <section className="paywall-offer">
+              <div className="paywall-offer__price"><strong>{formatBRL(ANNUAL_PRICE)}<small>/ano</small></strong><span className="paywall-offer__hint">Escolha como prefere pagar</span></div>
+              <p className="annual-commitment">Um pagamento libera 12 meses de receitas personalizadas para toda a sua matilha.</p>
+            </section>
 
-        <button type="button" className="pz-button pz-button--primary wide paywall-cta" onClick={() => { void subscribe(); }} disabled={subscribing}>
-          {subscribing ? 'Abrindo pagamento…' : `Assinar por ${formatBRL(ANNUAL_PRICE)}/ano`}
-        </button>
-        <p className="paywall-disclosure">
-          Pagamento processado pelo Asaas. {formatBRL(ANNUAL_PRICE)} cobrados no cartão a cada 12 meses até você
-          cancelar a renovação.
-        </p>
-        <div className="paywall-links">
-          <button type="button" onClick={() => toast('Termos de Uso será aberta aqui.')}>
-            Termos de Uso
-          </button>
-          <span>·</span>
-          <button type="button" onClick={() => toast('Política de Privacidade será aberta aqui.')}>
-            Privacidade
-          </button>
-        </div>
+            <form className="transparent-checkout" onSubmit={submitPayment}>
+              <fieldset className="payment-methods">
+                <legend>Forma de pagamento</legend>
+                <button type="button" className={method === 'pix' ? 'is-selected' : ''} onClick={() => setMethod('pix')}><span aria-hidden="true">◇</span><b>Pix</b><small>Liberação após o pagamento</small></button>
+                <button type="button" className={method === 'credit_card' ? 'is-selected' : ''} onClick={() => setMethod('credit_card')}><span aria-hidden="true">▭</span><b>Cartão de crédito</b><small>Renovação anual automática</small></button>
+              </fieldset>
+
+              <div className="checkout-form-section">
+                <h2>Dados do titular</h2>
+                <label>Nome completo<input autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} required /></label>
+                <label>E-mail<input type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></label>
+                <div className="checkout-form-grid">
+                  <label>CPF<input inputMode="numeric" autoComplete="off" value={cpf} onChange={(e) => setCpf(formatCpf(e.target.value))} placeholder="000.000.000-00" required /></label>
+                  <label>Celular<input inputMode="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(formatPhone(e.target.value))} placeholder="(00) 00000-0000" required /></label>
+                </div>
+              </div>
+
+              {method === 'credit_card' ? (
+                <div className="checkout-form-section">
+                  <h2>Dados do cartão</h2>
+                  <label>Nome impresso no cartão<input autoComplete="cc-name" value={cardHolder} onChange={(e) => setCardHolder(e.target.value.toUpperCase())} required /></label>
+                  <label>Número do cartão<input inputMode="numeric" autoComplete="cc-number" value={cardNumber} onChange={(e) => setCardNumber(formatCard(e.target.value))} placeholder="0000 0000 0000 0000" required /></label>
+                  <div className="checkout-form-grid">
+                    <label>Validade<input inputMode="numeric" autoComplete="cc-exp" value={expiry} onChange={(e) => setExpiry(formatExpiry(e.target.value))} placeholder="MM/AA" required /></label>
+                    <label>Código de segurança<input inputMode="numeric" autoComplete="cc-csc" value={ccv} onChange={(e) => setCcv(onlyDigits(e.target.value, 4))} placeholder="000" required /></label>
+                  </div>
+                  <div className="checkout-form-grid">
+                    <label>CEP<input inputMode="numeric" autoComplete="postal-code" value={postalCode} onChange={(e) => setPostalCode(formatCep(e.target.value))} placeholder="00000-000" required /></label>
+                    <label>Número do endereço<input inputMode="numeric" autoComplete="address-line2" value={addressNumber} onChange={(e) => setAddressNumber(e.target.value)} required /></label>
+                  </div>
+                </div>
+              ) : null}
+
+              <button type="submit" className="pz-button pz-button--primary wide paywall-cta" disabled={processing}>
+                {processing ? 'Processando…' : method === 'pix' ? `Gerar Pix de ${formatBRL(ANNUAL_PRICE)}` : `Pagar ${formatBRL(ANNUAL_PRICE)} no cartão`}
+              </button>
+              <p className="paywall-disclosure">{method === 'pix' ? 'O Pix libera 12 meses de acesso. Ao final do período, você escolhe se quer renovar.' : 'Cobrança anual recorrente. Você pode cancelar a renovação a qualquer momento e usar o período já pago até o fim.'}</p>
+              <p className="checkout-security"><span aria-hidden="true">⌾</span> Pagamento seguro. Os dados do cartão não são armazenados pelo Papazilla.</p>
+            </form>
+
+            <div className="paywall-links">
+              <button type="button" onClick={() => navigate('/conta/termos')}>Termos de Uso</button><span>·</span><button type="button" onClick={() => navigate('/conta/termos')}>Privacidade</button>
+            </div>
+          </>
+        )}
       </div>
 
-      {toastMsg ? (
-        <div className="pz-toast is-visible" role="status">
-          {toastMsg}
-        </div>
-      ) : null}
+      {toastMsg ? <div className="pz-toast is-visible" role="status">{toastMsg}</div> : null}
     </div>
   );
 }

@@ -12,9 +12,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.body?.confirm !== true) throw new HttpError(400, 'Confirme a exclusão da conta.');
     const admin = supabaseAdmin();
     const { data: sub, error: subError } = await admin.from('subscriptions')
-      .select('asaas_subscription_id,asaas_checkout_id,status').eq('user_id', user.id).maybeSingle();
+      .select('asaas_subscription_id,asaas_checkout_id,asaas_payment_id,payment_method,status').eq('user_id', user.id).maybeSingle();
     if (subError) throw subError;
-    if (sub?.status === 'active' && !sub.asaas_subscription_id) {
+    if (sub?.status === 'active' && sub.payment_method !== 'pix' && !sub.asaas_subscription_id) {
       throw new HttpError(409, 'A assinatura precisa ser conferida antes da exclusão. Entre em contato com o suporte.');
     }
 
@@ -29,6 +29,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       await asaasFetch(`/checkouts/${encodeURIComponent(sub.asaas_checkout_id)}/cancel`, { method: 'POST' });
       const { error } = await admin.from('subscriptions')
         .update({ status: 'none', asaas_checkout_id: null }).eq('user_id', user.id);
+      if (error) throw error;
+    }
+    if (sub?.status === 'pending' && sub.asaas_payment_id) {
+      await asaasFetch(`/payments/${encodeURIComponent(sub.asaas_payment_id)}`, { method: 'DELETE' });
+      const { error } = await admin.from('subscriptions')
+        .update({ status: 'none', asaas_payment_id: null }).eq('user_id', user.id);
       if (error) throw error;
     }
 

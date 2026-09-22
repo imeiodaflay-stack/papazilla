@@ -32,9 +32,11 @@ interface AsaasWebhookPayload {
     externalReference?: string | null;
   };
   payment?: {
+    id?: string;
     subscription?: string;
     customer?: string;
     checkoutSession?: string;
+    externalReference?: string | null;
   };
 }
 
@@ -90,9 +92,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
       case 'PAYMENT_RECEIVED':
       case 'PAYMENT_CONFIRMED': {
+        const paymentId = payload.payment?.id;
         const subscriptionId = payload.payment?.subscription;
         const checkoutId = payload.payment?.checkoutSession;
-        if (!subscriptionId && !checkoutId) break;
+        const externalReference = payload.payment?.externalReference;
+        if (!paymentId && !subscriptionId && !checkoutId && !externalReference) break;
 
         const values = {
           status: 'active',
@@ -106,6 +110,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         // foi salvo ao iniciar a compra. Depois disso, renovações também podem
         // ser correlacionadas pelo id da assinatura já persistido.
         let matched = false;
+        if (paymentId) {
+          const { data, error } = await admin
+            .from('subscriptions')
+            .update(values)
+            .eq('asaas_payment_id', paymentId)
+            .select('user_id');
+          if (error) throw error;
+          matched = Boolean(data?.length);
+        }
         if (checkoutId) {
           const { data, error } = await admin
             .from('subscriptions')
@@ -113,13 +126,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             .eq('asaas_checkout_id', checkoutId)
             .select('user_id');
           if (error) throw error;
-          matched = Boolean(data?.length);
+          matched = matched || Boolean(data?.length);
         }
         if (!matched && subscriptionId) {
+          const { data, error } = await admin
+            .from('subscriptions')
+            .update(values)
+            .eq('asaas_subscription_id', subscriptionId)
+            .select('user_id');
+          if (error) throw error;
+          matched = Boolean(data?.length);
+        }
+        // `externalReference` recebe o user_id na criação da cobrança e é o
+        // último vínculo seguro em caso de o webhook chegar antes de o ID do
+        // pagamento/assinatura terminar de ser persistido.
+        if (!matched && externalReference) {
           const { error } = await admin
             .from('subscriptions')
             .update(values)
-            .eq('asaas_subscription_id', subscriptionId);
+            .eq('user_id', externalReference);
           if (error) throw error;
         }
         break;

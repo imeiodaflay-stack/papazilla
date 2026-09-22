@@ -82,7 +82,9 @@ export function ContaScreen() {
     ? 'Receitas personalizadas para toda a matilha, salvas e disponíveis em qualquer aparelho.'
     : 'Cadastre seus pets e explore os conteúdos. Assine para criar receitas personalizadas.';
   const valueLabel = isActive ? 'Pagamento' : 'Receitas';
-  const planValue = isActive ? `${formatBRL(ANNUAL_PRICE)}/ano no cartão` : 'Benefício premium';
+  const planValue = isActive
+    ? `${formatBRL(ANNUAL_PRICE)}/ano via ${subscription?.paymentMethod === 'pix' ? 'Pix' : 'cartão'}`
+    : 'Benefício premium';
 
   function goManagePlan() {
     if (isActive) navigate('/assinatura/gerenciar');

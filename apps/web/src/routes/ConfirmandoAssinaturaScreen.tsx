@@ -5,12 +5,9 @@ import { getSubscription, hasActiveAccess, loadSubscriptionForOwner } from '../l
 import { getUserId, initAuth } from '../lib/session.js';
 
 /**
- * Pra onde o Asaas redireciona depois do pagamento (`successUrl`). O
- * pagamento em si só é confirmado quando o webhook (`/api/webhooks-asaas`)
- * processar — geralmente questão de segundos, mas não é instantâneo — então
- * essa tela reconsulta a assinatura algumas vezes antes de seguir em frente,
- * em vez de confiar cegamente no redirecionamento (que só significa "a
- * pessoa terminou o checkout", não "o pagamento foi confirmado").
+ * Espera a confirmação server-side do pagamento pelo webhook. A resposta da
+ * criação da cobrança nunca libera o acesso sozinha, então esta tela
+ * reconsulta a assinatura antes de seguir.
  */
 const POLL_INTERVAL_MS = 1500;
 const SLOW_POLL_INTERVAL_MS = 5000;
@@ -75,7 +72,7 @@ export function ConfirmandoAssinaturaScreen() {
         ) : (
           <>
             <h1 className="pz-h1">Confirmando seu pagamento…</h1>
-            <p>Só um instante, já estamos verificando com o Asaas.</p>
+            <p>Só um instante, já estamos confirmando o seu pagamento.</p>
           </>
         )}
       </div>

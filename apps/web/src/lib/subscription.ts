@@ -1,5 +1,5 @@
 /**
- * Assinatura real via Asaas (substitui a simulação em `localStorage` da
+ * Assinatura real via API de pagamentos (substitui a simulação em `localStorage` da
  * Fase 0 — qualquer pessoa podia "assinar de graça" editando o navegador).
  *
  * `cachedSubscription` é carregado da tabela `subscriptions` (Supabase) por
@@ -10,14 +10,12 @@
  *
  * Sem Supabase configurado, ou sem sessão, não existe assinatura — ao
  * contrário de pets, não há fallback local: pagamento de verdade só pode vir
- * confirmado pelo servidor (webhook do Asaas → `/api/webhooks-asaas`), nunca
+ * confirmado pelo servidor (webhook → `/api/webhooks-asaas`), nunca
  * inventado no navegador.
  *
  * Decisão de produto (Flay, 2026-09): oferta única, Papazilla Anual R$99,99,
- * cobrança recorrente automática só no cartão — sem parcelamento (o Asaas
- * não parcela cobrança recorrente; parcelar exigiria uma compra avulsa que
- * não renova sozinha, ver handover). Isso substitui a oferta "à vista ou 6x"
- * desenhada antes desta decisão.
+ * cobrança recorrente automática no cartão, ou pagamento anual por Pix com
+ * renovação manual. Sem parcelamento no MVP.
  */
 import { isSupabaseConfigured } from './env.js';
 import { supabase } from './supabase.js';
@@ -30,19 +28,26 @@ export interface Subscription {
   status: SubscriptionStatus;
   plan: 'annual';
   currentPeriodEnd: string | null;
+  paymentMethod: 'credit_card' | 'pix' | null;
 }
 
 interface SubscriptionRow {
   status: SubscriptionStatus;
   plan: string;
   current_period_end: string | null;
+  payment_method: 'credit_card' | 'pix' | null;
 }
 
 let cachedSubscription: Subscription | null = null;
 let ownerId: string | null = null;
 
 function rowToSubscription(row: SubscriptionRow): Subscription {
-  return { status: row.status, plan: 'annual', currentPeriodEnd: row.current_period_end };
+  return {
+    status: row.status,
+    plan: 'annual',
+    currentPeriodEnd: row.current_period_end,
+    paymentMethod: row.payment_method,
+  };
 }
 
 /** Chamada por `session.ts` a cada mudança de sessão, igual `loadPetsForOwner`. */
@@ -54,7 +59,7 @@ export async function loadSubscriptionForOwner(userId: string | null): Promise<v
   }
   const { data, error } = await supabase
     .from('subscriptions')
-    .select('status, plan, current_period_end')
+    .select('status, plan, current_period_end, payment_method')
     .eq('user_id', userId)
     .maybeSingle();
   if (error) {
@@ -106,20 +111,43 @@ async function authedFetch(path: string, body?: unknown): Promise<Response> {
   });
 }
 
-/**
- * Pede pro servidor criar o checkout no Asaas; devolve a URL da página de
- * pagamento hospedada. `returnTo` viaja no corpo pro servidor montar a
- * `successUrl` com ele — o Asaas não devolve query params que a gente
- * grudar na URL do checkout, só os que a gente configurou na criação.
- */
-export async function createCheckoutSession(returnTo: string): Promise<string> {
-  const res = await authedFetch('/api/checkout-create', { returnTo });
-  const body = await res.json().catch(() => null);
-  if (!res.ok || !body?.url) throw new Error(body?.error || 'Não foi possível iniciar o pagamento.');
-  return body.url as string;
+/** Envia os dados do checkout próprio à Function segura, sem persistir cartão no navegador ou banco. */
+export interface TransparentPaymentInput {
+  method: 'credit_card' | 'pix';
+  payer: {
+    name: string;
+    email: string;
+    cpfCnpj: string;
+    mobilePhone: string;
+    postalCode?: string;
+    addressNumber?: string;
+  };
+  creditCard?: {
+    holderName: string;
+    number: string;
+    expiryMonth: string;
+    expiryYear: string;
+    ccv: string;
+  };
 }
 
-/** Cancela a renovação automática no Asaas e atualiza o cache local. */
+export interface PaymentCreationResult {
+  status: 'processing' | 'awaiting_payment';
+  pix?: {
+    encodedImage: string;
+    payload: string;
+    expirationDate: string;
+  };
+}
+
+export async function createTransparentPayment(input: TransparentPaymentInput): Promise<PaymentCreationResult> {
+  const res = await authedFetch('/api/payment-create', input);
+  const body = await res.json().catch(() => null);
+  if (!res.ok || !body?.status) throw new Error(body?.error || 'Não foi possível processar o pagamento.');
+  return body as PaymentCreationResult;
+}
+
+/** Cancela a renovação automática no processador e atualiza o cache local. */
 export async function cancelSubscription(): Promise<void> {
   const res = await authedFetch('/api/subscription-cancel');
   if (!res.ok) {
