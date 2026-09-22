@@ -38,11 +38,19 @@ export function RecipeDetailScreen() {
   const [renaming, setRenaming] = useState(false);
   const [titleInput, setTitleInput] = useState(storedRecipe ? displayRecipeTitle(storedRecipe) : '');
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [bodyAtEnd, setBodyAtEnd] = useState(false);
 
   function toast(message: string) {
     window.clearTimeout(toastTimer.current);
     setToastMsg(message);
     toastTimer.current = window.setTimeout(() => setToastMsg(null), 2600);
+  }
+
+  function handleBodyScroll(event: React.UIEvent<HTMLDivElement>) {
+    const body = event.currentTarget;
+    const hasOverflow = body.scrollHeight > body.clientHeight + 1;
+    const reachedEnd = body.scrollTop + body.clientHeight >= body.scrollHeight - 2;
+    setBodyAtEnd(hasOverflow && reachedEnd);
   }
 
   if (!storedRecipe) return <Navigate to="/receitas" replace />;
@@ -119,7 +127,7 @@ export function RecipeDetailScreen() {
         </button>
       </header>
 
-      <div className="flow-body recipe-detail-body">
+      <div className="flow-body recipe-detail-body" onScroll={handleBodyScroll}>
         {showMore ? (
           <div className="more-menu">
             <button
@@ -289,7 +297,7 @@ export function RecipeDetailScreen() {
         ))}
       </div>
 
-      <footer className="flow-footer flow-footer--stacked">
+      <footer className={`flow-footer flow-footer--stacked recipe-detail__footer${bodyAtEnd ? ' is-at-end' : ''}`}>
         <button type="button" className="pz-button pz-button--outline wide" onClick={() => navigate(`/receitas/${storedRecipe.id}/compartilhar`)}>
           {clinicalRequired ? 'Compartilhar para revisão veterinária' : 'Compartilhar receita'}
         </button>

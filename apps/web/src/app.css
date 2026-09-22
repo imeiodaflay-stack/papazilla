@@ -4610,6 +4610,7 @@
   display: grid;
   align-content: center;
   justify-items: center;
+  text-align: center;
   background: var(--pz-surface-soft);
 }
 .recipe-photo--empty img {
@@ -4619,8 +4620,10 @@
   opacity: 0.7;
 }
 .recipe-photo--empty em {
+  width: 100%;
   margin-top: 0.25rem;
   color: var(--pz-ink-label);
+  text-align: center;
   font: 700 0.875rem / 1 var(--pz-font-support);
 }
 .saved-recipe-card__body {
@@ -4850,6 +4853,13 @@
   gap: 0.65rem;
   padding-top: 0.4rem;
   border-top: 0;
+}
+.flow-footer--stacked.recipe-detail__footer {
+  border-top: 1px solid transparent;
+  transition: border-color 0.18s ease;
+}
+.flow-footer--stacked.recipe-detail__footer.is-at-end {
+  border-top-color: var(--pz-border);
 }
 
 /* -------- Registrar fornalha (cook log) -------- */
