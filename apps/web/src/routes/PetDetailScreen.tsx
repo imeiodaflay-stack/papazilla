@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import zillaFrente from '../assets/zilla-frente.png';
 import calendarioIcon from '../assets/icons/calendario.png';
-import graficoIcon from '../assets/icons/grafico-barras.png';
-import patinhaIcon from '../assets/icons/patinha.png';
+import idadeIcon from '../assets/icons/idade-estrela.png';
+import pesoIcon from '../assets/icons/peso-balanca.png';
+import atividadeIcon from '../assets/icons/atividade-bolinha.png';
 import potinhoIcon from '../assets/icons/potinho.png';
 import sucessoIcon from '../assets/icons/sucesso.png';
 import profileSheetIcon from '../assets/icons/receita.png';
@@ -193,12 +194,12 @@ export function PetDetailScreen({ petIdOverride, isSinglePetRoot = false }: PetD
                 <strong>{registeredOn}</strong>
               </article>
               <article>
-                <img src={calendarioIcon} alt="" />
+                <img src={idadeIcon} alt="" />
                 <small>Idade</small>
                 <strong>{pet.age || '—'}</strong>
               </article>
               <article>
-                <img src={graficoIcon} alt="" />
+                <img src={pesoIcon} alt="" />
                 <small>Peso</small>
                 <strong>{pet.weight ? `${pet.weight} kg` : '—'}</strong>
               </article>
@@ -208,7 +209,7 @@ export function PetDetailScreen({ petIdOverride, isSinglePetRoot = false }: PetD
                 <strong>{pet.goal || '—'}</strong>
               </article>
               <article>
-                <img src={patinhaIcon} alt="" />
+                <img src={atividadeIcon} alt="" />
                 <small>Atividade</small>
                 <strong>{pet.activityTime || '—'}</strong>
               </article>
