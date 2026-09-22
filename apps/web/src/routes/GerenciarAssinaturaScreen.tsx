@@ -59,7 +59,7 @@ export function GerenciarAssinaturaScreen() {
           type="button"
           className="flow-header__back"
           aria-label="Voltar para Minha conta"
-          onClick={() => navigate('/conta')}
+          onClick={() => navigate(-1)}
         >
           ←
         </button>
