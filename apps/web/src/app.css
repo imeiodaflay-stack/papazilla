@@ -1096,6 +1096,9 @@
 .flow-intro {
   margin-bottom: 1.25rem;
 }
+.flow-intro--with-note {
+  margin-bottom: 0.75rem;
+}
 .flow-intro h1 {
   margin: 0.35rem 0 0.65rem;
   font: 600 clamp(1.7rem, 7vw, 2.05rem) / 1.12 var(--pz-font-display);
@@ -3527,6 +3530,10 @@
   background: var(--pz-info-bg);
   border-radius: 15px;
   color: var(--pz-info-ink);
+}
+.flow-intro--with-note + .shared-recipe-note {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
 }
 .shared-recipe-note img {
   flex: 0 0 22px;

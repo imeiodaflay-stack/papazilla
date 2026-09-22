@@ -307,7 +307,7 @@ export function ReceitaScreen() {
       </div>
 
       <div className="flow-body" ref={bodyRef}>
-        <div className="flow-intro">
+        <div className={`flow-intro${step === 1 && petsWithMuscleLoss.length > 0 ? ' flow-intro--with-note' : ''}`}>
           <p className="eyebrow">{eyebrowByStep[step]}</p>
           <h1>{isResultStep ? resultTitle : titleByStep[step]}</h1>
           <p>{recipeIntro}</p>
