@@ -86,6 +86,7 @@ export function ReceitaScreen() {
   const [format, setFormat] = useState(() => draft?.format ?? 'Os dois');
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [bodyAtEnd, setBodyAtEnd] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<number>();
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -132,7 +133,15 @@ export function ReceitaScreen() {
 
   function goToStep(index: number) {
     setStep(Math.max(0, Math.min(STEPS_COUNT - 1, index)));
+    setBodyAtEnd(false);
     bodyRef.current?.scrollTo({ top: 0 });
+  }
+
+  function handleBodyScroll(event: React.UIEvent<HTMLDivElement>) {
+    const body = event.currentTarget;
+    const hasOverflow = body.scrollHeight > body.clientHeight + 1;
+    const reachedEnd = body.scrollTop + body.clientHeight >= body.scrollHeight - 2;
+    setBodyAtEnd(hasOverflow && reachedEnd);
   }
 
   function togglePet(id: string) {
@@ -306,7 +315,7 @@ export function ReceitaScreen() {
         <span style={{ width: `${((step + 1) / STEPS_COUNT) * 100}%` }} />
       </div>
 
-      <div className="flow-body" ref={bodyRef}>
+      <div className="flow-body" ref={bodyRef} onScroll={handleBodyScroll}>
         <div className={`flow-intro${step === 1 && petsWithMuscleLoss.length > 0 ? ' flow-intro--with-note' : ''}`}>
           <p className="eyebrow">{eyebrowByStep[step]}</p>
           <h1>{isResultStep ? resultTitle : titleByStep[step]}</h1>
@@ -536,7 +545,7 @@ export function ReceitaScreen() {
         ) : null}
       </div>
 
-      <footer className="flow-footer">
+      <footer className={`flow-footer recipe-flow__footer${bodyAtEnd ? ' is-at-end' : ''}`}>
         <button type="button" className="pz-button pz-button--outline" onClick={onBack}>
           {step === 0 ? 'Cancelar' : 'Voltar'}
         </button>

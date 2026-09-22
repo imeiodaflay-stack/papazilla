@@ -1128,6 +1128,13 @@
 .flow-footer .pz-button--primary {
   width: 100%;
 }
+.recipe-flow__footer {
+  border-top-color: transparent;
+  transition: border-color 0.18s ease;
+}
+.recipe-flow__footer.is-at-end {
+  border-top-color: var(--pz-border);
+}
 
 /* --- controles da anamnese --- */
 .photo-picker {
