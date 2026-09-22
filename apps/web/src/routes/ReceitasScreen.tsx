@@ -33,7 +33,16 @@ export function ReceitasScreen() {
     toastTimer.current = window.setTimeout(() => setToastMsg(null), 2600);
   }
 
-  const visible = filter === 'all' ? recipes : recipes.filter((r) => r.petIds.includes(filter));
+  const visible = recipes.filter((recipe) => {
+    if (filter === 'all') return true;
+    if (filter === 'favorites') return recipe.favorite;
+    if (filter === 'five-hearts') {
+      const ratings = recipe.cookLogs.map((log) => log.rating).filter((rating) => rating > 0);
+      if (ratings.length === 0) return false;
+      return ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length === 5;
+    }
+    return recipe.petIds.includes(filter);
+  });
 
   return (
     <div className="app-view">
@@ -62,7 +71,7 @@ export function ReceitasScreen() {
           ) : (
             <>
               {pets.length > 0 ? (
-                <div className="recipe-filters" role="group" aria-label="Filtrar receitas por pet">
+                <div className="recipe-filters" role="group" aria-label="Filtrar receitas">
                   <button type="button" className={filter === 'all' ? 'is-selected' : undefined} onClick={() => setFilter('all')}>
                     Todas
                   </button>
@@ -76,6 +85,20 @@ export function ReceitasScreen() {
                       {pet.name}
                     </button>
                   ))}
+                  <button
+                    type="button"
+                    className={filter === 'favorites' ? 'is-selected' : undefined}
+                    onClick={() => setFilter('favorites')}
+                  >
+                    ★ Favoritas
+                  </button>
+                  <button
+                    type="button"
+                    className={filter === 'five-hearts' ? 'is-selected' : undefined}
+                    onClick={() => setFilter('five-hearts')}
+                  >
+                    ♥ 5 corações
+                  </button>
                 </div>
               ) : null}
 
@@ -83,7 +106,12 @@ export function ReceitasScreen() {
                 {visible.length} {visible.length === 1 ? 'receita' : 'receitas'} na sua coleção
               </p>
 
-              <div className="saved-recipe-list">
+              {visible.length === 0 ? (
+                <div className="pz-card saved-filter-empty">
+                  <p>Nenhuma receita neste filtro.</p>
+                  <button type="button" onClick={() => setFilter('all')}>Ver todas as receitas</button>
+                </div>
+              ) : <div className="saved-recipe-list">
                 {visible.map((recipe) => {
                   const recipePets = recipe.petPlans?.map(({ pet }) => pet) ?? pets.filter((p) => recipe.petIds.includes(p.id));
                   const petNames = recipePets.length > 0 ? joinPt(recipePets.map((p) => p.name)) : 'matilha';
@@ -118,7 +146,7 @@ export function ReceitasScreen() {
                     </button>
                   );
                 })}
-              </div>
+              </div>}
             </>
           )}
         </div>

@@ -4570,6 +4570,21 @@
   color: var(--pz-ink-label);
   font-size: 0.875rem;
 }
+.saved-filter-empty {
+  display: grid;
+  justify-items: start;
+  gap: 0.65rem;
+}
+.saved-filter-empty p {
+  margin: 0;
+}
+.saved-filter-empty button {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: var(--pz-accent-ink);
+  font: 700 0.875rem / 1.2 var(--pz-font-support);
+}
 .saved-recipe-list {
   display: grid;
   gap: 0.7rem;

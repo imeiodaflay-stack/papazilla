@@ -1,5 +1,5 @@
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import sheetIcon from '../assets/icons/sheet.png';
+import calendarioIcon from '../assets/icons/calendario.png';
 import { getPet } from '../lib/petsStore.js';
 import { getRecipe } from '../lib/recipeRepository.js';
 import { displayRecipeTitle } from '../lib/recipeDisplay.js';
@@ -35,7 +35,7 @@ export function RecipeHistoryScreen() {
           <strong>Histórico de fornalhas</strong>
         </div>
         <span className="flow-header__avatar">
-          <img src={sheetIcon} alt="" />
+          <img src={calendarioIcon} alt="" />
         </span>
       </header>
 
