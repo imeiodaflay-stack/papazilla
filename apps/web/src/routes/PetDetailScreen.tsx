@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
-import zillaIcon from '../assets/icons/zilla.png';
+import zillaFrente from '../assets/zilla-frente.png';
 import calendarioIcon from '../assets/icons/calendario.png';
 import graficoIcon from '../assets/icons/grafico-barras.png';
 import patinhaIcon from '../assets/icons/patinha.png';
+import potinhoIcon from '../assets/icons/potinho.png';
 import sucessoIcon from '../assets/icons/sucesso.png';
 import profileSheetIcon from '../assets/icons/receita.png';
 import infoIcon from '../assets/icons/info.png';
@@ -18,8 +19,14 @@ import { describePet, neuteredLabel } from '../lib/petLabel.js';
  * de verdade. "•••" abre "Excluir Monstrinho" (real, com confirmação — sem
  * tela equivalente no protótipo, que só mostrava um toast).
  */
-export function PetDetailScreen() {
-  const { petId } = useParams<{ petId: string }>();
+interface PetDetailScreenProps {
+  petIdOverride?: string;
+  isSinglePetRoot?: boolean;
+}
+
+export function PetDetailScreen({ petIdOverride, isSinglePetRoot = false }: PetDetailScreenProps = {}) {
+  const { petId: routePetId } = useParams<{ petId: string }>();
+  const petId = petIdOverride ?? routePetId;
   const navigate = useNavigate();
   const location = useLocation();
   const [toastMsg, setToastMsg] = useState<string | null>(null);
@@ -40,11 +47,12 @@ export function PetDetailScreen() {
 
   if (!pet) return <Navigate to="/zilla" replace />;
 
-  const { displayName } = describePet(pet);
+  const { displayName, isFemale } = describePet(pet);
   const identity = [pet.breed || 'Sem raça definida', pet.sex, neuteredLabel(pet.sex, pet.neutered)]
     .filter(Boolean)
     .join(' · ');
   const registeredOn = new Date(pet.createdAt).toLocaleDateString('pt-BR');
+  const anamnesisUpdatedOn = new Date(pet.updatedAt || pet.createdAt).toLocaleDateString('pt-BR');
 
   function toast(message: string) {
     window.clearTimeout(toastTimer.current);
@@ -65,27 +73,35 @@ export function PetDetailScreen() {
   return (
     <div className="app-view">
       <header className="app-header pets-header pets-header--detail">
-        <button
-          type="button"
-          className="profile-list-back"
-          aria-label="Voltar para a lista de pets"
-          onClick={() => navigate('/zilla')}
-        >
-          ←
-        </button>
+        {isSinglePetRoot ? (
+          <span className="profile-list-back-placeholder" aria-hidden="true" />
+        ) : (
+          <button
+            type="button"
+            className="profile-list-back"
+            aria-label="Voltar para a lista de pets"
+            onClick={() => navigate('/zilla')}
+          >
+            ←
+          </button>
+        )}
         <label className="pet-switcher">
           <span>Visualizando</span>
-          <select
-            aria-label="Trocar de pet"
-            value={pet.id}
-            onChange={(e) => switchPet(e.target.value)}
-          >
-            {pets.map((p) => (
-              <option key={p.id} value={p.id}>
-                {describePet(p).displayName}
-              </option>
-            ))}
-          </select>
+          {pets.length > 1 ? (
+            <select
+              aria-label="Trocar de pet"
+              value={pet.id}
+              onChange={(e) => switchPet(e.target.value)}
+            >
+              {pets.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {describePet(p).displayName}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <strong>{displayName}</strong>
+          )}
         </label>
         <Link to="/conta" className="avatar-button" aria-label="Abrir Minha conta">
           F
@@ -94,11 +110,19 @@ export function PetDetailScreen() {
 
       <main className="app-view__main">
         <div className="pets-content">
-          <section className="pet-hero-card">
-            <div className="pet-hero-card__portrait">
-              <img src={pet.photoPath || zillaIcon} alt="" className={pet.photoPath ? 'photo-picker__preview' : undefined} />
-              <span aria-hidden="true">♥</span>
-            </div>
+          <section className={`pet-hero-card${pet.photoPath ? ' pet-hero-card--photo' : ' pet-hero-card--empty'}`}>
+            {pet.photoPath ? (
+              <img src={pet.photoPath} alt={`Foto de ${displayName}`} className="pet-hero-card__photo" />
+            ) : (
+              <div className="pet-hero-card__empty-state">
+                <img src={zillaFrente} alt="Zilla" />
+                <strong>{displayName} ainda está sem foto</strong>
+                <span>Adicione um retrato para deixar o perfil com a cara {isFemale ? 'dela' : 'dele'}.</span>
+                <button type="button" onClick={() => navigate(`/zilla/${pet.id}/editar`)}>
+                  Adicionar foto
+                </button>
+              </div>
+            )}
             <div className="pet-hero-card__identity">
               <span className="pz-badge pz-badge--success">Parte da matilha</span>
               <h2>{displayName}</h2>
@@ -162,7 +186,12 @@ export function PetDetailScreen() {
                 Editar
               </button>
             </div>
-            <div className="pet-stats-grid">
+            <div className="pet-stats-grid pet-profile-facts">
+              <article className="pet-profile-fact--peach">
+                <img src={calendarioIcon} alt="" />
+                <small>Cadastrada em</small>
+                <strong>{registeredOn}</strong>
+              </article>
               <article>
                 <img src={calendarioIcon} alt="" />
                 <small>Idade</small>
@@ -173,15 +202,20 @@ export function PetDetailScreen() {
                 <small>Peso</small>
                 <strong>{pet.weight ? `${pet.weight} kg` : '—'}</strong>
               </article>
+              <article className="pet-profile-fact--green">
+                <img src={sucessoIcon} alt="" />
+                <small>Objetivo atual</small>
+                <strong>{pet.goal || '—'}</strong>
+              </article>
               <article>
                 <img src={patinhaIcon} alt="" />
                 <small>Atividade</small>
                 <strong>{pet.activityTime || '—'}</strong>
               </article>
-              <article className="pet-stat--wide">
-                <img src={sucessoIcon} alt="" />
-                <small>Objetivo atual</small>
-                <strong>{pet.goal || '—'}</strong>
+              <article className="pet-profile-fact--blue">
+                <img src={potinhoIcon} alt="" />
+                <small>Gosta de comer?</small>
+                <strong>{pet.appetite || '—'}</strong>
               </article>
             </div>
           </section>
@@ -191,10 +225,9 @@ export function PetDetailScreen() {
               <img src={profileSheetIcon} alt="" />
             </div>
             <div>
-              <span className="pz-badge pz-badge--success">Perfil em dia</span>
+              <span className="pz-badge pz-badge--success">Atualizado em {anamnesisUpdatedOn}</span>
               <h2>Perfil e anamnese</h2>
               <p>Saúde, rotina, digestão e preferências de {displayName}.</p>
-              <small>Cadastrada em {registeredOn}</small>
             </div>
             <button
               type="button"
