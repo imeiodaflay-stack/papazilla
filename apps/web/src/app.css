@@ -2021,88 +2021,106 @@
   color: var(--pz-ink-label);
   font-size: 0.875rem;
 }
-.pack-heading > span {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 999px;
+.pack-heading--portraits {
+  align-items: center;
+}
+.pack-heading--portraits > span {
+  flex: 0 0 auto;
+  padding: 0.45rem 0.65rem;
+  border-radius: var(--pz-radius-pill);
   background: var(--pz-success-bg);
   color: var(--pz-secondary-ink);
-  font: 800 0.875rem / 1 var(--pz-font-support);
+  font: 800 0.8125rem / 1 var(--pz-font-support);
 }
 
-.pet-list {
+.pet-portrait-list {
   display: grid;
-  gap: 0.7rem;
+  gap: 1rem;
 }
-.pet-list-card {
-  display: grid;
-  grid-template-columns: 68px 1fr 26px;
-  gap: 0.75rem;
-  align-items: center;
+.pet-portrait-card {
+  position: relative;
+  display: block;
   width: 100%;
-  min-height: 106px;
-  padding: 0.75rem;
-  border: 1px solid var(--pz-border);
-  border-radius: 20px;
-  background: #fff;
-  color: var(--pz-ink);
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  border-radius: 28px;
+  background: #d9dec0;
+  color: var(--pz-creme);
+  box-shadow: 0 12px 28px rgb(74 45 34 / 12%);
   text-align: left;
+  isolation: isolate;
 }
-.pet-list-card:active {
-  background: var(--pz-surface-soft);
+.pet-portrait-card:active {
   transform: scale(0.99);
 }
-.pet-list-card__portrait {
-  display: grid;
-  place-items: center;
-  width: 68px;
-  height: 68px;
-  overflow: hidden;
-  border-radius: 50%;
-  background: #eef0d7;
-}
-.pet-list-card__portrait img {
-  width: 65px;
-  height: 65px;
-  object-fit: contain;
-}
-.pet-list-card__portrait .pet-list-card__photo {
+.pet-portrait-card__media,
+.pet-portrait-card__media img,
+.pet-portrait-card__shade {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
+}
+.pet-portrait-card__photo {
   object-fit: cover;
 }
-.pet-list-card__content {
+.pet-portrait-card__shade {
+  z-index: 1;
+  background: linear-gradient(180deg, rgb(38 23 17 / 4%) 38%, rgb(38 23 17 / 76%) 100%);
+}
+.pet-portrait-card--placeholder {
+  background: linear-gradient(145deg, #eef0d7, #d7deb0);
+}
+.pet-portrait-card__fallback {
+  inset: 14% 15% 23%;
+  width: 70%;
+  height: 63%;
+  object-fit: contain;
+}
+.pet-portrait-card__arrow {
+  position: absolute;
+  z-index: 2;
+  top: 1rem;
+  right: 1rem;
   display: grid;
-  min-width: 0;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgb(255 248 243 / 90%);
+  color: var(--pz-chocolate);
+  box-shadow: 0 6px 18px rgb(74 45 34 / 14%);
+  font: 700 1.35rem / 1 var(--pz-font-support);
+  backdrop-filter: blur(8px);
 }
-.pet-list-card__content > strong {
-  font: 600 1.25rem / 1 var(--pz-font-display);
+.pet-portrait-card__content {
+  position: absolute;
+  z-index: 2;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+  display: grid;
+  gap: 0.65rem;
 }
-.pet-list-card__content > small {
-  margin: 0.25rem 0 0.5rem;
-  overflow: hidden;
-  color: var(--pz-ink-label);
-  font-size: 0.875rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.pet-portrait-card__content > strong {
+  color: var(--pz-creme);
+  font: 600 2rem / 1 var(--pz-font-display);
+  text-shadow: 0 2px 12px rgb(38 23 17 / 32%);
 }
-.pet-list-card__content > span {
+.pet-portrait-card__meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.3rem;
+  gap: 0.4rem;
 }
-.pet-list-card__content b {
-  padding: 0.35rem 0.42rem;
-  border-radius: 999px;
-  background: var(--pz-surface-soft);
-  font: 700 0.875rem / 1 var(--pz-font-support);
-}
-.pet-list-card__arrow {
-  color: var(--pz-accent-ink);
-  font: 400 2rem / 1 var(--pz-font-display);
-  text-align: center;
+.pet-portrait-card__meta b {
+  padding: 0.42rem 0.6rem;
+  border-radius: var(--pz-radius-pill);
+  background: rgb(255 248 243 / 88%);
+  color: var(--pz-chocolate);
+  font: 800 0.8125rem / 1 var(--pz-font-support);
+  backdrop-filter: blur(8px);
 }
 
 .add-monster-button {
