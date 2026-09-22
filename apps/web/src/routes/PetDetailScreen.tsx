@@ -194,12 +194,12 @@ export function PetDetailScreen({ petIdOverride, isSinglePetRoot = false }: PetD
                 <strong>{registeredOn}</strong>
               </article>
               <article>
-                <img src={idadeIcon} alt="" />
+                <img src={idadeIcon} alt="" className="pet-profile-fact__brand-icon" />
                 <small>Idade</small>
                 <strong>{pet.age || '—'}</strong>
               </article>
               <article>
-                <img src={pesoIcon} alt="" />
+                <img src={pesoIcon} alt="" className="pet-profile-fact__brand-icon" />
                 <small>Peso</small>
                 <strong>{pet.weight ? `${pet.weight} kg` : '—'}</strong>
               </article>
@@ -209,7 +209,7 @@ export function PetDetailScreen({ petIdOverride, isSinglePetRoot = false }: PetD
                 <strong>{pet.goal || '—'}</strong>
               </article>
               <article>
-                <img src={atividadeIcon} alt="" />
+                <img src={atividadeIcon} alt="" className="pet-profile-fact__brand-icon" />
                 <small>Atividade</small>
                 <strong>{pet.activityTime || '—'}</strong>
               </article>

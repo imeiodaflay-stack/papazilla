@@ -2391,6 +2391,10 @@
   margin-bottom: 0.2rem;
   object-fit: contain;
 }
+.pet-stats-grid article > .pet-profile-fact__brand-icon {
+  width: 28px;
+  height: 28px;
+}
 .pet-stats-grid small {
   color: var(--pz-ink-label);
   font: 600 0.875rem / 1.2 var(--pz-font-body);
