@@ -4,6 +4,7 @@ import zillaIcon from '../assets/icons/zilla.png';
 import { getPet, updatePet, waitForPendingPetWrites } from '../lib/petsStore.js';
 import { describePet } from '../lib/petLabel.js';
 import { fileToDataUrl, PhotoUploadError, uploadPhoto } from '../lib/photoUpload.js';
+import { useScrollAwareFooter } from '../hooks/useScrollAwareFooter.js';
 
 const GOAL_OPTIONS = [
   'Manter o peso atual',
@@ -41,6 +42,7 @@ export function PetEditScreen() {
   const [photoUploading, setPhotoUploading] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const { bodyRef, dividerVisible, onBodyScroll } = useScrollAwareFooter();
   const toastTimer = useRef<number>();
   const photoInputRef = useRef<HTMLInputElement>(null);
 
@@ -122,7 +124,7 @@ export function PetEditScreen() {
         <span style={{ width: '100%' }} />
       </div>
 
-      <div className="flow-body">
+      <div className="flow-body" ref={bodyRef} onScroll={onBodyScroll}>
         <div className="flow-intro">
           <p className="eyebrow">Perfil de {describePet(pet).displayName}</p>
           <h1>O que mudou por aí?</h1>
@@ -224,7 +226,7 @@ export function PetEditScreen() {
         </div>
       </div>
 
-      <footer className="flow-footer">
+      <footer className={`flow-footer scroll-aware-footer${dividerVisible ? ' is-divider-visible' : ''}`}>
         <button type="button" className="pz-button pz-button--outline" onClick={() => navigate(`/zilla/${pet.id}`)}>
           Cancelar
         </button>

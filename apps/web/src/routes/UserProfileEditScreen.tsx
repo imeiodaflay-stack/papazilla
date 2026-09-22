@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import perfilIcon from '../assets/icons/perfil.png';
 import { getUserProfile, setUserProfile } from '../lib/userProfile.js';
 import { fileToDataUrl, PhotoUploadError, uploadPhoto } from '../lib/photoUpload.js';
+import { useScrollAwareFooter } from '../hooks/useScrollAwareFooter.js';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -19,6 +20,7 @@ export function UserProfileEditScreen() {
   const [avatarUrl, setAvatarUrl] = useState(current?.avatarUrl ?? '');
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const { bodyRef, dividerVisible, onBodyScroll } = useScrollAwareFooter();
   const toastTimer = useRef<number>();
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
@@ -66,7 +68,7 @@ export function UserProfileEditScreen() {
         </span>
       </header>
 
-      <div className="flow-body">
+      <div className="flow-body" ref={bodyRef} onScroll={onBodyScroll}>
         <div className="flow-intro">
           <p className="eyebrow">Seu perfil</p>
           <h1>Como podemos te chamar?</h1>
@@ -116,7 +118,7 @@ export function UserProfileEditScreen() {
         </div>
       </div>
 
-      <footer className="flow-footer">
+      <footer className={`flow-footer scroll-aware-footer${dividerVisible ? ' is-divider-visible' : ''}`}>
         <button type="button" className="pz-button pz-button--outline" onClick={() => navigate('/conta')}>
           Cancelar
         </button>

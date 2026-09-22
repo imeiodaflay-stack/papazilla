@@ -1128,14 +1128,6 @@
 .flow-footer .pz-button--primary {
   width: 100%;
 }
-.recipe-flow__footer {
-  border-top-color: transparent;
-  transition: border-color 0.18s ease;
-}
-.recipe-flow__footer.is-at-end {
-  border-top-color: var(--pz-border);
-}
-
 /* --- controles da anamnese --- */
 .photo-picker {
   display: grid;
@@ -4854,11 +4846,11 @@
   padding-top: 0.4rem;
   border-top: 0;
 }
-.flow-footer--stacked.recipe-detail__footer {
+.flow-footer.scroll-aware-footer {
   border-top: 1px solid transparent;
   transition: border-color 0.18s ease;
 }
-.flow-footer--stacked.recipe-detail__footer.is-at-end {
+.flow-footer.scroll-aware-footer.is-divider-visible {
   border-top-color: var(--pz-border);
 }
 

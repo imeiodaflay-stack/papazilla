@@ -6,6 +6,7 @@ import infoIcon from '../assets/icons/info.png';
 import { addPet, getPet, updatePet, waitForPendingPetWrites, type StoredPet } from '../lib/petsStore.js';
 import { deriveWeightTendency } from '../lib/weightTendency.js';
 import { fileToDataUrl, PhotoUploadError, uploadPhoto } from '../lib/photoUpload.js';
+import { useScrollAwareFooter } from '../hooks/useScrollAwareFooter.js';
 
 /**
  * Anamnese do Monstrinho — fiel à tela "profile" de `papazilla-prototype`.
@@ -1329,7 +1330,7 @@ export function AnamneseScreen() {
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [savingPet, setSavingPet] = useState(false);
   const toastTimer = useRef<number>();
-  const bodyRef = useRef<HTMLDivElement>(null);
+  const { bodyRef, dividerVisible, onBodyScroll } = useScrollAwareFooter();
   const photoInputRef = useRef<HTMLInputElement>(null);
 
   async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -1564,7 +1565,7 @@ export function AnamneseScreen() {
         <span style={{ width: `${((step + 1) / STEPS.length) * 100}%` }} />
       </div>
 
-      <div className="flow-body" ref={bodyRef}>
+      <div className="flow-body" ref={bodyRef} onScroll={onBodyScroll}>
         <div className="flow-intro">
           <p className="eyebrow">{current.eyebrow}</p>
           <h1>{current.title}</h1>
@@ -1573,7 +1574,7 @@ export function AnamneseScreen() {
         {current.body(ctx)}
       </div>
 
-      <footer className="flow-footer">
+      <footer className={`flow-footer scroll-aware-footer${dividerVisible ? ' is-divider-visible' : ''}`}>
         <button
           type="button"
           className="pz-button pz-button--outline"

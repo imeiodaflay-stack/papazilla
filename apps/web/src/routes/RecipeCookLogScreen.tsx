@@ -7,6 +7,7 @@ import { getPet } from '../lib/petsStore.js';
 import { addCookLog, getRecipe } from '../lib/recipeRepository.js';
 import { recipeTitle } from '../lib/recipeDisplay.js';
 import { fileToDataUrl, PhotoUploadError, uploadPhoto } from '../lib/photoUpload.js';
+import { useScrollAwareFooter } from '../hooks/useScrollAwareFooter.js';
 
 const RATING_CAPTIONS: Record<number, string> = {
   1: 'Não foi a favorita desta vez.',
@@ -34,6 +35,7 @@ export function RecipeCookLogScreen() {
   const [photoUploading, setPhotoUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const { bodyRef, dividerVisible, onBodyScroll } = useScrollAwareFooter();
   const toastTimer = useRef<number>();
   const photoInputRef = useRef<HTMLInputElement>(null);
 
@@ -117,7 +119,7 @@ export function RecipeCookLogScreen() {
         <span style={{ width: '100%' }} />
       </div>
 
-      <div className="flow-body cook-log-body">
+      <div className="flow-body cook-log-body" ref={bodyRef} onScroll={onBodyScroll}>
         <div className="flow-intro">
           <p className="eyebrow">Receita preparada</p>
           <h1>Como ficou essa fornalha?</h1>
@@ -193,7 +195,7 @@ export function RecipeCookLogScreen() {
         </label>
       </div>
 
-      <footer className="flow-footer">
+      <footer className={`flow-footer scroll-aware-footer${dividerVisible ? ' is-divider-visible' : ''}`}>
         <button type="button" className="pz-button pz-button--outline" onClick={() => navigate(`/receitas/${storedRecipe.id}`)}>
           Agora não
         </button>

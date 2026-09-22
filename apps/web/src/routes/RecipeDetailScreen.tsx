@@ -13,6 +13,7 @@ import { describePet, joinPt } from '../lib/petLabel.js';
 import { RecipeFinalizers } from '../components/RecipeFinalizers.js';
 import { RecipeIngredientTable } from '../components/RecipeIngredientTable.js';
 import { RecipePreparationSteps } from '../components/RecipePreparationSteps.js';
+import { useScrollAwareFooter } from '../hooks/useScrollAwareFooter.js';
 
 /**
  * Detalhe de uma receita salva — fiel à tela "recipe-detail" de
@@ -38,19 +39,12 @@ export function RecipeDetailScreen() {
   const [renaming, setRenaming] = useState(false);
   const [titleInput, setTitleInput] = useState(storedRecipe ? displayRecipeTitle(storedRecipe) : '');
   const [confirmingDelete, setConfirmingDelete] = useState(false);
-  const [bodyAtEnd, setBodyAtEnd] = useState(false);
+  const { bodyRef, dividerVisible, onBodyScroll } = useScrollAwareFooter();
 
   function toast(message: string) {
     window.clearTimeout(toastTimer.current);
     setToastMsg(message);
     toastTimer.current = window.setTimeout(() => setToastMsg(null), 2600);
-  }
-
-  function handleBodyScroll(event: React.UIEvent<HTMLDivElement>) {
-    const body = event.currentTarget;
-    const hasOverflow = body.scrollHeight > body.clientHeight + 1;
-    const reachedEnd = body.scrollTop + body.clientHeight >= body.scrollHeight - 2;
-    setBodyAtEnd(hasOverflow && reachedEnd);
   }
 
   if (!storedRecipe) return <Navigate to="/receitas" replace />;
@@ -127,7 +121,7 @@ export function RecipeDetailScreen() {
         </button>
       </header>
 
-      <div className="flow-body recipe-detail-body" onScroll={handleBodyScroll}>
+      <div className="flow-body recipe-detail-body" ref={bodyRef} onScroll={onBodyScroll}>
         {showMore ? (
           <div className="more-menu">
             <button
@@ -297,7 +291,7 @@ export function RecipeDetailScreen() {
         ))}
       </div>
 
-      <footer className={`flow-footer flow-footer--stacked recipe-detail__footer${bodyAtEnd ? ' is-at-end' : ''}`}>
+      <footer className={`flow-footer flow-footer--stacked scroll-aware-footer${dividerVisible ? ' is-divider-visible' : ''}`}>
         <button type="button" className="pz-button pz-button--outline wide" onClick={() => navigate(`/receitas/${storedRecipe.id}/compartilhar`)}>
           {clinicalRequired ? 'Compartilhar para revisão veterinária' : 'Compartilhar receita'}
         </button>

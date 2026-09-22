@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import mensagemIcon from '../assets/icons/mensagem.png';
+import { useScrollAwareFooter } from '../hooks/useScrollAwareFooter.js';
 
 /**
  * Central de Ajuda — FAQ curta + canal de contato, conforme `escopo-mvp.md`
@@ -40,6 +41,7 @@ const FAQ = [
 export function AjudaScreen() {
   const navigate = useNavigate();
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const { bodyRef, dividerVisible, onBodyScroll } = useScrollAwareFooter();
   const toastTimer = useRef<number>();
 
   function toast(message: string) {
@@ -68,7 +70,7 @@ export function AjudaScreen() {
         </span>
       </header>
 
-      <div className="flow-body">
+      <div className="flow-body" ref={bodyRef} onScroll={onBodyScroll}>
         <div className="flow-intro">
           <p className="eyebrow">Dúvidas e contato</p>
           <h1>Central de Ajuda</h1>
@@ -98,7 +100,7 @@ export function AjudaScreen() {
         </section>
       </div>
 
-      <footer className="flow-footer flow-footer--single">
+      <footer className={`flow-footer flow-footer--single scroll-aware-footer${dividerVisible ? ' is-divider-visible' : ''}`}>
         <button
           type="button"
           className="pz-button pz-button--primary wide"

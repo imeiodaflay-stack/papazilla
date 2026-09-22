@@ -7,6 +7,7 @@ import sucessoIcon from '../assets/icons/sucesso.png';
 import favoritoIcon from '../assets/icons/favorito.png';
 import { getPet } from '../lib/petsStore.js';
 import { describePet, joinPt } from '../lib/petLabel.js';
+import { useScrollAwareFooter } from '../hooks/useScrollAwareFooter.js';
 
 /**
  * Respostas da anamnese — fiel à tela "anamnesis-detail" de `papazilla-prototype`:
@@ -19,6 +20,7 @@ export function AnamnesisDetailScreen() {
   const navigate = useNavigate();
   const location = useLocation();
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const { bodyRef, dividerVisible, onBodyScroll } = useScrollAwareFooter();
   const toastTimer = useRef<number>();
 
   const pet = petId ? getPet(petId) : undefined;
@@ -68,7 +70,7 @@ export function AnamnesisDetailScreen() {
         <span style={{ width: '100%' }} />
       </div>
 
-      <div className="flow-body anamnesis-detail-body">
+      <div className="flow-body anamnesis-detail-body" ref={bodyRef} onScroll={onBodyScroll}>
         <div className="flow-intro">
           <p className="eyebrow">Perfil em dia</p>
           <h1>Tudo sobre {displayName}</h1>
@@ -190,7 +192,7 @@ export function AnamnesisDetailScreen() {
         </div>
       </div>
 
-      <footer className="flow-footer flow-footer--single">
+      <footer className={`flow-footer flow-footer--single scroll-aware-footer${dividerVisible ? ' is-divider-visible' : ''}`}>
         <button
           type="button"
           className="pz-button pz-button--primary wide"
