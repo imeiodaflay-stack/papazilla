@@ -289,7 +289,7 @@ export function RecipeDetailScreen() {
         ))}
       </div>
 
-      <footer className="flow-footer flow-footer--single">
+      <footer className="flow-footer flow-footer--stacked">
         <button type="button" className="pz-button pz-button--outline wide" onClick={() => navigate(`/receitas/${storedRecipe.id}/compartilhar`)}>
           {clinicalRequired ? 'Compartilhar para revisão veterinária' : 'Compartilhar receita'}
         </button>
