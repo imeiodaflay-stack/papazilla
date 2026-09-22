@@ -4892,6 +4892,9 @@
   color: var(--pz-ink-label);
   font-size: 0.875rem;
 }
+.cook-log-body .question-block {
+  margin-top: 1rem;
+}
 .cook-pets > div {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
