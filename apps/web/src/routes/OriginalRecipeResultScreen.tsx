@@ -6,18 +6,15 @@ import infoIcon from '../assets/icons/info.png';
 import zillaIcon from '../assets/icons/zilla.png';
 import { findOriginalRecipe } from '../lib/originalRecipes.js';
 import { getActivePet, listPets } from '../lib/petsStore.js';
-import { buildPetPlan } from '../lib/recipeEngine.js';
+import { buildPetPlan, buildSharedRecipe } from '../lib/recipeEngine.js';
 import { formatGrams, mealsCount } from '../lib/recipeDisplay.js';
 import { getSubscription, hasActiveAccess } from '../lib/subscription.js';
 import { joinPt } from '../lib/petLabel.js';
 import { parseResultParams } from '../lib/originalRecipeParams.js';
+import { RecipeIngredientTable } from '../components/RecipeIngredientTable.js';
+import { RecipeFinalizers } from '../components/RecipeFinalizers.js';
+import { RecipePreparationSteps } from '../components/RecipePreparationSteps.js';
 import { useScrollAwareFooter } from '../hooks/useScrollAwareFooter.js';
-
-const PLAN_CHOICES = {
-  formulation: 'padrao',
-  supplement: 'food-dog',
-  predominantProtein: 'chicken-pork',
-} as const;
 
 export function OriginalRecipeResultScreen() {
   const { slug } = useParams();
@@ -30,7 +27,16 @@ export function OriginalRecipeResultScreen() {
   const selectedIds = new Set(selectedPetIds.length ? selectedPetIds : activePet ? [activePet.id] : pets[0] ? [pets[0].id] : []);
   const selectedPets = pets.filter((pet) => selectedIds.has(pet.id));
   const days = Math.max(1, Math.min(30, daysParam ?? (original?.kind === 'treat' ? 15 : 7)));
-  const plans = selectedPets.map((pet) => ({ pet, plan: buildPetPlan(pet, PLAN_CHOICES) }));
+  const planChoices = {
+    formulation: original?.formula?.formulation ?? 'padrao',
+    supplement: 'food-dog',
+    predominantProtein: 'chicken-pork',
+  } as const;
+  const plans = selectedPets.map((pet) => ({ pet, plan: buildPetPlan(pet, planChoices) }));
+  const recipe =
+    original?.formula && plans.length > 0
+      ? buildSharedRecipe(plans.map(({ plan }) => plan), { ...original.formula.selection, herbs: [] }, days)
+      : null;
   const { bodyRef, dividerVisible, onBodyScroll } = useScrollAwareFooter();
 
   if (!original) return <Navigate to="/papa" replace />;
@@ -105,14 +111,18 @@ export function OriginalRecipeResultScreen() {
             </section>
           ) : null}
 
-          <section className="original-formula-pending">
-            <img src={infoIcon} alt="" />
-            <div>
-              <small>Fórmula em validação</small>
-              <h2>{isTreat ? 'Ingredientes e rendimento' : 'Ingredientes e quantidades'}</h2>
-              <p>Esta estrutura visual já está pronta. Os dados completos serão liberados quando a fórmula desta Original passar pela revisão nutricional.</p>
-            </div>
-          </section>
+          {recipe ? (
+            <RecipeIngredientTable groups={recipe.groups} format="Os dois" />
+          ) : (
+            <section className="original-formula-pending">
+              <img src={infoIcon} alt="" />
+              <div>
+                <small>Fórmula em validação</small>
+                <h2>{isTreat ? 'Ingredientes e rendimento' : 'Ingredientes e quantidades'}</h2>
+                <p>Esta estrutura visual já está pronta. Os dados completos serão liberados quando a fórmula desta Original passar pela revisão nutricional.</p>
+              </div>
+            </section>
+          )}
 
           {!isPack ? (
             <section className="portion-stats original-result-stats">
@@ -121,14 +131,23 @@ export function OriginalRecipeResultScreen() {
             </section>
           ) : null}
 
-          <details className="recipe-preparation">
-            <summary><span><img src={potinhoIcon} alt="" /><b>{isTreat ? 'Tamanho e conservação' : 'Suplementos e finalização'}</b></span><b aria-hidden="true">⌄</b></summary>
-            <div className="recipe-preparation__body"><p className="recipe-preparation__intro">Disponível depois da validação da fórmula.</p></div>
-          </details>
-          <details className="recipe-preparation">
-            <summary><span><img src={receitaIcon} alt="" /><b>Modo de preparo</b></span><b aria-hidden="true">⌄</b></summary>
-            <div className="recipe-preparation__body"><p className="recipe-preparation__intro">Disponível depois da validação da fórmula.</p></div>
-          </details>
+          {recipe ? (
+            <>
+              <RecipeFinalizers petPlans={plans} />
+              <RecipePreparationSteps petPlans={plans} days={days} />
+            </>
+          ) : (
+            <>
+              <details className="recipe-preparation">
+                <summary><span><img src={potinhoIcon} alt="" /><b>{isTreat ? 'Tamanho e conservação' : 'Suplementos e finalização'}</b></span><b aria-hidden="true">⌄</b></summary>
+                <div className="recipe-preparation__body"><p className="recipe-preparation__intro">Disponível depois da validação da fórmula.</p></div>
+              </details>
+              <details className="recipe-preparation">
+                <summary><span><img src={receitaIcon} alt="" /><b>Modo de preparo</b></span><b aria-hidden="true">⌄</b></summary>
+                <div className="recipe-preparation__body"><p className="recipe-preparation__intro">Disponível depois da validação da fórmula.</p></div>
+              </details>
+            </>
+          )}
           <details className="recipe-preparation">
             <summary><span><img src={infoIcon} alt="" /><b>{isTreat ? 'Limites e cuidados' : 'Mais sobre esta receita'}</b></span><b aria-hidden="true">⌄</b></summary>
             <div className="recipe-preparation__body"><p className="recipe-preparation__intro">Disponível depois da validação da fórmula.</p></div>
