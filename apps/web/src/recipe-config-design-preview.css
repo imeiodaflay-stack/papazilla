@@ -92,10 +92,6 @@ body { margin: 0; min-height: 100vh; background: radial-gradient(circle at 12% 1
 .cfg-add-pet > div { display: grid; gap: 2px; }
 .cfg-add-pet strong { font-size: 12px; }
 .cfg-add-pet small { color: #806a61; font-size: 10px; }
-.cfg-next-steps { margin-top: 18px; padding-top: 13px; display: flex; flex-wrap: wrap; align-items: center; gap: 7px; border-top: 1px solid #eaded7; color: #806a61; font-size: 10px; }
-.cfg-next-steps > span { width: 100%; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
-.cfg-next-steps div { padding: 6px 8px; display: flex; align-items: center; gap: 4px; background: #fff; border: 1px solid #eaded7; border-radius: 999px; }
-.cfg-next-steps i { width: 17px; height: 17px; display: grid; place-items: center; color: #fff; background: #f7bda3; border-radius: 50%; font-style: normal; }
 .cfg-footer { padding: 12px 16px 18px; display: grid; grid-template-columns: .78fr 1.22fr; gap: 9px; background: rgba(255,248,243,.96); border-top: 1px solid #eaded7; box-shadow: 0 -8px 22px rgba(74,45,34,.06); }
 .cfg-button { min-height: 48px; border-radius: 999px; font: 800 13px/1 var(--pz-font-support, Nunito, sans-serif); }
 .cfg-button--ghost { color: #a24731; background: transparent; border: 1.5px solid #f98b69; }

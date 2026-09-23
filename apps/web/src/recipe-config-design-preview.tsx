@@ -161,10 +161,6 @@ function CustomScreen({ packSize }: { packSize: PackSize }) {
       <PetPicker packSize={packSize} />
       <div className="cfg-note cfg-note--blue"><img src={infoIcon} alt="" /><p><strong>{packSize === 'one' ? 'Uma receita para Mocha' : 'Uma base, porções separadas'}</strong>{packSize === 'one' ? 'Você também pode incluir outro Monstrinho nesta fornalha.' : 'Vamos somar os ingredientes e marcar quanto pertence a Mocha, Chloe e Mochi.'}</p></div>
       <button type="button" className="cfg-add-pet"><span>＋</span><div><strong>Cadastrar outro Monstrinho</strong><small>Ele aparecerá aqui nas próximas receitas</small></div></button>
-      <div className="cfg-next-steps">
-        <span>Depois:</span>
-        <div><i>2</i> Proporção</div><div><i>3</i> Proteína</div><div><i>4</i> Carboidrato</div>
-      </div>
     </ScreenFrame>
   );
 }
