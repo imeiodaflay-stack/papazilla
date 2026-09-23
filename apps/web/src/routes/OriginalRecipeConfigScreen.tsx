@@ -9,6 +9,7 @@ import { findOriginalRecipe } from '../lib/originalRecipes.js';
 import { buildPetPlan } from '../lib/recipeEngine.js';
 import { formatGrams, mealsCount } from '../lib/recipeDisplay.js';
 import { getSubscription, hasActiveAccess } from '../lib/subscription.js';
+import { buildResultParams } from '../lib/originalRecipeParams.js';
 import { useScrollAwareFooter } from '../hooks/useScrollAwareFooter.js';
 
 const PLAN_CHOICES = {
@@ -181,7 +182,7 @@ export function OriginalRecipeConfigScreen() {
 
       <footer className={`flow-footer scroll-aware-footer${dividerVisible ? ' is-divider-visible' : ''}`}>
         <button type="button" className="pz-button pz-button--outline" onClick={() => navigate('/papa')}>Voltar</button>
-        <button type="button" className="pz-button pz-button--primary" onClick={() => navigate(`/papa/original/${original.slug}/resultado`, { state: { selectedPetIds: [...selectedPetIds], days, mealOverrides } })}>{isTreat ? 'Calcular petiscos →' : 'Calcular receita →'}</button>
+        <button type="button" className="pz-button pz-button--primary" onClick={() => navigate(`/papa/original/${original.slug}/resultado?${buildResultParams(selectedPetIds, days, mealOverrides)}`)}>{isTreat ? 'Calcular petiscos →' : 'Calcular receita →'}</button>
       </footer>
 
       {toastMessage ? <div className="pz-toast is-visible" role="status">{toastMessage}</div> : null}

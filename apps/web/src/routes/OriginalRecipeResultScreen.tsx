@@ -1,4 +1,4 @@
-import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import receitaIcon from '../assets/icons/receita.png';
 import calendarioIcon from '../assets/icons/calendario.png';
 import potinhoIcon from '../assets/icons/potinho.png';
@@ -7,9 +7,10 @@ import zillaIcon from '../assets/icons/zilla.png';
 import { findOriginalRecipe } from '../lib/originalRecipes.js';
 import { getActivePet, listPets } from '../lib/petsStore.js';
 import { buildPetPlan } from '../lib/recipeEngine.js';
-import { formatGrams, mealSize, mealsCount } from '../lib/recipeDisplay.js';
+import { formatGrams, mealsCount } from '../lib/recipeDisplay.js';
 import { getSubscription, hasActiveAccess } from '../lib/subscription.js';
 import { joinPt } from '../lib/petLabel.js';
+import { parseResultParams } from '../lib/originalRecipeParams.js';
 import { useScrollAwareFooter } from '../hooks/useScrollAwareFooter.js';
 
 const PLAN_CHOICES = {
@@ -18,23 +19,17 @@ const PLAN_CHOICES = {
   predominantProtein: 'chicken-pork',
 } as const;
 
-interface OriginalResultState {
-  selectedPetIds?: string[];
-  days?: number;
-  mealOverrides?: Record<string, number>;
-}
-
 export function OriginalRecipeResultScreen() {
   const { slug } = useParams();
   const original = findOriginalRecipe(slug);
-  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const pets = listPets();
   const activePet = getActivePet();
-  const state = (location.state ?? {}) as OriginalResultState;
-  const selectedIds = new Set(state.selectedPetIds?.length ? state.selectedPetIds : activePet ? [activePet.id] : pets[0] ? [pets[0].id] : []);
+  const { selectedPetIds, days: daysParam, mealOverrides } = parseResultParams(searchParams);
+  const selectedIds = new Set(selectedPetIds.length ? selectedPetIds : activePet ? [activePet.id] : pets[0] ? [pets[0].id] : []);
   const selectedPets = pets.filter((pet) => selectedIds.has(pet.id));
-  const days = Math.max(1, Math.min(30, state.days ?? (original?.kind === 'treat' ? 15 : 7)));
+  const days = Math.max(1, Math.min(30, daysParam ?? (original?.kind === 'treat' ? 15 : 7)));
   const plans = selectedPets.map((pet) => ({ pet, plan: buildPetPlan(pet, PLAN_CHOICES) }));
   const { bodyRef, dividerVisible, onBodyScroll } = useScrollAwareFooter();
 
@@ -48,6 +43,7 @@ export function OriginalRecipeResultScreen() {
   const totalMealGrams = plans.reduce((sum, { plan }) => sum + plan.totalGramsPerDay, 0) * days;
   const totalTreatLimit = plans.reduce((sum, { plan }) => sum + plan.treatsGramsPerDay.max, 0) * days;
   const singlePlan = plans[0]!;
+  const singleMealCount = mealOverrides[singlePlan.pet.id] ?? mealsCount(singlePlan.plan, singlePlan.pet);
   const totalValue = formatGrams(isTreat ? totalTreatLimit : totalMealGrams);
   const title = isTreat
     ? isPack ? 'Os petiscos da matilha estão prontos!' : `Os petiscos de ${selectedPets[0]!.name} estão prontos!`
@@ -98,7 +94,7 @@ export function OriginalRecipeResultScreen() {
             <section className="original-result-pack">
               <div><small>Uma receita para</small><strong>{petNames}</strong></div>
               {plans.map(({ pet, plan }) => {
-                const mealCount = state.mealOverrides?.[pet.id] ?? mealsCount(plan, pet);
+                const mealCount = mealOverrides[pet.id] ?? mealsCount(plan, pet);
                 return (
                   <span key={pet.id}>
                     <img src={pet.photoPath || zillaIcon} alt={pet.photoPath ? `Foto de ${pet.name}` : ''} />
@@ -121,7 +117,7 @@ export function OriginalRecipeResultScreen() {
           {!isPack ? (
             <section className="portion-stats original-result-stats">
               <div className="portion-stats__card"><span className="portion-stats__icon"><img src={isTreat ? potinhoIcon : calendarioIcon} alt="" /></span><small>{isTreat ? 'Limite por dia' : 'Por dia'}</small><strong>{formatGrams(isTreat ? singlePlan.plan.treatsGramsPerDay.max : singlePlan.plan.totalGramsPerDay)}</strong></div>
-              <div className="portion-stats__card"><span className="portion-stats__icon"><img src={potinhoIcon} alt="" /></span><small>{isTreat ? `Em ${days} dias` : 'Por refeição'}</small><strong>{formatGrams(isTreat ? singlePlan.plan.treatsGramsPerDay.max * days : mealSize(singlePlan.plan, singlePlan.pet))}</strong></div>
+              <div className="portion-stats__card"><span className="portion-stats__icon"><img src={potinhoIcon} alt="" /></span><small>{isTreat ? `Em ${days} dias` : 'Por refeição'}</small><strong>{formatGrams(isTreat ? singlePlan.plan.treatsGramsPerDay.max * days : Math.round(singlePlan.plan.totalGramsPerDay / singleMealCount))}</strong></div>
             </section>
           ) : null}
 
