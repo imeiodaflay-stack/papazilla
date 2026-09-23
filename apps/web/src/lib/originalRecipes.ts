@@ -53,7 +53,23 @@ export const ORIGINAL_RECIPES: OriginalRecipeSummary[] = [
       selection: { proteins: ['frango_peito'], organs: [], carbs: ['arroz_branco'], vegetables: ['cenoura'] },
     },
   },
-  { slug: 'barato-nutritivo', title: 'Barato Nutritivo', subtitle: 'Sabor que cabe no bolso', likes: 27, image: baratoImage, kind: 'meal' },
+  {
+    slug: 'barato-nutritivo',
+    title: 'Barato Nutritivo',
+    subtitle: 'Sabor que cabe no bolso',
+    likes: 27,
+    image: baratoImage,
+    kind: 'meal',
+    // Validada por Claude em 2026-09-23, mesma metodologia da Básico Brasileiro.
+    // Coxa/sobrecoxa de frango (desossada) — corte tipicamente mais barato que o
+    // peito no Brasil — mandioca e chuchu, tubérculo e vegetal comuns e baratos.
+    // Evitei ingredientes com aviso de "solta intestino" (abóbora/quiabo) porque
+    // essa Original ainda não mostra a seção de notas/disclaimers da receita.
+    formula: {
+      formulation: 'padrao',
+      selection: { proteins: ['frango_coxa'], organs: [], carbs: ['mandioca'], vegetables: ['chuchu'] },
+    },
+  },
   { slug: 'frozen-antioxidante', title: 'Frozen Antioxidante', subtitle: 'Geladinho funcional', likes: 91, image: frozenImage, kind: 'treat' },
   { slug: 'gelatina-dourada', title: 'Gelatina Dourada', subtitle: 'Com poder anti-inflamatório', likes: 46, image: gelatinaImage, kind: 'treat' },
   { slug: 'chips-de-banana', title: 'Chips de Banana', subtitle: 'Pronto rapidinho na air-fryer', likes: 53, image: chipsImage, kind: 'treat' },
