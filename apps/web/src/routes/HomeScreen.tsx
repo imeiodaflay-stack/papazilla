@@ -4,30 +4,17 @@ import calculatorIcon from '../assets/icons/calculator.webp';
 import lockedIcon from '../assets/icons/locked.webp';
 import loveIcon from '../assets/icons/love.webp';
 import zillaChef from '../assets/originals/zilla-chef.webp';
-import snackImage from '../assets/originals/snack-pa-pum.jpeg';
-import basicoImage from '../assets/originals/basico-brasileiro.jpg';
-import baratoImage from '../assets/originals/barato-nutritivo.jpeg';
-import frozenImage from '../assets/originals/frozen-antioxidante.jpeg';
-import gelatinaImage from '../assets/originals/gelatina-dourada.jpeg';
-import chipsImage from '../assets/originals/chips-banana.jpeg';
 import { listPets } from '../lib/petsStore.js';
+import { ORIGINAL_RECIPES } from '../lib/originalRecipes.js';
 import { getSubscription, hasActiveAccess, loadSubscriptionForOwner } from '../lib/subscription.js';
 import { getUserId } from '../lib/session.js';
-
-const originals = [
-  { slug: 'snack-pa-pum', title: 'Snack Pá-pum', subtitle: 'Proteico e com 2 ingredientes', likes: 38, image: snackImage },
-  { slug: 'basico-brasileiro', title: 'Básico Brasileiro', subtitle: 'Comida do dia a dia', likes: 64, image: basicoImage },
-  { slug: 'barato-nutritivo', title: 'Barato Nutritivo', subtitle: 'Sabor que cabe no bolso', likes: 27, image: baratoImage },
-  { slug: 'frozen-antioxidante', title: 'Frozen Antioxidante', subtitle: 'Geladinho funcional', likes: 91, image: frozenImage },
-  { slug: 'gelatina-dourada', title: 'Gelatina Dourada', subtitle: 'Com poder anti-inflamatório', likes: 46, image: gelatinaImage },
-  { slug: 'chips-de-banana', title: 'Chips de Banana', subtitle: 'Pronto rapidinho na air-fryer', likes: 53, image: chipsImage },
-] as const;
 
 /**
  * Vitrine Papá. Os retratos da matilha são informativos: a escolha dos pets
  * acontece somente no fluxo da receita. Originals sem acesso vigente abrem a
- * oferta; a configuração própria de cada Original será conectada quando suas
- * receitas e regras de quantidade estiverem implementadas.
+ * oferta; quem tem acesso abre a configuração própria da Original. O cálculo
+ * final só será conectado quando ingredientes e regras de cada prato forem
+ * validados, sem reaproveitar indevidamente o wizard da personalizada.
  */
 export function HomeScreen() {
   const navigate = useNavigate();
@@ -44,11 +31,7 @@ export function HomeScreen() {
   }
 
   function openOriginal(slug: string) {
-    void requireSubscription(() => {
-      // Reserva a seleção na URL até a experiência específica da Original ser
-      // ligada; o wizard genérico não representa corretamente estes conteúdos.
-      navigate(`/papa?original=${encodeURIComponent(slug)}`, { replace: true });
-    });
+    void requireSubscription(() => navigate(`/papa/original/${encodeURIComponent(slug)}`));
   }
 
   return (
@@ -91,7 +74,7 @@ export function HomeScreen() {
         </header>
 
         <div className="home-originals__grid">
-          {originals.map((original) => (
+          {ORIGINAL_RECIPES.map((original) => (
             <button
               key={original.slug}
               type="button"

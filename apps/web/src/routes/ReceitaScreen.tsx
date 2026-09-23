@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import type { FormulationId, SupplementId } from '@papazilla/nutrition-engine';
 import { CARBS, FORMULATIONS, ORGANS, PROTEINS, VEGETABLES, findItem } from '@papazilla/nutrition-engine';
-import zillaIcon from '../assets/icons/zilla.png';
 import potinhoIcon from '../assets/icons/potinho.png';
 import infoIcon from '../assets/icons/info.png';
 import { getActivePet, getActivePetId, listPets } from '../lib/petsStore.js';
@@ -25,6 +24,7 @@ import {
 } from '../lib/recipeDisplay.js';
 import { IngredientPicker } from '../components/IngredientPicker.js';
 import { RecipeResultCard } from '../components/RecipeResultCard.js';
+import { RecipePetSelector } from '../components/RecipePetSelector.js';
 import { useScrollAwareFooter } from '../hooks/useScrollAwareFooter.js';
 
 /**
@@ -123,6 +123,17 @@ export function ReceitaScreen() {
   const petPlans = useMemo(
     () => selectedPets.map((pet) => ({ pet, plan: buildPetPlan(pet, choices) })),
     [selectedPets.map((p) => p.id).join(','), choices],
+  );
+  const petSelectorEntries = useMemo(
+    () => pets.map((pet) => {
+      const plan = buildPetPlan(pet, choices);
+      return {
+        pet,
+        detail: `${pet.weight ? `${pet.weight} kg · ` : ''}${pet.goal || (pet.lifeStage === 'Filhote' ? 'Filhote' : 'Adulto')}`,
+        amount: `${formatGrams(plan.totalGramsPerDay)} por dia · ${mealsCount(plan, pet)} refeições`,
+      };
+    }),
+    [pets.map((pet) => `${pet.id}:${pet.updatedAt}`).join('|'), choices],
   );
 
   if (pets.length === 0) return <Navigate to="/zilla" replace />;
@@ -241,7 +252,7 @@ export function ReceitaScreen() {
         : 'Receita';
 
   const eyebrowByStep = [
-    'A matilha à mesa',
+    'Passo 1 de 9 · A matilha à mesa',
     'Composição do potinho',
     'Base da receita',
     'Energia',
@@ -290,13 +301,13 @@ export function ReceitaScreen() {
 
   return (
     <div className="flow-screen recipe-flow">
-      <header className="flow-header">
+      <header className="flow-header recipe-config-header">
         <button type="button" className="flow-header__back" aria-label="Fechar receita" onClick={() => navigate('/papa')}>
           ←
         </button>
         <div>
-          <span className="flow-header__eyebrow">{contextLabel}</span>
-          {isResultStep ? <strong>Receita pronta</strong> : null}
+          <span className="flow-header__eyebrow">{isResultStep ? contextLabel : 'Receita personalizada'}</span>
+          <strong>{isResultStep ? 'Receita pronta' : 'Configurar receita'}</strong>
         </div>
         <span className="flow-header__avatar">
           <img src={potinhoIcon} alt="" />
@@ -316,36 +327,7 @@ export function ReceitaScreen() {
 
         {step === 0 ? (
           <>
-            <div className="recipe-pet-list">
-              {pets.map((pet) => {
-                const isSelected = selectedPetIds.has(pet.id);
-                const plan = buildPetPlan(pet, choices);
-                return (
-                  <button
-                    key={pet.id}
-                    type="button"
-                    className={`recipe-pet-choice${isSelected ? ' is-selected' : ''}`}
-                    aria-pressed={isSelected}
-                    onClick={() => togglePet(pet.id)}
-                  >
-                    <span className="recipe-pet-avatar">
-                      <img src={zillaIcon} alt="" />
-                    </span>
-                    <span>
-                      <strong>{pet.name}</strong>
-                      <small>
-                        {pet.weight ? `${pet.weight} kg · ` : ''}
-                        {pet.lifeStage === 'Filhote' ? 'filhote' : 'adulto'}
-                      </small>
-                      <b>
-                        {formatGrams(plan.totalGramsPerDay)} por dia · {mealsCount(plan, pet)} refeições
-                      </b>
-                    </span>
-                    <i aria-hidden="true">✓</i>
-                  </button>
-                );
-              })}
-            </div>
+            <RecipePetSelector entries={petSelectorEntries} selectedIds={selectedPetIds} onToggle={togglePet} />
             <div className="shared-recipe-note">
               <img src={infoIcon} alt="" />
               <p>
