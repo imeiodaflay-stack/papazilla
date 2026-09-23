@@ -30,6 +30,7 @@ import { SucessoScreen } from './routes/SucessoScreen.js';
 import { BeneficiosScreen } from './routes/BeneficiosScreen.js';
 import { ReceitaScreen } from './routes/ReceitaScreen.js';
 import { OriginalRecipeConfigScreen } from './routes/OriginalRecipeConfigScreen.js';
+import { OriginalRecipeResultScreen } from './routes/OriginalRecipeResultScreen.js';
 
 /**
  * Rotas do MVP. Fluxo confirmado (arquitetura-tecnica.md):
@@ -49,6 +50,7 @@ export const router = createBrowserRouter([
   { path: '/beneficios', element: <BeneficiosScreen /> },
   { path: '/receita', element: <ReceitaScreen /> },
   { path: '/papa/original/:slug', element: <OriginalRecipeConfigScreen /> },
+  { path: '/papa/original/:slug/resultado', element: <OriginalRecipeResultScreen /> },
   { path: '/conta', element: <ContaScreen /> },
   { path: '/conta/editar', element: <UserProfileEditScreen /> },
   { path: '/conta/acesso', element: <AccountAccessScreen /> },

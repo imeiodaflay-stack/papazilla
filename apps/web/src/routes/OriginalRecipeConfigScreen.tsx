@@ -181,7 +181,7 @@ export function OriginalRecipeConfigScreen() {
 
       <footer className={`flow-footer scroll-aware-footer${dividerVisible ? ' is-divider-visible' : ''}`}>
         <button type="button" className="pz-button pz-button--outline" onClick={() => navigate('/papa')}>Voltar</button>
-        <button type="button" className="pz-button pz-button--primary" onClick={() => toast('A receita completa será liberada quando a fórmula desta Original estiver validada.')}>{isTreat ? 'Calcular petiscos →' : 'Calcular receita →'}</button>
+        <button type="button" className="pz-button pz-button--primary" onClick={() => navigate(`/papa/original/${original.slug}/resultado`, { state: { selectedPetIds: [...selectedPetIds], days, mealOverrides } })}>{isTreat ? 'Calcular petiscos →' : 'Calcular receita →'}</button>
       </footer>
 
       {toastMessage ? <div className="pz-toast is-visible" role="status">{toastMessage}</div> : null}

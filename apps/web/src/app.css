@@ -4319,6 +4319,124 @@
   height: auto;
   clip-path: inset(0 0 35% 0);
 }
+.original-result-intro h1 {
+  font-size: clamp(1.75rem, 7vw, 2rem);
+}
+.original-result-total {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(120px, 0.92fr);
+}
+.original-result-total .recipe-result-card__total-text {
+  max-width: none;
+}
+.original-result-total .recipe-result-card__tagline {
+  font-family: var(--pz-font-display);
+  font-size: 1.12rem;
+  line-height: 1.02;
+}
+.original-result-food {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: 20px;
+  box-shadow: var(--pz-shadow-pop);
+  transform: rotate(2deg);
+}
+.original-result-summary__photo {
+  flex: 0 0 58px;
+  width: 58px;
+  height: 58px;
+  overflow: hidden;
+  border-radius: 50%;
+}
+.original-result-summary__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.original-result-pack {
+  margin: 0 0.85rem 0.85rem;
+  padding: 0.9rem;
+  display: grid;
+  gap: 0.6rem;
+  background: var(--pz-success-bg);
+  border-radius: 18px;
+}
+.original-result-pack > div {
+  display: grid;
+  gap: 0.12rem;
+}
+.original-result-pack > div small {
+  color: var(--pz-secondary-ink);
+  font-size: 0.875rem;
+}
+.original-result-pack > div strong {
+  font: 800 0.875rem / 1.2 var(--pz-font-support);
+}
+.original-result-pack > span {
+  min-width: 0;
+  padding: 0.38rem;
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgb(255 255 255 / 58%);
+  border-radius: 12px;
+}
+.original-result-pack > span > img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.original-result-pack > span > span {
+  min-width: 0;
+  display: grid;
+  gap: 0.08rem;
+}
+.original-result-pack b {
+  font: 800 0.875rem / 1.2 var(--pz-font-support);
+}
+.original-result-pack small {
+  overflow: hidden;
+  color: var(--pz-ink-muted);
+  font-size: 0.875rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.original-formula-pending {
+  margin: 0 0.85rem 0.85rem;
+  padding: 0.9rem;
+  display: grid;
+  grid-template-columns: 38px 1fr;
+  gap: 0.65rem;
+  align-items: start;
+  color: var(--pz-info-ink);
+  background: var(--pz-info-bg);
+  border-radius: 18px;
+}
+.original-formula-pending > img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+}
+.original-formula-pending small {
+  font: 800 0.75rem / 1.2 var(--pz-font-support);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.original-formula-pending h2 {
+  margin: 0.18rem 0 0.3rem;
+  font: 800 1rem / 1.2 var(--pz-font-support);
+}
+.original-formula-pending p {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+.original-result-stats {
+  margin-top: 0;
+}
 .pet-portion-breakdown {
   padding: 0.7rem 1rem;
   display: flex;
