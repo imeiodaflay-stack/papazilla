@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import cartaoIcon from '../assets/icons/cartao.webp';
+import pixIcon from '../assets/icons/pix.webp';
 import zillaFrente from '../assets/zilla-frente.png';
 import { getActivePet } from '../lib/petsStore.js';
 import { describePet } from '../lib/petLabel.js';
@@ -198,8 +200,8 @@ export function AssinaturaScreen() {
             <form className="transparent-checkout" onSubmit={submitPayment}>
               <fieldset className="payment-methods">
                 <legend>Forma de pagamento</legend>
-                <button type="button" className={method === 'pix' ? 'is-selected' : ''} onClick={() => setMethod('pix')}><span aria-hidden="true">◇</span><b>Pix</b><small>Liberação após o pagamento</small></button>
-                <button type="button" className={method === 'credit_card' ? 'is-selected' : ''} onClick={() => setMethod('credit_card')}><span aria-hidden="true">▭</span><b>Cartão de crédito</b><small>Renovação anual automática</small></button>
+                <button type="button" className={method === 'pix' ? 'is-selected' : ''} onClick={() => setMethod('pix')}><span className="payment-methods__icon" aria-hidden="true"><img src={pixIcon} alt="" /></span><b>Pix</b><small>Liberação após o pagamento</small></button>
+                <button type="button" className={method === 'credit_card' ? 'is-selected' : ''} onClick={() => setMethod('credit_card')}><span className="payment-methods__icon" aria-hidden="true"><img src={cartaoIcon} alt="" /></span><b>Cartão de crédito</b><small>Renovação anual automática</small></button>
               </fieldset>
 
               <div className="checkout-form-section">

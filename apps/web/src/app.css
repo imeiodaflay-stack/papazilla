@@ -2825,10 +2825,10 @@
 }
 .payment-methods button {
   display: grid;
-  grid-template-columns: 28px 1fr;
-  gap: 0.15rem 0.45rem;
+  grid-template-columns: 40px 1fr;
+  gap: 0.15rem 0.5rem;
   align-items: center;
-  min-height: 78px;
+  min-height: 84px;
   padding: 0.7rem;
   border: 1.5px solid var(--pz-border);
   border-radius: 17px;
@@ -2841,16 +2841,18 @@
   box-shadow: 0 0 0 2px rgb(113 106 17 / 10%);
   background: var(--pz-success-bg);
 }
-.payment-methods button > span {
+.payment-methods__icon {
   grid-row: 1 / 3;
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 9px;
-  background: var(--pz-pessego);
-  color: var(--pz-chocolate);
-  font: 900 1.1rem / 1 var(--pz-font-support);
+  width: 40px;
+  height: 40px;
+}
+.payment-methods__icon img {
+  display: block;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
 }
 .payment-methods button b {
   font: 800 0.875rem / 1.1 var(--pz-font-support);
