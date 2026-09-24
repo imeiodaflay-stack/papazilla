@@ -16,6 +16,9 @@ const MAX_ATTEMPTS = 12;
 function destinationFor(returnTo: string | null): string {
   if (returnTo === 'recipe') return '/receita';
   if (returnTo === 'conta') return '/conta';
+  if (returnTo?.match(/^original:[a-z0-9-]+$/)) {
+    return `/papa/original/${encodeURIComponent(returnTo.slice('original:'.length))}`;
+  }
   return '/papa';
 }
 

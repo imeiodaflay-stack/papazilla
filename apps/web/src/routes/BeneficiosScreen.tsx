@@ -1,4 +1,5 @@
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import aniversarioIcon from '../assets/icons/aniversario.png';
 import digestaoIcon from '../assets/icons/digestao.png';
 import escovacaoIcon from '../assets/icons/escovacao.png';
@@ -7,6 +8,9 @@ import zillaFallback from '../assets/icons/zilla.png';
 import zillaFront from '../assets/zilla-frente-transparent.png';
 import { getActivePet, listPets, type StoredPet } from '../lib/petsStore.js';
 import { describePet, joinPt } from '../lib/petLabel.js';
+import { findOriginalRecipe } from '../lib/originalRecipes.js';
+import { getSubscription, hasActiveAccess, loadSubscriptionForOwner } from '../lib/subscription.js';
+import { getUserId } from '../lib/session.js';
 
 function petArticle(pet: StoredPet): string {
   return `${describePet(pet).article} ${pet.name}`;
@@ -19,6 +23,8 @@ function petArticle(pet: StoredPet): string {
  */
 export function BeneficiosScreen() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [continuing, setContinuing] = useState(false);
   const pets = listPets();
   const activePet = getActivePet() ?? pets[0] ?? null;
   const activeDescription = describePet(activePet);
@@ -32,6 +38,12 @@ export function BeneficiosScreen() {
   const subjectPronoun = isPack ? 'eles' : activeDescription.isFemale ? 'ela' : 'ele';
   const subscriberVerb = isPack ? 'são assinantes' : 'já é assinante';
   const petPhoto = activePet?.photoPath || zillaFallback;
+  const requestedReturnTo = searchParams.get('returnTo') ?? 'recipe';
+  const originalSlug = requestedReturnTo.startsWith('original:') ? requestedReturnTo.slice('original:'.length) : '';
+  const original = findOriginalRecipe(originalSlug);
+  const returnTo = original ? `original:${original.slug}` : 'recipe';
+  const destination = original ? `/papa/original/${encodeURIComponent(original.slug)}` : '/receita';
+  const primaryLabel = original ? `Preparar ${original.title}` : 'Criar minha receita personalizada';
 
   const benefits = [
     {
@@ -59,6 +71,17 @@ export function BeneficiosScreen() {
       tone: 'green',
     },
   ];
+
+  async function continueToRecipe() {
+    if (continuing) return;
+    setContinuing(true);
+    await loadSubscriptionForOwner(getUserId());
+    if (hasActiveAccess(getSubscription())) {
+      navigate(destination);
+      return;
+    }
+    navigate(`/assinatura?returnTo=${encodeURIComponent(returnTo)}`);
+  }
 
   return (
     <div className="beneficios-view">
@@ -128,9 +151,10 @@ export function BeneficiosScreen() {
         <button
           type="button"
           className="pz-button pz-button--primary wide"
-          onClick={() => navigate('/receita', { replace: true })}
+          onClick={() => { void continueToRecipe(); }}
+          disabled={continuing}
         >
-          Criar minha receita personalizada <span aria-hidden="true">›</span>
+          {continuing ? 'Verificando acesso…' : primaryLabel} <span aria-hidden="true">›</span>
         </button>
         <button
           type="button"

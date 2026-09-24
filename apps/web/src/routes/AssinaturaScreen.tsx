@@ -17,7 +17,7 @@ import {
 import { getUserId } from '../lib/session.js';
 import { getUserProfile } from '../lib/userProfile.js';
 
-type ReturnTo = 'papa' | 'conta' | 'recipe';
+type ReturnTo = 'papa' | 'conta' | 'recipe' | `original:${string}`;
 type PaymentMethod = 'pix' | 'credit_card';
 
 interface PaywallState {
@@ -27,6 +27,12 @@ interface PaywallState {
 function closePath(returnTo: ReturnTo | undefined): string {
   if (returnTo === 'conta') return '/conta';
   return '/papa';
+}
+
+function parseReturnTo(value: string | null | undefined): ReturnTo | undefined {
+  if (value === 'papa' || value === 'conta' || value === 'recipe') return value;
+  if (value?.match(/^original:[a-z0-9-]+$/)) return value as `original:${string}`;
+  return undefined;
 }
 
 function onlyDigits(value: string, max: number): string {
@@ -60,9 +66,8 @@ export function AssinaturaScreen() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const queryReturnTo = searchParams.get('returnTo');
-  const returnTo = (location.state as PaywallState | null)?.returnTo
-    ?? (['papa', 'conta', 'recipe'].includes(queryReturnTo ?? '') ? queryReturnTo as ReturnTo : undefined);
+  const returnTo = parseReturnTo((location.state as PaywallState | null)?.returnTo)
+    ?? parseReturnTo(searchParams.get('returnTo'));
   const backTo = closePath(returnTo);
   const profile = getUserProfile();
   const activePet = getActivePet();
@@ -96,7 +101,7 @@ export function AssinaturaScreen() {
     const timer = window.setInterval(() => {
       void loadSubscriptionForOwner(getUserId()).then(() => {
         if (!cancelled && hasActiveAccess(getSubscription())) {
-          navigate(`/assinatura/confirmando?returnTo=${returnTo ?? 'papa'}`, { replace: true });
+          navigate(`/assinatura/confirmando?returnTo=${encodeURIComponent(returnTo ?? 'papa')}`, { replace: true });
         }
       });
     }, 2500);
@@ -135,7 +140,7 @@ export function AssinaturaScreen() {
         setPix(result.pix);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
-        navigate(`/assinatura/confirmando?returnTo=${returnTo ?? 'papa'}`, { replace: true });
+        navigate(`/assinatura/confirmando?returnTo=${encodeURIComponent(returnTo ?? 'papa')}`, { replace: true });
       }
     } catch (error) {
       toast(error instanceof Error ? error.message : 'Não foi possível processar o pagamento.');

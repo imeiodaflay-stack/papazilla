@@ -6,32 +6,23 @@ import loveIcon from '../assets/icons/love.webp';
 import zillaChef from '../assets/originals/zilla-chef.webp';
 import { listPets } from '../lib/petsStore.js';
 import { ORIGINAL_RECIPES } from '../lib/originalRecipes.js';
-import { getSubscription, hasActiveAccess, loadSubscriptionForOwner } from '../lib/subscription.js';
-import { getUserId } from '../lib/session.js';
 
 /**
  * Vitrine Papá. Os retratos da matilha são informativos: a escolha dos pets
- * acontece somente no fluxo da receita. Originals sem acesso vigente abrem a
- * oferta; quem tem acesso abre a configuração própria da Original. O cálculo
- * final só será conectado quando ingredientes e regras de cada prato forem
- * validados, sem reaproveitar indevidamente o wizard da personalizada.
+ * acontece somente no fluxo da receita. Tanto a Personalizada quanto as
+ * Originals passam primeiro pela carta de benefícios; é nela que o acesso é
+ * conferido antes de seguir para a configuração ou para a assinatura.
  */
 export function HomeScreen() {
   const navigate = useNavigate();
   const pets = listPets();
 
-  async function requireSubscription(onActive: () => void) {
-    await loadSubscriptionForOwner(getUserId());
-    if (hasActiveAccess(getSubscription())) onActive();
-    else navigate('/assinatura', { state: { returnTo: 'papa' } });
-  }
-
   function createRecipe() {
-    void requireSubscription(() => navigate('/receita'));
+    navigate('/beneficios?returnTo=recipe');
   }
 
   function openOriginal(slug: string) {
-    void requireSubscription(() => navigate(`/papa/original/${encodeURIComponent(slug)}`));
+    navigate(`/beneficios?returnTo=${encodeURIComponent(`original:${slug}`)}`);
   }
 
   return (

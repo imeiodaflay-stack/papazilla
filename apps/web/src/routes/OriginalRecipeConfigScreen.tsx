@@ -46,7 +46,9 @@ export function OriginalRecipeConfigScreen() {
 
   if (!original) return <Navigate to="/papa" replace />;
   if (pets.length === 0) return <Navigate to="/zilla" replace />;
-  if (!hasActiveAccess(getSubscription())) return <Navigate to="/assinatura" state={{ returnTo: 'papa' }} replace />;
+  if (!hasActiveAccess(getSubscription())) {
+    return <Navigate to="/assinatura" state={{ returnTo: `original:${original.slug}` }} replace />;
+  }
 
   const selectedPlans = plans.filter(({ pet }) => selectedPetIds.has(pet.id));
   const petEntries = plans.map(({ pet, plan }) => ({
