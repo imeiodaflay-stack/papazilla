@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import zillaIcon from '../assets/icons/zilla.png';
 import calculatorIcon from '../assets/icons/calculator.webp';
@@ -6,6 +7,26 @@ import loveIcon from '../assets/icons/love.webp';
 import zillaChef from '../assets/originals/zilla-chef.webp';
 import { listPets } from '../lib/petsStore.js';
 import { ORIGINAL_RECIPES } from '../lib/originalRecipes.js';
+import { getSubscription, hasActiveAccess } from '../lib/subscription.js';
+
+const ORIGINAL_LIKES_KEY = 'papazilla.originalLikes';
+
+function readLikedOriginals(): string[] {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(ORIGINAL_LIKES_KEY) ?? '[]') as unknown;
+    return Array.isArray(parsed) ? parsed.filter((slug): slug is string => typeof slug === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+function storeLikedOriginals(slugs: string[]): void {
+  try {
+    localStorage.setItem(ORIGINAL_LIKES_KEY, JSON.stringify(slugs));
+  } catch {
+    /* storage indisponível — o estado continua funcionando durante a sessão */
+  }
+}
 
 /**
  * Vitrine Papá. Os retratos da matilha são informativos: a escolha dos pets
@@ -16,6 +37,8 @@ import { ORIGINAL_RECIPES } from '../lib/originalRecipes.js';
 export function HomeScreen() {
   const navigate = useNavigate();
   const pets = listPets();
+  const hasSubscription = hasActiveAccess(getSubscription());
+  const [likedOriginals, setLikedOriginals] = useState<string[]>(readLikedOriginals);
 
   function createRecipe() {
     navigate('/beneficios?returnTo=recipe');
@@ -23,6 +46,14 @@ export function HomeScreen() {
 
   function openOriginal(slug: string) {
     navigate(`/beneficios?returnTo=${encodeURIComponent(`original:${slug}`)}`);
+  }
+
+  function toggleLike(slug: string) {
+    setLikedOriginals((current) => {
+      const next = current.includes(slug) ? current.filter((item) => item !== slug) : [...current, slug];
+      storeLikedOriginals(next);
+      return next;
+    });
   }
 
   return (
@@ -65,28 +96,41 @@ export function HomeScreen() {
         </header>
 
         <div className="home-originals__grid">
-          {ORIGINAL_RECIPES.map((original) => (
-            <button
-              key={original.slug}
-              type="button"
-              className="home-original"
-              aria-label={`${original.title}. Conteúdo exclusivo para assinantes.`}
-              onClick={() => openOriginal(original.slug)}
-            >
-              <span className="home-original__photo">
-                <img className="home-original__dish" src={original.image} alt="" />
-                <img className="home-original__locked" src={lockedIcon} alt="" aria-hidden="true" />
-                <span className="home-original__likes" aria-label={`${original.likes} pessoas amaram`}>
+          {ORIGINAL_RECIPES.map((original) => {
+            const liked = likedOriginals.includes(original.slug);
+            const likes = original.likes + (liked ? 1 : 0);
+            return (
+              <article key={original.slug} className="home-original">
+                <button
+                  type="button"
+                  className="home-original__open"
+                  aria-label={hasSubscription ? original.title : `${original.title}. Conteúdo exclusivo para assinantes.`}
+                  onClick={() => openOriginal(original.slug)}
+                >
+                  <span className="home-original__photo">
+                    <img className="home-original__dish" src={original.image} alt="" />
+                    {!hasSubscription ? (
+                      <img className="home-original__locked" src={lockedIcon} alt="" aria-hidden="true" />
+                    ) : null}
+                  </span>
+                  <span className="home-original__copy">
+                    <strong>{original.title}</strong>
+                    <small>{original.subtitle}</small>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className={`home-original__likes${liked ? ' is-liked' : ''}`}
+                  aria-label={liked ? `Remover curtida de ${original.title}` : `Curtir ${original.title}`}
+                  aria-pressed={liked}
+                  onClick={() => toggleLike(original.slug)}
+                >
                   <img src={loveIcon} alt="" aria-hidden="true" />
-                  {original.likes}
-                </span>
-              </span>
-              <span className="home-original__copy">
-                <strong>{original.title}</strong>
-                <small>{original.subtitle}</small>
-              </span>
-            </button>
-          ))}
+                  <span>{likes}</span>
+                </button>
+              </article>
+            );
+          })}
         </div>
 
         <p className="home-originals__note">

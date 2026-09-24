@@ -2152,7 +2152,12 @@
   gap: 0.9rem 0.75rem;
 }
 .home-original {
+  position: relative;
   min-width: 0;
+}
+.home-original__open {
+  display: block;
+  width: 100%;
   padding: 0;
   border: 0;
   background: transparent;
@@ -2174,7 +2179,7 @@
   object-fit: cover;
   transition: transform var(--pz-duration-tap) var(--pz-ease-enter);
 }
-.home-original:active .home-original__dish {
+.home-original__open:active .home-original__dish {
   transform: scale(0.985);
 }
 .home-original__locked {
@@ -2196,17 +2201,34 @@
   height: 28px;
   padding: 0.125rem 0.5rem 0.125rem 0.25rem;
   border-radius: 999px;
+  border: 1px solid transparent;
   background: rgba(255, 248, 243, 0.88);
   box-shadow: 0 2px 7px rgba(74, 45, 34, 0.1);
   color: var(--pz-chocolate);
   font: 600 0.8125rem / 1 var(--pz-font-body);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: transform var(--pz-duration-tap) var(--pz-ease-enter), background-color var(--pz-duration-tap) ease;
 }
 .home-original__likes img {
   width: 24px;
   height: 24px;
   object-fit: contain;
+  opacity: 0.72;
+  filter: saturate(0.55);
+  transition: opacity var(--pz-duration-tap) ease, filter var(--pz-duration-tap) ease;
+}
+.home-original__likes.is-liked {
+  border-color: rgba(255, 127, 94, 0.32);
+  background: rgba(255, 232, 222, 0.96);
+}
+.home-original__likes.is-liked img {
+  opacity: 1;
+  filter: none;
+}
+.home-original__likes:active {
+  transform: scale(0.94);
 }
 .home-original__copy {
   display: grid;
