@@ -1,7 +1,8 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import wordmark from '../assets/papazilla-wordmark.png';
 import zilla from '../assets/zilla-frente.png';
 import { AppNav } from '../components/AppNav.js';
+import { AccountAvatarLink } from '../components/AccountAvatarLink.js';
 
 /**
  * Sem Monstrinhos — fiel à tela "empty" de `papazilla-prototype`.
@@ -18,9 +19,7 @@ export function ZillaScreen() {
     <div className="app-view">
       <header className="app-header">
         <img src={wordmark} alt="Papazilla" />
-        <Link to="/conta" className="avatar-button" aria-label="Abrir Minha conta">
-          F
-        </Link>
+        <AccountAvatarLink />
       </header>
       <main className="app-view__main">
         <div className="empty-state">

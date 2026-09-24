@@ -42,14 +42,19 @@ export function setUserAvatar(avatarUrl: string): void {
   setUserProfile({ name: current?.name ?? '', email: current?.email ?? '', avatarUrl });
 }
 
-/** Copia nome/e-mail reais do provedor de login pra cá. Nunca apaga um valor já preenchido com um vazio. */
+/** Copia nome/e-mail/foto reais do provedor. Uma foto escolhida no Papazilla tem prioridade. */
 export function syncProfileFromAuthUser(user: User): void {
   const providerName =
     (user.user_metadata?.full_name as string | undefined) ?? (user.user_metadata?.name as string | undefined) ?? '';
+  const providerAvatar =
+    (user.user_metadata?.avatar_url as string | undefined) ??
+    (user.user_metadata?.picture as string | undefined) ??
+    '';
   const current = getUserProfile();
   const name = providerName || current?.name || '';
   const email = user.email || current?.email || '';
+  const avatarUrl = current?.avatarUrl || providerAvatar || undefined;
   if (!name && !email) return;
-  if (current?.name === name && current?.email === email) return;
-  setUserProfile({ name, email, avatarUrl: current?.avatarUrl });
+  if (current?.name === name && current?.email === email && current?.avatarUrl === avatarUrl) return;
+  setUserProfile({ name, email, avatarUrl });
 }

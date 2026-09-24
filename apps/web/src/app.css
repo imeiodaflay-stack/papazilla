@@ -58,6 +58,19 @@
   color: var(--pz-chocolate);
   font: 700 0.9rem / 1 var(--pz-font-support);
   text-decoration: none;
+  overflow: hidden;
+}
+.avatar-button img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.avatar-button > span {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
 }
 
 .app-view__main {
@@ -3236,7 +3249,21 @@
   background: var(--pz-pessego);
   box-shadow: 0 0 0 1px var(--pz-border);
 }
-.user-avatar-large > span {
+.user-avatar-large__media {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+}
+.user-avatar-large__media > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.user-avatar-large__media > span {
   color: var(--pz-chocolate);
   font: 600 1.45rem / 1 var(--pz-font-display);
 }

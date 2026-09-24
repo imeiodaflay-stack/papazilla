@@ -136,11 +136,13 @@ export function ContaScreen() {
             onClick={() => avatarInputRef.current?.click()}
             disabled={avatarUploading}
           >
-            {avatarUrl ? (
-              <img src={avatarUrl} alt="" className="photo-picker__preview" />
-            ) : (
-              <span>{(userProfile?.name || 'F').charAt(0).toUpperCase()}</span>
-            )}
+            <span className="user-avatar-large__media">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="" />
+              ) : (
+                <span>{(userProfile?.name || 'F').charAt(0).toUpperCase()}</span>
+              )}
+            </span>
             <i aria-hidden="true">＋</i>
           </button>
           <div>

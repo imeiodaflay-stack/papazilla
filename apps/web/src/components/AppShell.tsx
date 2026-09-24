@@ -1,5 +1,6 @@
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { AppNav } from './AppNav.js';
+import { AccountAvatarLink } from './AccountAvatarLink.js';
 import wordmark from '../assets/papazilla-wordmark.png';
 
 /**
@@ -19,9 +20,7 @@ export function AppShell() {
             <strong>O que vamos papá?</strong>
           </div>
         ) : <img src={wordmark} alt="Papazilla" />}
-        <Link to="/conta" className="avatar-button" aria-label="Abrir Minha conta">
-          F
-        </Link>
+        <AccountAvatarLink />
       </header>
       <main className="app-view__main">
         <Outlet />

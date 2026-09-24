@@ -1,7 +1,8 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import zillaIcon from '../assets/icons/zilla.png';
 import infoIcon from '../assets/icons/info.png';
 import { AppNav } from '../components/AppNav.js';
+import { AccountAvatarLink } from '../components/AccountAvatarLink.js';
 import { setActivePetId, type StoredPet } from '../lib/petsStore.js';
 import { describePet, shortGoal } from '../lib/petLabel.js';
 
@@ -32,9 +33,7 @@ export function PetsListScreen({ pets }: { pets: StoredPet[] }) {
           <p className="eyebrow">Pets</p>
           <h1>Sua matilha</h1>
         </div>
-        <Link to="/conta" className="avatar-button" aria-label="Abrir Minha conta">
-          F
-        </Link>
+        <AccountAvatarLink />
       </header>
 
       <main className="app-view__main">

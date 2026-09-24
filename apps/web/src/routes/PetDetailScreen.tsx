@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import zillaFrente from '../assets/zilla-frente.png';
 import calendarioIcon from '../assets/icons/calendario.png';
 import idadeIcon from '../assets/icons/idade-estrela.png';
@@ -10,6 +10,7 @@ import sucessoIcon from '../assets/icons/sucesso.png';
 import profileSheetIcon from '../assets/icons/receita.png';
 import infoIcon from '../assets/icons/info.png';
 import { AppNav } from '../components/AppNav.js';
+import { AccountAvatarLink } from '../components/AccountAvatarLink.js';
 import { deletePet, getPet, listPets, setActivePetId } from '../lib/petsStore.js';
 import { describePet, neuteredLabel } from '../lib/petLabel.js';
 
@@ -104,9 +105,7 @@ export function PetDetailScreen({ petIdOverride, isSinglePetRoot = false }: PetD
             <strong>{displayName}</strong>
           )}
         </label>
-        <Link to="/conta" className="avatar-button" aria-label="Abrir Minha conta">
-          F
-        </Link>
+        <AccountAvatarLink />
       </header>
 
       <main className="app-view__main">

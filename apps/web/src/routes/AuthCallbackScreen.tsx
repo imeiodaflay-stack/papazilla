@@ -22,28 +22,30 @@ export function AuthCallbackScreen() {
       return;
     }
 
-    function proceed(userId: string | null) {
+    async function proceed(userId: string | null) {
       if (doneRef.current) return;
       doneRef.current = true;
       if (!userId) {
         setFailed(true);
         return;
       }
+      // Garante que nome, e-mail e foto do Google já estejam na store local
+      // antes de montar a primeira tela que exibe o avatar.
+      await initAuth();
       setAuthenticated(true);
       // Espera a matilha carregar do Supabase antes de navegar — sem isso, um
       // usuário com pets em outro aparelho cairia num /zilla vazio até algo
       // (que hoje não existe) forçar uma nova leitura de listPets().
-      void loadPetsForOwner(userId).then(() => {
-        navigate(hasSeenOnboarding() ? '/zilla' : '/onboarding', { replace: true });
-      });
+      await loadPetsForOwner(userId);
+      navigate(hasSeenOnboarding() ? '/zilla' : '/onboarding', { replace: true });
     }
 
     void initAuth(); // garante que o listener que sincroniza o perfil (session.ts) já está armado
-    const { data } = supabase.auth.onAuthStateChange((_event, session) => proceed(session?.user.id ?? null));
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => { void proceed(session?.user.id ?? null); });
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) proceed(session.user.id);
+      if (session) void proceed(session.user.id);
     });
-    const timeout = window.setTimeout(() => proceed(null), 8000);
+    const timeout = window.setTimeout(() => { void proceed(null); }, 8000);
 
     return () => {
       data.subscription.unsubscribe();

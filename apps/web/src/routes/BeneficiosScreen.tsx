@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import aniversarioIcon from '../assets/icons/aniversario.png';
 import digestaoIcon from '../assets/icons/digestao.png';
 import escovacaoIcon from '../assets/icons/escovacao.png';
@@ -10,6 +10,7 @@ import { describePet, joinPt } from '../lib/petLabel.js';
 import { findOriginalRecipe } from '../lib/originalRecipes.js';
 import { getSubscription, hasActiveAccess, loadSubscriptionForOwner } from '../lib/subscription.js';
 import { getUserId } from '../lib/session.js';
+import { AccountAvatarLink } from '../components/AccountAvatarLink.js';
 
 function petArticle(pet: StoredPet): string {
   return `${describePet(pet).article} ${pet.name}`;
@@ -89,9 +90,7 @@ export function BeneficiosScreen() {
           <small>PAPÁ</small>
           <strong>O que vamos papá?</strong>
         </div>
-        <Link to="/conta" className="avatar-button" aria-label="Abrir Minha conta">
-          F
-        </Link>
+        <AccountAvatarLink />
       </header>
 
       <main className="beneficios-letter">
