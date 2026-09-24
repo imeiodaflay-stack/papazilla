@@ -32,6 +32,7 @@ import { ReceitaScreen } from './routes/ReceitaScreen.js';
 import { OriginalRecipeConfigScreen } from './routes/OriginalRecipeConfigScreen.js';
 import { OriginalRecipeResultScreen } from './routes/OriginalRecipeResultScreen.js';
 import { GaleriaScreen } from './routes/GaleriaScreen.js';
+import { RouteScrollReset } from './components/RouteScrollReset.js';
 
 /**
  * Rotas do MVP. Fluxo confirmado (arquitetura-tecnica.md):
@@ -42,6 +43,9 @@ import { GaleriaScreen } from './routes/GaleriaScreen.js';
  * genérica `AppShell` (ver `ZillaRoute`).
  */
 export const router = createBrowserRouter([
+  {
+    element: <RouteScrollReset />,
+    children: [
   { path: '/', element: <SplashScreen /> },
   { path: '/entrar', element: <AuthScreen /> },
   { path: '/auth/callback', element: <AuthCallbackScreen /> },
@@ -81,4 +85,6 @@ export const router = createBrowserRouter([
     children: [{ path: '/papa', element: <PapaRoute /> }],
   },
   { path: '*', element: <Navigate to="/" replace /> },
+    ],
+  },
 ]);
