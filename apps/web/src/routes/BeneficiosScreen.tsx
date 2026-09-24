@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import aniversarioIcon from '../assets/icons/aniversario.png';
 import digestaoIcon from '../assets/icons/digestao.png';
 import escovacaoIcon from '../assets/icons/escovacao.png';
 import pesoIcon from '../assets/icons/peso.png';
 import zillaFallback from '../assets/icons/zilla.png';
-import zillaFront from '../assets/zilla-frente-transparent.png';
 import { getActivePet, listPets, type StoredPet } from '../lib/petsStore.js';
 import { describePet, joinPt } from '../lib/petLabel.js';
 import { findOriginalRecipe } from '../lib/originalRecipes.js';
@@ -85,14 +84,15 @@ export function BeneficiosScreen() {
 
   return (
     <div className="beneficios-view">
-      <div className="beneficios-top" aria-hidden="true">
-        <p>
-          Um bilhete da Zilla pra quem cuida {ownerPreposition} {petNames} <span>♥</span>
-        </p>
-        <img src={zillaFront} alt="" />
-        <b>♥</b>
-        <i>● ●</i>
-      </div>
+      <header className="app-header app-header--papa beneficios-header">
+        <div className="app-header__title">
+          <small>PAPÁ</small>
+          <strong>O que vamos papá?</strong>
+        </div>
+        <Link to="/conta" className="avatar-button" aria-label="Abrir Minha conta">
+          F
+        </Link>
+      </header>
 
       <main className="beneficios-letter">
         <section className="beneficios-greeting">

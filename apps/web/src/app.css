@@ -1764,58 +1764,9 @@
   background:
     radial-gradient(circle at 50% 10%, #fff 0, #fffaf6 55%, #f8eddf 100%);
 }
-.beneficios-top {
-  position: relative;
-  height: 210px;
-  overflow: hidden;
-}
-.beneficios-top > p {
-  position: absolute;
-  z-index: 2;
-  top: 1.1rem;
-  left: 1rem;
-  width: 10rem;
-  margin: 0;
-  padding: 1rem 1rem 1.15rem;
-  border-radius: 44% 52% 48% 40%;
-  background: #ffd5c6;
-  transform: rotate(-3deg);
-  color: var(--pz-chocolate);
-  font: 700 1.65rem / 1.02 var(--pz-font-hand);
-  text-align: center;
-}
-.beneficios-top > p span {
-  color: var(--pz-accent-ink);
-}
-.beneficios-top > img {
-  position: absolute;
-  z-index: 1;
-  right: 0.6rem;
-  bottom: -0.75rem;
-  width: 14.5rem;
-  height: 12rem;
-  object-fit: contain;
-  object-position: center bottom;
-  filter: drop-shadow(0 8px 10px rgb(74 45 34 / 12%));
-}
-.beneficios-top > b {
-  position: absolute;
-  top: 0.85rem;
-  right: 1rem;
-  color: #ff6d49;
-  font-size: 2.7rem;
-  line-height: 1;
-  transform: rotate(9deg);
-}
-.beneficios-top > i {
-  position: absolute;
-  top: 1.35rem;
-  left: 10.6rem;
-  color: #ff6d2f;
-  font-size: 0.7rem;
-  font-style: normal;
-  letter-spacing: 0.25rem;
-  transform: rotate(25deg);
+.beneficios-header {
+  min-height: 88px;
+  margin: 0 1.25rem;
 }
 .beneficios-letter {
   position: relative;
@@ -2025,14 +1976,6 @@
   transform: translateX(-50%) rotate(-8deg);
 }
 @media (max-width: 370px) {
-  .beneficios-top > p {
-    width: 9.2rem;
-    font-size: 1.45rem;
-  }
-  .beneficios-top > img {
-    right: 0;
-    width: 13.5rem;
-  }
   .beneficios-greeting {
     grid-template-columns: minmax(0, 1.2fr) minmax(5.8rem, 0.8fr);
   }
