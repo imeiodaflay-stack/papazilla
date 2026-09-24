@@ -31,11 +31,12 @@ import { BeneficiosScreen } from './routes/BeneficiosScreen.js';
 import { ReceitaScreen } from './routes/ReceitaScreen.js';
 import { OriginalRecipeConfigScreen } from './routes/OriginalRecipeConfigScreen.js';
 import { OriginalRecipeResultScreen } from './routes/OriginalRecipeResultScreen.js';
+import { GaleriaScreen } from './routes/GaleriaScreen.js';
 
 /**
  * Rotas do MVP. Fluxo confirmado (arquitetura-tecnica.md):
  * Splash → Entrar/criar conta → Onboarding → Cadastro do 1º Monstrinho → Papá.
- * Navegação inferior (app-view): Pets / Papá / Curiosidades / Salvas.
+ * Navegação inferior (app-view): Pets / Papá / Salvas / Galeria / Artigos.
  * Minha conta, a anamnese, as telas da área Pets (lista/perfil/respostas),
  * Curiosidades e Receitas salvas têm cabeçalho próprio — não usam a casca
  * genérica `AppShell` (ver `ZillaRoute`).
@@ -65,8 +66,11 @@ export const router = createBrowserRouter([
   { path: '/zilla/:petId/editar', element: <PetEditScreen /> },
   { path: '/zilla/:petId/respostas', element: <AnamnesisDetailScreen /> },
   { path: '/zilla/:petId/anamnese', element: <AnamneseScreen /> },
-  { path: '/curiosidades', element: <CuriosidadesScreen /> },
+  { path: '/artigos', element: <CuriosidadesScreen /> },
+  { path: '/artigos/:curiosidadeId', element: <CuriosidadeDetalheScreen /> },
+  { path: '/curiosidades', element: <Navigate to="/artigos" replace /> },
   { path: '/curiosidades/:curiosidadeId', element: <CuriosidadeDetalheScreen /> },
+  { path: '/galeria', element: <GaleriaScreen /> },
   { path: '/receitas', element: <ReceitasScreen /> },
   { path: '/receitas/:recipeId', element: <RecipeDetailScreen /> },
   { path: '/receitas/:recipeId/compartilhar', element: <RecipeShareScreen /> },

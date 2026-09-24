@@ -32,7 +32,7 @@ export function CuriosidadesScreen() {
   const visible = filter === 'all' ? CURIOSITIES : CURIOSITIES.filter((c) => c.category === filter);
 
   function openCuriosity(id: string, hasArticle: boolean) {
-    if (hasArticle) navigate(`/curiosidades/${id}`);
+    if (hasArticle) navigate(`/artigos/${id}`);
     else toast('Este exemplo terá a mesma estrutura de leitura e fontes.');
   }
 
@@ -41,7 +41,7 @@ export function CuriosidadesScreen() {
       <header className="app-header curiosities-header">
         <div>
           <p className="eyebrow">Descobertas do Zilla</p>
-          <h1>Curiosidades</h1>
+          <h1>Artigos</h1>
         </div>
         <button
           type="button"
@@ -64,7 +64,7 @@ export function CuriosidadesScreen() {
             <img src={zillaLendo} alt="Zilla lendo e trazendo uma curiosidade" />
           </section>
 
-          <div className="curiosity-filters" role="group" aria-label="Filtrar curiosidades">
+          <div className="curiosity-filters" role="group" aria-label="Filtrar artigos">
             {FILTERS.map((f) => (
               <button
                 key={f}

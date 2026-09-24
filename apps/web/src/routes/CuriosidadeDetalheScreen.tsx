@@ -27,7 +27,7 @@ export function CuriosidadeDetalheScreen() {
   const curiosity = curiosidadeId ? findCuriosity(curiosidadeId) : undefined;
   const [saved, setSaved] = useState(false);
 
-  if (!curiosity || !curiosity.article) return <Navigate to="/curiosidades" replace />;
+  if (!curiosity || !curiosity.article) return <Navigate to="/artigos" replace />;
   const { article } = curiosity;
 
   return (
@@ -36,8 +36,8 @@ export function CuriosidadeDetalheScreen() {
         <button
           type="button"
           className="flow-header__back"
-          aria-label="Voltar para curiosidades"
-          onClick={() => navigate('/curiosidades')}
+          aria-label="Voltar para artigos"
+          onClick={() => navigate('/artigos')}
         >
           ←
         </button>
