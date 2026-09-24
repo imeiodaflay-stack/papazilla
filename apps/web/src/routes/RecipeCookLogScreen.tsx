@@ -20,7 +20,7 @@ const RATING_CAPTIONS: Record<number, string> = {
 /**
  * Registrar fornalha — fiel à tela "cook-log" de `papazilla-prototype`.
  * Preparo real: quem provou, avaliação, nota e foto entram de fato no
- * histórico persistido da receita (`recipeRepository.addCookLog`).
+ * galeria persistida da receita (`recipeRepository.addCookLog`).
  */
 export function RecipeCookLogScreen() {
   const navigate = useNavigate();
@@ -123,7 +123,7 @@ export function RecipeCookLogScreen() {
         <div className="flow-intro">
           <p className="eyebrow">Receita preparada</p>
           <h1>Como ficou essa fornalha?</h1>
-          <p>Guarde a foto e a reação da matilha. Esse preparo entra no histórico da receita.</p>
+          <p>Guarde a foto e a reação da matilha. Esse preparo entra na Galeria da receita.</p>
         </div>
 
         <button
@@ -186,7 +186,7 @@ export function RecipeCookLogScreen() {
         </div>
 
         <label className="cook-note">
-          <span>Uma lembrança deste preparo</span>
+          <span>{photoPath ? 'Legenda da foto' : 'Uma lembrança deste preparo'}</span>
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}

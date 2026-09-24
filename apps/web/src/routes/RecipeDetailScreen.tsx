@@ -5,7 +5,8 @@ import potinhoIcon from '../assets/icons/potinho.png';
 import sucessoIcon from '../assets/icons/sucesso.png';
 import infoIcon from '../assets/icons/info.png';
 import { getPet } from '../lib/petsStore.js';
-import { deleteRecipe, getRecipe, renameRecipe, setRecipeFavorite } from '../lib/recipeRepository.js';
+import { deleteRecipe, getRecipe, renameRecipe, setRecipeFavorite, updateCookLogPhoto } from '../lib/recipeRepository.js';
+import { PhotoUploadError, uploadPhoto } from '../lib/photoUpload.js';
 import { derivePredominantProtein } from '../lib/engineMapping.js';
 import { buildPetPlan, buildSharedRecipe } from '../lib/recipeEngine.js';
 import { displayRecipeTitle, formatGrams, orderDisclaimers, recipeIngredientSummary } from '../lib/recipeDisplay.js';
@@ -13,7 +14,7 @@ import { describePet, joinPt } from '../lib/petLabel.js';
 import { RecipeFinalizers } from '../components/RecipeFinalizers.js';
 import { RecipeIngredientTable } from '../components/RecipeIngredientTable.js';
 import { RecipePreparationSteps } from '../components/RecipePreparationSteps.js';
-import { useScrollAwareFooter } from '../hooks/useScrollAwareFooter.js';
+import galeriaIcon from '../assets/icons/galeria.svg';
 
 /**
  * Detalhe de uma receita salva — fiel à tela "recipe-detail" de
@@ -39,7 +40,9 @@ export function RecipeDetailScreen() {
   const [renaming, setRenaming] = useState(false);
   const [titleInput, setTitleInput] = useState(storedRecipe ? displayRecipeTitle(storedRecipe) : '');
   const [confirmingDelete, setConfirmingDelete] = useState(false);
-  const { bodyRef, dividerVisible, onBodyScroll } = useScrollAwareFooter();
+  const [coverUploading, setCoverUploading] = useState(false);
+  const [, setCoverRevision] = useState(0);
+  const coverInputRef = useRef<HTMLInputElement>(null);
 
   function toast(message: string) {
     window.clearTimeout(toastTimer.current);
@@ -88,7 +91,30 @@ export function RecipeDetailScreen() {
   const cookCount = storedRecipe.cookLogs.length;
   const ratings = storedRecipe.cookLogs.map((l) => l.rating).filter((r) => r > 0);
   const avgRating = ratings.length > 0 ? ratings.reduce((s, r) => s + r, 0) / ratings.length : null;
-  const lastLog = [...storedRecipe.cookLogs].sort((a, b) => b.date.localeCompare(a.date))[0];
+  const galleryLogs = [...storedRecipe.cookLogs]
+    .filter((log) => Boolean(log.photoPath))
+    .sort((a, b) => b.date.localeCompare(a.date));
+  const latestCookLog = [...storedRecipe.cookLogs].sort((a, b) => b.date.localeCompare(a.date))[0];
+  const coverLog = galleryLogs[0];
+
+  async function handleCoverPhotoChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    const targetLog = coverLog ?? latestCookLog;
+    if (!file || !targetLog || coverUploading) return;
+
+    setCoverUploading(true);
+    try {
+      const photoPath = await uploadPhoto('cook-photos', file);
+      await updateCookLogPhoto(storedRecipe!.id, targetLog.id, photoPath);
+      setCoverRevision((revision) => revision + 1);
+      toast(coverLog ? 'Foto da receita atualizada.' : 'Foto adicionada à receita.');
+    } catch (error) {
+      toast(error instanceof PhotoUploadError || error instanceof Error ? error.message : 'Não foi possível atualizar a foto.');
+    } finally {
+      setCoverUploading(false);
+    }
+  }
 
   const headerTitle = pets.length > 1 ? `Para ${joinPt(pets.map((p) => p.name))}` : `Para ${describePet(pets[0]).article} ${pets[0]!.name}`;
   const eyebrowTitle =
@@ -98,6 +124,13 @@ export function RecipeDetailScreen() {
 
   return (
     <div className="flow-screen recipe-detail-view">
+      <input
+        ref={coverInputRef}
+        type="file"
+        accept="image/*"
+        hidden
+        onChange={(event) => { void handleCoverPhotoChange(event); }}
+      />
       <header className="flow-header">
         <button
           type="button"
@@ -121,7 +154,7 @@ export function RecipeDetailScreen() {
         </button>
       </header>
 
-      <div className="flow-body recipe-detail-body" ref={bodyRef} onScroll={onBodyScroll}>
+      <div className="flow-body recipe-detail-body">
         {showMore ? (
           <div className="more-menu">
             <button
@@ -174,7 +207,7 @@ export function RecipeDetailScreen() {
               <img src={infoIcon} alt="" />
               <p>
                 <strong>Excluir esta receita?</strong>
-                <span>Essa ação não pode ser desfeita. A receita e o histórico de fornalhas dela serão apagados.</span>
+                <span>Essa ação não pode ser desfeita. A receita e os preparos registrados nela serão apagados.</span>
               </p>
             </div>
             <div className="confirm-actions">
@@ -188,10 +221,32 @@ export function RecipeDetailScreen() {
           </div>
         ) : null}
 
-        <div className="recipe-detail-photo recipe-photo recipe-photo--empty">
-          <img src={potinhoIcon} alt="" />
-          <em>Sem foto ainda</em>
-        </div>
+        {coverLog?.photoPath ? (
+          <button
+            type="button"
+            className="recipe-detail-photo recipe-photo recipe-detail-photo--change"
+            disabled={coverUploading}
+            onClick={() => coverInputRef.current?.click()}
+          >
+            <img
+              src={coverLog.photoPath}
+              alt={`Foto de ${displayRecipeTitle(storedRecipe)}`}
+              className="recipe-photo__cover"
+            />
+            <span>{coverUploading ? 'Enviando…' : 'Trocar foto'}</span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="recipe-detail-photo recipe-photo recipe-photo--empty recipe-detail-photo--add"
+            disabled={coverUploading}
+            onClick={() => latestCookLog ? coverInputRef.current?.click() : navigate(`/receitas/${storedRecipe.id}/preparo`)}
+          >
+            <img src={potinhoIcon} alt="" />
+            <em>Sem foto ainda</em>
+            <small>{coverUploading ? 'Enviando…' : 'Adicionar foto'}</small>
+          </button>
+        )}
 
         <div className="recipe-detail-title">
           <p className="eyebrow">
@@ -216,8 +271,8 @@ export function RecipeDetailScreen() {
           <div className="shared-recipe-note">
             <img src={infoIcon} alt="" />
             <p>
-              <strong>Ainda sem preparo registrado</strong>Toque em "Registrar fornalha" depois de cozinhar pra guardar o
-              histórico desta receita.
+              <strong>Ainda sem preparo registrado</strong>Depois de cozinhar, registre a fornalha para guardar esse momento na
+              Galeria.
             </p>
           </div>
         )}
@@ -256,32 +311,57 @@ export function RecipeDetailScreen() {
         <RecipeFinalizers petPlans={petPlans} />
         <RecipePreparationSteps petPlans={petPlans} days={storedRecipe.days} />
 
-        {lastLog ? (
-          <section className="cook-history">
-            <div className="section-row">
-              <div>
-                <p className="eyebrow">Histórico</p>
-                <h2>Últimas fornalhas</h2>
-              </div>
-              <button type="button" onClick={() => navigate(`/receitas/${storedRecipe.id}/historico`)}>
-                Ver todas
+        <section className="recipe-detail-actions" aria-label="Ações da receita">
+          <button type="button" className="pz-button pz-button--outline wide" onClick={() => navigate(`/receitas/${storedRecipe.id}/compartilhar`)}>
+            Compartilhar para revisão veterinária
+          </button>
+          <button
+            type="button"
+            className="pz-button pz-button--primary wide"
+            onClick={() => navigate(`/receitas/${storedRecipe.id}/preparo`)}
+          >
+            Preparar novamente
+          </button>
+        </section>
+
+        <section className="recipe-gallery" aria-labelledby="recipe-gallery-title">
+          <div className="recipe-gallery__heading">
+            <div>
+              <p className="eyebrow">Galeria</p>
+              <h2 id="recipe-gallery-title">Fornalhas dos seus Monstrinhos</h2>
+            </div>
+            <span>{galleryLogs.length} {galleryLogs.length === 1 ? 'foto' : 'fotos'}</span>
+          </div>
+
+          {galleryLogs.length > 0 ? (
+            <div className="recipe-gallery__grid">
+              {galleryLogs.map((log) => (
+                <article key={log.id} className="recipe-gallery-card">
+                  <div className="recipe-gallery-card__photo">
+                    <img
+                      src={log.photoPath}
+                      alt={log.note ? `Fornalha: ${log.note}` : 'Foto de uma fornalha desta receita'}
+                    />
+                    <span aria-label={`Avaliação ${log.rating} de 5`}>♥ {log.rating}</span>
+                  </div>
+                  <time dateTime={log.date}>
+                    {new Date(log.date).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' })}
+                  </time>
+                  {log.note ? <p>{log.note}</p> : <small>Sem legenda</small>}
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="recipe-gallery__empty">
+              <span><img src={galeriaIcon} alt="" /></span>
+              <h3>Sua galeria está começando</h3>
+              <p>Adicione uma foto na próxima fornalha para guardar esse momento aqui.</p>
+              <button type="button" onClick={() => navigate(`/receitas/${storedRecipe.id}/preparo`)}>
+                Registrar uma fornalha
               </button>
             </div>
-            <article>
-              <span className="mini-recipe-photo">🍲</span>
-              <div>
-                <strong>
-                  {new Date(lastLog.date).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' })}
-                </strong>
-                <small>
-                  {joinPt(lastLog.petIds.map((id) => getPet(id)?.name).filter((n): n is string => Boolean(n)))} · ♥{' '}
-                  {lastLog.rating}
-                </small>
-              </div>
-              <span>›</span>
-            </article>
-          </section>
-        ) : null}
+          )}
+        </section>
 
         {orderedDisclaimers.map((text, i) => (
           <div key={i} className={i === 0 && clinicalRequired ? 'clinical-warning' : 'shared-recipe-note'}>
@@ -290,19 +370,6 @@ export function RecipeDetailScreen() {
           </div>
         ))}
       </div>
-
-      <footer className={`flow-footer flow-footer--stacked scroll-aware-footer${dividerVisible ? ' is-divider-visible' : ''}`}>
-        <button type="button" className="pz-button pz-button--outline wide" onClick={() => navigate(`/receitas/${storedRecipe.id}/compartilhar`)}>
-          {clinicalRequired ? 'Compartilhar para revisão veterinária' : 'Compartilhar receita'}
-        </button>
-        <button
-          type="button"
-          className="pz-button pz-button--primary wide"
-          onClick={() => navigate(`/receitas/${storedRecipe.id}/preparo`)}
-        >
-          {cookCount === 0 ? 'Registrar fornalha' : 'Preparar novamente'}
-        </button>
-      </footer>
 
       {toastMsg ? (
         <div className="pz-toast is-visible" role="status">

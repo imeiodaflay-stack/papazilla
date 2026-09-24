@@ -91,6 +91,17 @@ export function addCookLog(recipeId: string, log: Omit<CookLog, 'id'>): StoredRe
   return recipe;
 }
 
+/** Adiciona ou substitui a foto de um preparo já registrado. */
+export function updateCookLogPhoto(recipeId: string, logId: string, photoPath: string): StoredRecipe | undefined {
+  const recipes = readRecipes();
+  const recipe = recipes.find((item) => item.id === recipeId);
+  const log = recipe?.cookLogs.find((item) => item.id === logId);
+  if (!recipe || !log) return undefined;
+  log.photoPath = photoPath;
+  writeRecipes(recipes);
+  return recipe;
+}
+
 /** Renomeia a receita. `title` vazio remove o nome customizado e volta a derivar da seleção. */
 export function renameRecipe(recipeId: string, title: string): StoredRecipe | undefined {
   const recipes = readRecipes();

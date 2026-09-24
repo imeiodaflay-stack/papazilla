@@ -121,6 +121,13 @@ export function displayRecipeTitle(recipe: { customTitle?: string; selection: { 
   return recipe.customTitle?.trim() || recipeTitle(recipe.selection);
 }
 
+/** Foto mais recente registrada numa fornalha, usada como capa da receita. */
+export function latestRecipePhotoPath(recipe: { cookLogs: { date: string; photoPath: string }[] }): string | null {
+  return [...recipe.cookLogs]
+    .filter((log) => Boolean(log.photoPath))
+    .sort((a, b) => b.date.localeCompare(a.date))[0]?.photoPath ?? null;
+}
+
 /** Lista curta de ingredientes pra subtítulo, na ordem proteína→carbo→vegetal→víscera. */
 export function recipeIngredientSummary(selection: {
   proteins: string[];

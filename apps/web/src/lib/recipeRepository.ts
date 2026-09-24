@@ -8,6 +8,7 @@ import {
   addCookLog as addLocalCookLog, addRecipe as addLocalRecipe,
   deleteRecipe as deleteLocalRecipe, listRecipes as listLocalRecipes,
   renameRecipe as renameLocalRecipe, setRecipeFavorite as setLocalFavorite,
+  updateCookLogPhoto as updateLocalCookLogPhoto,
 } from './recipesStore.js';
 import type { CookLog, StoredRecipe } from './recipesStore.js';
 
@@ -130,6 +131,28 @@ export async function addCookLog(recipeId: string, input: Omit<CookLog, 'id'>): 
     rating: row.rating, note: row.note, photoPath: row.photo_path,
   }];
   return recipe;
+}
+
+export async function updateCookLogPhoto(recipeId: string, logId: string, photoPath: string): Promise<void> {
+  const recipe = getRecipe(recipeId);
+  const log = recipe?.cookLogs.find((item) => item.id === logId);
+  if (!recipe || !log) throw new Error('Preparo não encontrado.');
+
+  if (!isSupabaseConfigured || !supabase) {
+    const updated = updateLocalCookLogPhoto(recipeId, logId, photoPath);
+    if (!updated) throw new Error('Não foi possível atualizar a foto.');
+    cache = cache.map((item) => item.id === recipeId ? updated as SavedRecipe : item);
+    return;
+  }
+
+  if (!ownerId) throw new Error('Entre novamente para atualizar a foto.');
+  const { error } = await supabase.from('recipe_preparations')
+    .update({ photo_path: photoPath })
+    .eq('id', logId)
+    .eq('recipe_id', recipeId)
+    .eq('owner_id', ownerId);
+  if (error) throw new Error('Não foi possível atualizar a foto.');
+  log.photoPath = photoPath;
 }
 
 export async function renameRecipe(id: string, title: string): Promise<void> {

@@ -6,7 +6,7 @@ import { AppNav } from '../components/AppNav.js';
 import { listPets } from '../lib/petsStore.js';
 import { listRecipes } from '../lib/recipeRepository.js';
 import { joinPt } from '../lib/petLabel.js';
-import { displayRecipeTitle, relativeTimeLabel } from '../lib/recipeDisplay.js';
+import { displayRecipeTitle, latestRecipePhotoPath, relativeTimeLabel } from '../lib/recipeDisplay.js';
 
 /**
  * Receitas salvas — fiel à tela "saved-recipes" de `papazilla-prototype`,
@@ -106,6 +106,7 @@ export function ReceitasScreen() {
                   const cookCount = recipe.cookLogs.length;
                   const ratings = recipe.cookLogs.map((l) => l.rating).filter((r) => r > 0);
                   const avgRating = ratings.length > 0 ? ratings.reduce((s, r) => s + r, 0) / ratings.length : null;
+                  const coverPhoto = latestRecipePhotoPath(recipe);
                   return (
                     <button
                       key={recipe.id}
@@ -113,9 +114,15 @@ export function ReceitasScreen() {
                       className="saved-recipe-card"
                       onClick={() => navigate(`/receitas/${recipe.id}`)}
                     >
-                      <span className="recipe-photo recipe-photo--empty">
-                        <img src={potinhoIcon} alt="" />
-                        <em>Sem foto ainda</em>
+                      <span className={`recipe-photo${coverPhoto ? '' : ' recipe-photo--empty'}`}>
+                        {coverPhoto ? (
+                          <img src={coverPhoto} alt={`Foto de ${displayRecipeTitle(recipe)}`} className="recipe-photo__cover" />
+                        ) : (
+                          <>
+                            <img src={potinhoIcon} alt="" />
+                            <em>Sem foto ainda</em>
+                          </>
+                        )}
                       </span>
                       <span className="saved-recipe-card__body">
                         <small>
