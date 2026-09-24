@@ -81,7 +81,17 @@ export function BeneficiosScreen() {
           </div>
 
           <figure className={`beneficios-pet-photo${activePet?.photoPath ? '' : ' is-placeholder'}`}>
-            <img src={petPhoto} alt={activePet ? `Foto cadastrada de ${activePet.name}` : ''} />
+            <img
+              src={petPhoto}
+              alt={activePet ? `Foto cadastrada de ${activePet.name}` : ''}
+              onError={(event) => {
+                const image = event.currentTarget;
+                image.onerror = null;
+                image.src = zillaFallback;
+                image.alt = '';
+                image.closest('figure')?.classList.add('is-placeholder');
+              }}
+            />
             <span aria-hidden="true">♡</span>
           </figure>
         </section>
