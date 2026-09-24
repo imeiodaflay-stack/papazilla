@@ -1991,6 +1991,16 @@
     font-size: 0.95rem;
   }
 }
+@media (max-width: 340px) {
+  .beneficios-grid {
+    grid-template-columns: 1fr;
+  }
+  .beneficios-benefit {
+    grid-template-columns: 3rem minmax(0, 1fr);
+    min-height: 0;
+    padding: 0.75rem;
+  }
+}
 
 /* ============================================================
    Papá — Vitrine
