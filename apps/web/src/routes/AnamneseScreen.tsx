@@ -1217,13 +1217,32 @@ const STEPS: Step[] = [
     eyebrow: '19 · Refeições',
     title: 'Quantas refeições por dia?',
     intro: 'Quantas refeições você prefere oferecer?',
-    body: (ctx) => (
-      <SingleCards
-        name="preferredMeals"
-        ctx={ctx}
-        options={['1', '2', '3', '4', 'Quero que o Papazilla recomende']}
-      />
-    ),
+    body: (ctx) => {
+      const isPuppy = ctx.singles.ageStage === 'Filhote';
+      const tooFewForPuppy = isPuppy && ctx.singles.preferredMeals === '1';
+      return (
+        <>
+          <SingleCards
+            name="preferredMeals"
+            ctx={ctx}
+            options={['1', '2', '3', '4', 'Quero que o Papazilla recomende']}
+          />
+          {tooFewForPuppy ? (
+            <div className="clinical-warning">
+              <img src={infoIcon} alt="" />
+              <p>
+                <strong>1 refeição por dia é pouco para um filhote.</strong>
+                <span>
+                  Filhotes têm metabolismo acelerado e reserva de glicose menor — passar longos períodos em jejum
+                  aumenta o risco de hipoglicemia. Prefira pelo menos 2 a 3 refeições, ou deixe o Papazilla recomendar
+                  a partir da faixa etária dele.
+                </span>
+              </p>
+            </div>
+          ) : null}
+        </>
+      );
+    },
   },
   {
     eyebrow: '20 · Observações',

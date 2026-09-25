@@ -84,7 +84,11 @@ export function ReceitaScreen() {
   const [days, setDays] = useState(() => draft?.days ?? 7);
   const [customDaysText, setCustomDaysText] = useState('');
   const [customSelected, setCustomSelected] = useState(false);
-  const [format, setFormat] = useState(() => draft?.format ?? 'Os dois');
+  const [format, setFormat] = useState(() => {
+    if (draft?.format) return draft.format;
+    const preferred = getActivePet()?.recipeFormat;
+    return preferred && FORMAT_OPTIONS.includes(preferred) ? preferred : 'Os dois';
+  });
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);

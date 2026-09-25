@@ -56,6 +56,10 @@ export function RecipePreparationSteps({
             <div>
               <strong>Cozinhe sem temperos</strong>
               <p>Cozinhe cada grupo separadamente, em água ou no vapor. Não use cebola, alho, molhos ou temperos prontos.</p>
+              <p>
+                Se cozinhar em água, guarde o caldo: parte das vitaminas B e C migra pra ele. Sirva um pouco à parte ou
+                reintegre na porção.
+              </p>
             </div>
           </li>
           <li>
