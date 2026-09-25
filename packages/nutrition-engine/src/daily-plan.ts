@@ -53,7 +53,10 @@ export function calculateDailyPlan(input: DailyPlanInput): DailyPlan {
   const currentWeightKg = clamp(input.currentWeightKg || 0, WEIGHT_MIN_KG, WEIGHT_MAX_KG);
   const validationErrors: DailyPlanValidationCode[] = [];
 
-  const usesIdealWeight = input.goal === 'lose';
+  // "Emagrecer" usa o peso meta pra pesar MENOS que o atual; "Ganhar peso"
+  // usa o mesmo peso meta, mas pra pesar MAIS — mesma alavanca (o total é
+  // proporcional ao peso usado), sentido oposto.
+  const usesIdealWeight = input.goal === 'lose' || input.goal === 'gain';
   if (usesIdealWeight && !isValidWeight(input.idealWeightKg)) {
     validationErrors.push('IDEAL_WEIGHT_REQUIRED');
   }

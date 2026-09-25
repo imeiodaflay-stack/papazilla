@@ -7,8 +7,9 @@ import infoIcon from '../assets/icons/info.png';
 import { getActivePet, getActivePetId, listPets } from '../lib/petsStore.js';
 import { describePet, joinPt } from '../lib/petLabel.js';
 import { getSubscription, hasActiveAccess } from '../lib/subscription.js';
-import { derivePredominantProtein } from '../lib/engineMapping.js';
+import { derivePredominantProtein, mapCarbFavorites, mapVegetableFavorites } from '../lib/engineMapping.js';
 import { hasSignificantMuscleLoss } from '../lib/muscleCondition.js';
+import { proteinReminders, vegetableReminders } from '../lib/foodPreferences.js';
 import { buildPetPlan, buildSharedRecipe } from '../lib/recipeEngine.js';
 import { RecipeSaveError, saveRecipe } from '../lib/recipeRepository.js';
 import { clearRecipeDraft, peekRecipeDraft, saveRecipeDraft } from '../lib/recipeDraft.js';
@@ -47,8 +48,9 @@ import { useScrollAwareFooter } from '../hooks/useScrollAwareFooter.js';
  *   o cadastro, volta pra cá com o rascunho recarregado e o Monstrinho novo
  *   já incluído na seleção — fiel ao "recipeStep = 0; showScreen('recipe')"
  *   do protótipo.
- * - `season` não é coletado em lugar nenhum ainda; fixado em "mild" (ver
- *   `recipeEngine.ts`). `predominantProtein` é derivada da seleção de
+ * - `season` vem do país informado na Anamnese + data do servidor
+ *   (`deriveSeason`, `engineMapping.ts`); sem país ou perto do equador cai em
+ *   "mild" (sem ajuste). `predominantProtein` é derivada da seleção de
  *   proteínas do próprio wizard, não é uma pergunta separada (mesma regra do
  *   protótipo).
  */
@@ -77,8 +79,16 @@ export function ReceitaScreen() {
   });
   const [formulation, setFormulation] = useState<FormulationId>(() => draft?.formulation ?? 'padrao');
   const [proteins, setProteins] = useState<Set<string>>(() => new Set(draft?.proteins ?? ['frango_peito']));
-  const [carbs, setCarbs] = useState<Set<string>>(() => new Set(draft?.carbs ?? ['batata_doce']));
-  const [vegetables, setVegetables] = useState<Set<string>>(() => new Set(draft?.vegetables ?? ['cenoura']));
+  const [carbs, setCarbs] = useState<Set<string>>(() => {
+    if (draft?.carbs) return new Set(draft.carbs);
+    const favorites = mapCarbFavorites(getActivePet() ?? { carbs: [] });
+    return new Set(favorites.length > 0 ? favorites : ['batata_doce']);
+  });
+  const [vegetables, setVegetables] = useState<Set<string>>(() => {
+    if (draft?.vegetables) return new Set(draft.vegetables);
+    const favorites = mapVegetableFavorites(getActivePet() ?? { vegetableFavorites: [] });
+    return new Set(favorites.length > 0 ? favorites : ['cenoura']);
+  });
   const [organs, setOrgans] = useState<Set<string>>(() => new Set(draft?.organs ?? []));
   const [supplement, setSupplement] = useState<SupplementId>(() => draft?.supplement ?? 'food-dog');
   const [days, setDays] = useState(() => draft?.days ?? 7);
@@ -124,6 +134,8 @@ export function ReceitaScreen() {
 
   const selectedPets = pets.filter((p) => selectedPetIds.has(p.id));
   const petsWithMuscleLoss = selectedPets.filter(hasSignificantMuscleLoss);
+  const petProteinReminders = proteinReminders(selectedPets);
+  const petVegetableReminders = vegetableReminders(selectedPets);
   const petPlans = useMemo(
     () => selectedPets.map((pet) => ({ pet, plan: buildPetPlan(pet, choices) })),
     [selectedPets.map((p) => p.id).join(','), choices],
@@ -421,11 +433,33 @@ export function ReceitaScreen() {
         ) : null}
 
         {step === 2 ? (
-          <IngredientPicker items={PROTEINS} selected={proteins} onToggle={(id) => toggleInSet(setProteins, id)} />
+          <>
+            {petProteinReminders.map(({ pet, text }) => (
+              <div className="shared-recipe-note" key={pet.id}>
+                <img src={infoIcon} alt="" />
+                <p>
+                  <strong>Lembrete da Anamnese</strong>Você contou que {pet.name} {text}. A escolha é sua — é só pra não
+                  esquecer.
+                </p>
+              </div>
+            ))}
+            <IngredientPicker items={PROTEINS} selected={proteins} onToggle={(id) => toggleInSet(setProteins, id)} />
+          </>
         ) : null}
         {step === 3 ? <IngredientPicker items={CARBS} selected={carbs} onToggle={(id) => toggleInSet(setCarbs, id)} /> : null}
         {step === 4 ? (
-          <IngredientPicker items={VEGETABLES} selected={vegetables} onToggle={(id) => toggleInSet(setVegetables, id)} />
+          <>
+            {petVegetableReminders.map(({ pet, text }) => (
+              <div className="shared-recipe-note" key={pet.id}>
+                <img src={infoIcon} alt="" />
+                <p>
+                  <strong>Lembrete da Anamnese</strong>Você contou que {pet.name} prefere {text}. A escolha é sua — é só
+                  pra não esquecer.
+                </p>
+              </div>
+            ))}
+            <IngredientPicker items={VEGETABLES} selected={vegetables} onToggle={(id) => toggleInSet(setVegetables, id)} />
+          </>
         ) : null}
         {step === 5 ? (
           <>

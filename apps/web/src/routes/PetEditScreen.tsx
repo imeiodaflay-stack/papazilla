@@ -69,7 +69,8 @@ export function PetEditScreen() {
     }
   }
 
-  const missingIdealWeight = goal === 'Emagrecer' && !idealWeight.trim();
+  const usesIdealWeight = goal === 'Emagrecer' || goal === 'Ganhar peso';
+  const missingIdealWeight = usesIdealWeight && !idealWeight.trim();
   const saveDisabled = !name.trim() || !weight.trim() || missingIdealWeight;
 
   async function save() {
@@ -79,7 +80,7 @@ export function PetEditScreen() {
       breed: breed.trim(),
       age: age.trim(),
       weight: weight.trim(),
-      idealWeight: goal === 'Emagrecer' ? idealWeight.trim() : '',
+      idealWeight: usesIdealWeight ? idealWeight.trim() : '',
       activityTime,
       goal,
     });
@@ -205,10 +206,10 @@ export function PetEditScreen() {
               </button>
             ))}
           </div>
-          {goal === 'Emagrecer' ? (
+          {usesIdealWeight ? (
             <div className="conditional-panel">
               <label className="profile-field profile-field--full">
-                <span>Qual é o peso ideal do seu cão?</span>
+                <span>{goal === 'Ganhar peso' ? 'Qual é o peso-alvo do seu cão?' : 'Qual é o peso ideal do seu cão?'}</span>
                 <div className="input-suffix">
                   <input
                     value={idealWeight}
@@ -220,7 +221,11 @@ export function PetEditScreen() {
                   <span>kg</span>
                 </div>
               </label>
-              <p className="profile-question__hint">Essa meta será usada como referência para montar o plano de emagrecimento.</p>
+              <p className="profile-question__hint">
+                {goal === 'Ganhar peso'
+                  ? 'Essa meta será usada como referência para montar o plano de ganho de peso.'
+                  : 'Essa meta será usada como referência para montar o plano de emagrecimento.'}
+              </p>
             </div>
           ) : null}
         </div>

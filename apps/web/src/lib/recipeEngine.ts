@@ -18,6 +18,7 @@ import type {
 } from '@papazilla/nutrition-engine';
 import type { StoredPet } from './petsStore.js';
 import {
+  deriveSeason,
   mapExpectedAdultSize,
   mapGoal,
   mapLifeStage,
@@ -38,26 +39,21 @@ export interface RecipeChoices {
   predominantProtein: PredominantProtein;
 }
 
-/**
- * `season` não é coletado em lugar nenhum hoje (gap documentado em
- * `auditoria-calculadora-original-vs-app.md`); fixado em "mild" (sem ajuste),
- * igual ao meio da faixa da calculadora original.
- */
-const SEASON_DEFAULT = 'mild' as const;
+const USES_IDEAL_WEIGHT_GOALS = new Set(['Emagrecer', 'Ganhar peso']);
 
 export function buildDailyPlanInput(pet: StoredPet, choices: RecipeChoices): DailyPlanInput {
   const isPuppy = pet.lifeStage === 'Filhote';
   return {
     currentWeightKg: parseWeightKg(pet.weight) ?? 0,
     goal: mapGoal(pet.goal),
-    idealWeightKg: pet.goal === 'Emagrecer' ? parseWeightKg(pet.idealWeight) : undefined,
+    idealWeightKg: USES_IDEAL_WEIGHT_GOALS.has(pet.goal) ? parseWeightKg(pet.idealWeight) : undefined,
     lifeStage: mapLifeStage(pet),
     puppyAgeBand: isPuppy ? mapPuppyAgeBand(pet) : undefined,
     expectedAdultSize: isPuppy ? mapExpectedAdultSize(pet) : undefined,
     weightTendency: mapWeightTendency(pet),
     neutered: pet.neutered === 'Sim',
     senior: pet.senior === 'Sim',
-    season: SEASON_DEFAULT,
+    season: deriveSeason(pet),
     formulation: choices.formulation,
     supplement: choices.supplement,
     predominantProtein: choices.predominantProtein,

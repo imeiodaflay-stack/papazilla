@@ -19,7 +19,7 @@ describe('calculateDailyPlan — adulto padrão', () => {
 
   it('reporta a versão do motor', () => {
     expect(plan.engineVersion).toBe(ENGINE_VERSION);
-    expect(ENGINE_VERSION).toBe('1.0.0');
+    expect(ENGINE_VERSION).toBe('1.1.0');
   });
 
   it('12 kg adulto normal => 4,5% e 540 g/dia', () => {
@@ -83,6 +83,32 @@ describe('calculateDailyPlan — objetivo emagrecer', () => {
     // óleos usam o peso atual (14 kg)
     expect(plan.vegetableOil.dose).toBe('1 colher de sobremesa, 1x ao dia');
     expect(plan.fishOil.dose).toBe('1 cápsula de 1g, diária ou 3x/semana');
+  });
+});
+
+describe('calculateDailyPlan — objetivo ganhar peso', () => {
+  it('sem peso meta => inválido com IDEAL_WEIGHT_REQUIRED', () => {
+    const plan = calculateDailyPlan({ ...base, goal: 'gain' });
+    expect(plan.valid).toBe(false);
+    expect(plan.validationErrors).toEqual(['IDEAL_WEIGHT_REQUIRED']);
+  });
+
+  it('usa o peso meta (maior que o atual) na comida e o peso atual nos óleos', () => {
+    const plan = calculateDailyPlan({
+      ...base,
+      goal: 'gain',
+      currentWeightKg: 10,
+      idealWeightKg: 14,
+    });
+    expect(plan.valid).toBe(true);
+    expect(plan.weightUsedKg).toBe(14);
+    // adultRange(14) => [4,5], mid 4.5% => 14 * 0.045 * 1000 = 630
+    expect(plan.percentOfWeight).toBe(4.5);
+    expect(plan.totalGramsPerDay).toBe(630);
+    // mais comida que se usasse o peso atual (630 > 450 = 10*0.045*1000)
+    expect(plan.totalGramsPerDay).toBeGreaterThan(10 * 0.045 * 1000);
+    // óleos usam o peso atual (10 kg)
+    expect(plan.vegetableOil.dose).toBe('1 colher de sobremesa, 1x ao dia');
   });
 });
 

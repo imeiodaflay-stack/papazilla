@@ -113,6 +113,8 @@ export interface StoredPet {
   intoleranceName: string;
   cookingMethod: string;
   recipeFormat: string;
+  /** País onde o cão vive — só usado pra achar o hemisfério e derivar a estação (`engineMapping.ts`) pela data do servidor. */
+  country: string;
   /** "1"/"2"/"3"/"4"/"Quero que o Papazilla recomende" — usado no resultado da receita quando não é a última opção. */
   preferredMeals: string;
   createdAt: string;
@@ -213,6 +215,7 @@ function rowToStoredPet(row: PetRow): StoredPet {
     intoleranceName: snapshot.intoleranceName ?? '',
     cookingMethod: snapshot.cookingMethod ?? '',
     recipeFormat: snapshot.recipeFormat ?? '',
+    country: snapshot.country ?? '',
     preferredMeals: snapshot.preferredMeals ?? '',
     createdAt: row.created_at,
     updatedAt: row.updated_at,

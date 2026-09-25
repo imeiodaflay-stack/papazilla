@@ -9,5 +9,9 @@
  *
  * `1.0.0` = port fiel do motor de `calculadora-an-cozida.html`
  * (metodologia pública da Dra. Sylvia Angélico, cachorroverde.com.br).
+ * `1.1.0` = objetivo "Ganhar peso" passa a usar o peso meta (`idealWeightKg`)
+ * como peso usado no cálculo, mesma alavanca de "Emagrecer" em sentido
+ * oposto — nenhuma tabela/fator mudou, só a condição que decide qual peso
+ * entra na fórmula já existente.
  */
-export const ENGINE_VERSION = '1.0.0';
+export const ENGINE_VERSION = '1.1.0';

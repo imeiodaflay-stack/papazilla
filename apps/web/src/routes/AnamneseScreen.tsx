@@ -124,6 +124,7 @@ function buildEditState(pet: StoredPet): { singles: Singles; inputs: Inputs; mul
   if (pet.lastVet) singles.lastVet = pet.lastVet;
   if (pet.bloodTests) singles.bloodTests = pet.bloodTests;
   if (pet.preferredMeals) singles.preferredMeals = pet.preferredMeals;
+  if (pet.country) singles.country = pet.country;
   // Raça virou dropdown (`BREED_OPTIONS`) — pets com uma raça fora da lista
   // (cadastrados quando o campo era texto livre) caem em "Outra" com o
   // texto original preservado em `breedOther`.
@@ -234,6 +235,65 @@ const BREED_OPTIONS = [
   'Outra',
 ];
 
+/**
+ * País onde o cão vive — usado só pra saber o hemisfério (`COUNTRY_HEMISPHERE`
+ * em `engineMapping.ts`) e derivar a estação do ano pela data do servidor, em
+ * vez de perguntar "qual estação" direto (estranho de responder e desatualiza
+ * sozinho). Lista curta com o público esperado do Papazilla; "Outro" cai em
+ * "sem ajuste sazonal", igual a não responder.
+ */
+const COUNTRY_OPTIONS = [
+  'Brasil',
+  'Portugal',
+  'Argentina',
+  'Chile',
+  'Uruguai',
+  'Paraguai',
+  'Bolívia',
+  'Peru',
+  'Colômbia',
+  'Equador',
+  'Venezuela',
+  'México',
+  'Estados Unidos',
+  'Canadá',
+  'Espanha',
+  'França',
+  'Itália',
+  'Alemanha',
+  'Reino Unido',
+  'Irlanda',
+  'Países Baixos',
+  'Bélgica',
+  'Suíça',
+  'Áustria',
+  'Suécia',
+  'Noruega',
+  'Dinamarca',
+  'Polônia',
+  'Rússia',
+  'Turquia',
+  'Marrocos',
+  'Egito',
+  'Israel',
+  'Emirados Árabes Unidos',
+  'Índia',
+  'China',
+  'Japão',
+  'Coreia do Sul',
+  'Indonésia',
+  'Singapura',
+  'Malásia',
+  'Austrália',
+  'Nova Zelândia',
+  'África do Sul',
+  'Moçambique',
+  'Angola',
+  'Quênia',
+  'Nigéria',
+  'Outro',
+];
+
 const HEALTH_COMPLEMENTS = ['Pancreatite', 'Cálculos ou cristais urinários', 'Doença renal'];
 const DECIMAL_KEYS = ['age', 'weight', 'idealWeight', 'previousWeight', 'currentAmount'];
 
@@ -286,7 +346,7 @@ function isStepComplete(
     }
     case 1:
       if (!singles.goal) return false;
-      if (singles.goal === 'Emagrecer' && !filled(inputs.idealWeight)) return false;
+      if ((singles.goal === 'Emagrecer' || singles.goal === 'Ganhar peso') && !filled(inputs.idealWeight)) return false;
       return true;
     case 2:
       return Boolean(singles.bodyTop && singles.ribs && singles.belly);
@@ -630,6 +690,7 @@ const STEPS: Step[] = [
             </Question>
           </>
         ) : null}
+        <Select id="country" label="Em que país vocês moram?" ctx={ctx} options={COUNTRY_OPTIONS} />
       </>
     ),
   },
@@ -651,10 +712,18 @@ const STEPS: Step[] = [
             'Apoiar uma condição de saúde',
           ]}
         />
-        <ConditionalPanel show={ctx.singles.goal === 'Emagrecer'}>
-          <Field id="idealWeight" label="Qual é o peso ideal do seu cão?" ctx={ctx} placeholder="Ex.: 8,5" suffix="kg" />
+        <ConditionalPanel show={ctx.singles.goal === 'Emagrecer' || ctx.singles.goal === 'Ganhar peso'}>
+          <Field
+            id="idealWeight"
+            label={ctx.singles.goal === 'Ganhar peso' ? 'Qual é o peso-alvo do seu cão?' : 'Qual é o peso ideal do seu cão?'}
+            ctx={ctx}
+            placeholder="Ex.: 8,5"
+            suffix="kg"
+          />
           <p className="profile-question__hint">
-            Essa meta será usada como referência para montar o plano de emagrecimento.
+            {ctx.singles.goal === 'Ganhar peso'
+              ? 'Essa meta será usada como referência para montar o plano de ganho de peso.'
+              : 'Essa meta será usada como referência para montar o plano de emagrecimento.'}
           </p>
         </ConditionalPanel>
       </>
@@ -1254,8 +1323,8 @@ const STEPS: Step[] = [
         .filter(Boolean)
         .join(' · ');
       const goal =
-        ctx.singles.goal === 'Emagrecer' && ctx.inputs.idealWeight
-          ? `Emagrecer · peso ideal ${ctx.inputs.idealWeight} kg`
+        (ctx.singles.goal === 'Emagrecer' || ctx.singles.goal === 'Ganhar peso') && ctx.inputs.idealWeight
+          ? `${ctx.singles.goal} · peso-alvo ${ctx.inputs.idealWeight} kg`
           : ctx.singles.goal;
       return (
         <>
@@ -1465,7 +1534,7 @@ export function AnamneseScreen() {
         age: inputs.age?.trim() || '',
         weight: inputs.weight?.trim() || '',
         goal,
-        idealWeight: goal === 'Emagrecer' ? inputs.idealWeight?.trim() || '' : '',
+        idealWeight: goal === 'Emagrecer' || goal === 'Ganhar peso' ? inputs.idealWeight?.trim() || '' : '',
         bodyTop,
         ribs,
         belly,
@@ -1514,6 +1583,7 @@ export function AnamneseScreen() {
         cookingMethod: singles.cookingMethod ?? '',
         recipeFormat: singles.recipeFormat ?? '',
         preferredMeals: singles.preferredMeals ?? '',
+        country: singles.country ?? '',
       };
 
       if (editingPet) updatePet(editingPet.id, petPatch);

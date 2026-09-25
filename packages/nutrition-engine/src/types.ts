@@ -1,7 +1,13 @@
 /** Grupos de alimento da formulação. */
 export type FoodGroup = 'meat' | 'organs' | 'carb' | 'vegetables';
 
-/** Objetivo da alimentação. Só `lose` muda a matemática (usa o peso ideal). */
+/**
+ * Objetivo da alimentação. `lose` e `gain` mudam a matemática: usam o peso
+ * meta (`idealWeightKg`) em vez do atual — pra menos em `lose`, pra mais em
+ * `gain`, já que a porção é proporcional ao peso usado. `maintain`,
+ * `quality`, `aging` e `health` calculam hoje exatamente como "manter":
+ * nenhum ajuste próprio ainda (ver `auditoria-calculadora-original-vs-app.md`).
+ */
 export type FeedingGoal =
   | 'maintain'
   | 'lose'
