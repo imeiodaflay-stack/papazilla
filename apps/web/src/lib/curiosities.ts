@@ -283,6 +283,82 @@ export const CURIOSITIES: CuriosityItem[] = [
       },
     },
   },
+  {
+    id: 'cooking-method',
+    category: 'preparo',
+    art: 'cool',
+    sourceLabel: 'PREPARO · CACHORRO VERDE',
+    title: 'Vapor, água ou pressão: qual preserva mais nutrientes?',
+    summary: 'O método de cozimento muda quanto de vitamina sobra no prato — vapor preserva mais, pressão perde mais.',
+    readTime: '3 min de leitura',
+    article: {
+      headerEyebrow: 'Método de cozimento',
+      lead: 'Separar os ingredientes certos é só metade da receita — o jeito de cozinhar também muda quanto nutriente chega até o potinho.',
+      fact: {
+        value: 'Vapor',
+        text: 'é o método que a fonte usada na metodologia do Papazilla aponta como o que mais preserva vitaminas e antioxidantes, na comparação com água e panela de pressão.',
+      },
+      sections: [
+        {
+          heading: 'Por que o método muda o resultado',
+          body: 'Vitaminas hidrossolúveis, como as do complexo B e a vitamina C, se dissolvem na água do cozimento e se degradam com calor prolongado. Quanto mais tempo e mais água, maior a perda.',
+        },
+        {
+          heading: 'Cozinhando em água? Guarde o caldo',
+          body: 'Cozinhar em pouca água, numa panela pequena, já reduz a perda. Depois, reintegre o caldo na porção ou sirva um pouco à parte — é ali que boa parte das vitaminas que saíram do alimento foi parar.',
+        },
+        {
+          heading: 'E a panela de pressão?',
+          body: 'A pressão e a temperatura mais altas causam uma perda um pouco maior de vitaminas sensíveis ao calor. Se for usar, controle o tempo mínimo necessário e reaproveite o caldo do mesmo jeito.',
+        },
+      ],
+      scope: 'Este resumo descreve diferenças gerais entre métodos de cozimento doméstico. Nenhum dos três está proibido — o Papazilla já pergunta o método preferido na Anamnese e sugere guardar o caldo no modo de preparo da receita.',
+      source: {
+        label: 'Fonte consultada',
+        name: 'Cachorro Verde — Dra. Sylvia Angélico, CRMV-SP 29943',
+        updated: 'Atualizada em 25 set. 2026 no Papazilla',
+        url: 'https://cachorroverde.com.br/metodos-cozimento/',
+      },
+    },
+  },
+  {
+    id: 'meal-frequency',
+    category: 'nutricao',
+    art: 'portion',
+    sourceLabel: 'NUTRIÇÃO · VCA ANIMAL HOSPITALS',
+    title: 'Quantas refeições por dia, na prática?',
+    summary: 'Filhotes com menos de 4 meses precisam de pelo menos 3 refeições — menos que isso aumenta o risco de hipoglicemia.',
+    readTime: '3 min de leitura',
+    article: {
+      headerEyebrow: 'Frequência de refeições',
+      lead: 'Não existe um número mágico único — a frequência ideal muda com a idade do cão, e é mais crítica quanto menor e mais novo ele é.',
+      fact: {
+        value: '3 refeições',
+        text: 'por dia é o mínimo recomendado para filhotes com menos de 4 meses, segundo a VCA Animal Hospitals — o estômago pequeno não comporta porções grandes de uma vez.',
+      },
+      sections: [
+        {
+          heading: 'Por que filhotes pequenos precisam de mais',
+          body: 'Com o estômago ainda pequeno, um filhote não consegue guardar energia suficiente numa única refeição grande. Passar muito tempo sem comer pode levar à hipoglicemia — queda perigosa do açúcar no sangue.',
+        },
+        {
+          heading: 'Uma referência por idade',
+          body: 'A VCA recomenda pelo menos 3 refeições pequenas por dia até os 4 meses, e pelo menos 2 por dia a partir daí — tanto para cães mais velhos quanto para adultos, desde que a quantidade total do dia esteja certa.',
+        },
+        {
+          heading: 'Raça toy ou miniatura? Redobre a atenção',
+          body: 'Filhotes de raças toy (chihuahua, poodle toy, yorkshire) têm reserva de energia menor ainda e podem precisar de refeições mais frequentes — a VCA cita hipoglicemia como risco real nesse grupo nos primeiros meses de vida.',
+        },
+      ],
+      scope: 'Esta é uma referência geral por idade, não uma prescrição — o veterinário do seu cão pode recomendar algo diferente pela raça, saúde ou rotina dele. No Papazilla, se você marcar 1 refeição por dia pra um filhote na Anamnese, a gente avisa sobre esse risco.',
+      source: {
+        label: 'Fonte consultada',
+        name: 'VCA Animal Hospitals — Nutritional Considerations for Toy and Small Dogs',
+        updated: 'Atualizada em 25 set. 2026 no Papazilla',
+        url: 'https://vcahospitals.com/know-your-pet/nutritional-considerations-for-toy-and-small-dogs',
+      },
+    },
+  },
 ];
 
 export function findCuriosity(id: string): CuriosityItem | undefined {

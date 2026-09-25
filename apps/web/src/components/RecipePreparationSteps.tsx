@@ -80,7 +80,10 @@ export function RecipePreparationSteps({
             <span>6</span>
             <div>
               <strong>Finalize somente na hora de servir</strong>
-              <p>Adicione suplemento, óleos e qualquer dose individual indicada à porção já fria ou morna. Não tempere a receita por conta própria.</p>
+              <p>
+                Adicione suplemento, óleos e qualquer dose individual indicada à porção já fria ou morna. Não aqueça o
+                suplemento (Food Dog ou Nutroplus) nem tempere a receita por conta própria.
+              </p>
             </div>
           </li>
           <li>

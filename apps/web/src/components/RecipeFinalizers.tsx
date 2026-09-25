@@ -32,6 +32,13 @@ export function RecipeFinalizers({ petPlans }: { petPlans: { pet: StoredPet; pla
             ? 'A base é compartilhada; as doses continuam separadas por pet.'
             : `Dose calculada sobre a porção pronta de ${petPlans[0]?.pet.name ?? 'o Monstrinho'}.`}
         </p>
+        <div className="shared-recipe-note">
+          <img src={infoIcon} alt="" />
+          <p>
+            <strong>Não aqueça o suplemento.</strong>Recomendamos adicionar Food Dog e Nutroplus só à porção já fria ou
+            morna, na hora de servir — nunca direto na panela.
+          </p>
+        </div>
         <div className="pet-finalizers">
           {petPlans.map(({ pet, plan }, index) => (
             <details key={pet.id} className="pet-finalizer-card" open={petPlans.length === 1 || index === 0}>
