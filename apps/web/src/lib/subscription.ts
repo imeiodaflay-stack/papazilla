@@ -22,6 +22,13 @@ import { supabase } from './supabase.js';
 
 export const ANNUAL_PRICE = 99.99;
 
+/**
+ * Preço cheio depois do lançamento (Flay, 2026-09-28). Comunicado como
+ * "Preço de lançamento: R$ 99,99 por ano. Depois, R$ 149,99.", nunca como
+ * "de/por", porque esse preço ainda não foi praticado (ver landing).
+ */
+export const FULL_ANNUAL_PRICE = 149.99;
+
 export type SubscriptionStatus = 'none' | 'pending' | 'active' | 'past_due' | 'canceled';
 
 export interface Subscription {

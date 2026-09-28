@@ -7,6 +7,7 @@ import { getActivePet } from '../lib/petsStore.js';
 import { describePet } from '../lib/petLabel.js';
 import {
   ANNUAL_PRICE,
+  FULL_ANNUAL_PRICE,
   createTransparentPayment,
   formatBRL,
   getSubscription,
@@ -198,7 +199,7 @@ export function AssinaturaScreen() {
             </ul>
 
             <section className="paywall-offer">
-              <div className="paywall-offer__price"><strong>{formatBRL(ANNUAL_PRICE)}<small>/ano</small></strong><span className="paywall-offer__hint">Escolha como prefere pagar</span></div>
+              <div className="paywall-offer__price"><span className="paywall-offer__launch">Preço de lançamento</span><strong>{formatBRL(ANNUAL_PRICE)}<small>/ano</small></strong><span className="paywall-offer__hint">{formatBRL(ANNUAL_PRICE / 12)} por mês, pago uma vez por ano</span><span className="paywall-offer__later">Depois, {formatBRL(FULL_ANNUAL_PRICE)} por ano.</span></div>
               <p className="annual-commitment">Um pagamento libera 12 meses de receitas personalizadas para toda a sua matilha.</p>
             </section>
 

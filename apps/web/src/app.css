@@ -3126,6 +3126,16 @@
   color: var(--pz-accent-ink);
   font: 700 0.875rem / 1.3 var(--pz-font-support);
 }
+.paywall-offer__launch {
+  color: var(--pz-accent-ink);
+  font: 800 0.75rem / 1.2 var(--pz-font-support);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.paywall-offer__later {
+  color: var(--pz-ink-label);
+  font: 600 0.8125rem / 1.3 var(--pz-font-support);
+}
 
 .annual-commitment {
   margin: 0 0.9rem 0.85rem;
