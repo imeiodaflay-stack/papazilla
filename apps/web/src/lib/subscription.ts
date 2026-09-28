@@ -29,6 +29,9 @@ export const ANNUAL_PRICE = 99.99;
  */
 export const FULL_ANNUAL_PRICE = 149.99;
 
+/** Fim da promoção de lançamento (Flay, 2026-09-28). Em 01/11 trocar ANNUAL_PRICE aqui e em api/payment-create.ts. */
+export const LAUNCH_PRICE_UNTIL = '31/10';
+
 export type SubscriptionStatus = 'none' | 'pending' | 'active' | 'past_due' | 'canceled';
 
 export interface Subscription {
