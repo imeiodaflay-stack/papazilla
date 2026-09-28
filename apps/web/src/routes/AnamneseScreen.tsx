@@ -177,6 +177,7 @@ const BREED_OPTIONS = [
   'Beagle',
   'Bichon Frisé',
   'Border Collie',
+  'Boston Terrier',
   'Boxer',
   'Braco Alemão',
   'Buldogue Campeiro',
