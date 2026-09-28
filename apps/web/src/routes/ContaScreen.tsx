@@ -103,7 +103,7 @@ export function ContaScreen() {
     toast('Você saiu da conta.');
     window.setTimeout(() => {
       setAuthenticated(false);
-      navigate('/entrar', { replace: true });
+      navigate('/signup', { replace: true });
     }, 700);
   }
 

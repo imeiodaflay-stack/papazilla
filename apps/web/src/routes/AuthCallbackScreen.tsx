@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { hasSeenOnboarding, initAuth, setAuthenticated } from '../lib/session.js';
+import { initAuth, setAuthenticated } from '../lib/session.js';
 import { loadPetsForOwner } from '../lib/petsStore.js';
 import { supabase } from '../lib/supabase.js';
 
@@ -18,7 +18,7 @@ export function AuthCallbackScreen() {
 
   useEffect(() => {
     if (!supabase) {
-      navigate('/entrar', { replace: true });
+      navigate('/signup', { replace: true });
       return;
     }
 
@@ -37,7 +37,8 @@ export function AuthCallbackScreen() {
       // usuário com pets em outro aparelho cairia num /zilla vazio até algo
       // (que hoje não existe) forçar uma nova leitura de listPets().
       await loadPetsForOwner(userId);
-      navigate(hasSeenOnboarding() ? '/zilla' : '/onboarding', { replace: true });
+      // O splash (/welcome) decide entre /onboarding (primeiro acesso) e /zilla.
+      navigate('/welcome', { replace: true });
     }
 
     void initAuth(); // garante que o listener que sincroniza o perfil (session.ts) já está armado
@@ -62,7 +63,7 @@ export function AuthCallbackScreen() {
         <button
           type="button"
           className="pz-button pz-button--primary"
-          onClick={() => navigate('/entrar', { replace: true })}
+          onClick={() => navigate('/signup', { replace: true })}
         >
           Voltar para o login
         </button>

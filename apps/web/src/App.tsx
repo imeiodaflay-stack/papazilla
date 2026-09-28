@@ -46,8 +46,11 @@ export const router = createBrowserRouter([
   {
     element: <RouteScrollReset />,
     children: [
-  { path: '/', element: <SplashScreen /> },
-  { path: '/entrar', element: <AuthScreen /> },
+  // `/` vai receber a landing (site). Até ela existir, leva para o splash.
+  { path: '/', element: <Navigate to="/welcome" replace /> },
+  { path: '/welcome', element: <SplashScreen /> },
+  { path: '/signup', element: <AuthScreen /> },
+  { path: '/entrar', element: <Navigate to="/signup" replace /> },
   { path: '/auth/callback', element: <AuthCallbackScreen /> },
   { path: '/onboarding', element: <OnboardingScreen /> },
   { path: '/anamnese', element: <AnamneseScreen /> },

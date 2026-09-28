@@ -41,7 +41,7 @@ export function AuthScreen() {
 
   function finishAuth() {
     setAuthenticated(true);
-    navigate('/onboarding', { replace: true });
+    navigate('/welcome', { replace: true });
   }
 
   function loginWithGoogle() {

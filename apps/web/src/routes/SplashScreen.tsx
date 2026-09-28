@@ -8,7 +8,8 @@ import { hasSeenOnboarding, initAuth, isAuthenticated } from '../lib/session.js'
  * tagline entrando em sequência (splash-rise), loader coral pulsante, e auto-avanço
  * após 1350 ms. Alternativa estática completa para `prefers-reduced-motion`.
  *
- * Fluxo (arquitetura-tecnica.md): Splash → Entrar/criar conta → Onboarding → Papá.
+ * Fluxo (2026-09-28): site `/` → CTA `/signup` → login → `/welcome` (este splash) →
+ * `/onboarding` no primeiro acesso → `/zilla` sempre depois.
  * `initAuth()` resolve a sessão real do Supabase (quando configurado) antes de
  * decidir o destino, pra um usuário já logado não cair de volta em /entrar.
  */
@@ -21,7 +22,7 @@ export function SplashScreen() {
       await initAuth();
       if (cancelled) return;
       const dest = !isAuthenticated()
-        ? '/entrar'
+        ? '/signup'
         : hasSeenOnboarding()
           ? '/zilla'
           : '/onboarding';

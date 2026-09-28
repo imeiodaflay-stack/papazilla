@@ -39,7 +39,7 @@ export function AccountDataScreen() {
     try {
       await deleteAccount();
       setAuthenticated(false);
-      navigate('/entrar', { replace: true });
+      navigate('/signup', { replace: true });
     } catch (error) {
       toast(error instanceof Error ? error.message : 'Não foi possível excluir a conta.');
       setBusy(false);
