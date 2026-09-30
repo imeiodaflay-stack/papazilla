@@ -1587,8 +1587,9 @@ export function AnamneseScreen() {
         country: singles.country ?? '',
       };
 
+      let createdPetId: string | null = null;
       if (editingPet) updatePet(editingPet.id, petPatch);
-      else addPet(petPatch);
+      else createdPetId = addPet(petPatch).id;
 
       setSavingPet(true);
       try {
@@ -1614,6 +1615,7 @@ export function AnamneseScreen() {
         navigate('/sucesso', {
           replace: true,
           state: {
+            petId: createdPetId,
             name,
             sex,
             weight: inputs.weight?.trim() || '',

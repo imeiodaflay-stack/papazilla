@@ -32,12 +32,15 @@ export function RecipeResultCard({
   formulation,
   days,
   format,
+  title,
 }: {
   recipe: Recipe;
   petPlans: { pet: StoredPet; plan: DailyPlan }[];
   formulation: FormulationId;
   days: number;
   format: string;
+  /** Título mostrado na imagem de compartilhamento. */
+  title?: string;
 }) {
   const [sharingImage, setSharingImage] = useState(false);
   const [shareImageError, setShareImageError] = useState<string | null>(null);
@@ -46,7 +49,7 @@ export function RecipeResultCard({
     setSharingImage(true);
     setShareImageError(null);
     try {
-      await shareRecipeStoryImage({ recipe, petPlans, formulation, format });
+      await shareRecipeStoryImage({ recipe, petPlans, formulation, format, title });
     } catch {
       setShareImageError('Não foi possível gerar a imagem agora. Tente de novo.');
     } finally {

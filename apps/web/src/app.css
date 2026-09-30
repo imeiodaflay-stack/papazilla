@@ -6075,3 +6075,10 @@
   font-size: 0.875rem;
   line-height: 1.45;
 }
+
+.success-view__error {
+  margin: 0;
+  color: var(--pz-danger-ink, #b3412a);
+  font-size: 0.875rem;
+  text-align: center;
+}

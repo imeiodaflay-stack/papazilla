@@ -21,6 +21,7 @@ import {
   formatGrams,
   formulationSummary,
   mealsCount,
+  recipeTitle,
   supplementReference,
 } from '../lib/recipeDisplay.js';
 import { IngredientPicker } from '../components/IngredientPicker.js';
@@ -553,7 +554,14 @@ export function ReceitaScreen() {
         ) : null}
 
         {isResultStep && recipe ? (
-          <RecipeResultCard recipe={recipe} petPlans={petPlans} formulation={formulation} days={days} format={format} />
+          <RecipeResultCard
+            recipe={recipe}
+            petPlans={petPlans}
+            formulation={formulation}
+            days={days}
+            format={format}
+            title={recipeTitle({ proteins: [...proteins], carbs: [...carbs] })}
+          />
         ) : null}
       </div>
 

@@ -1,7 +1,9 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import zillaIcon from '../assets/icons/zilla.png';
 import { describePet } from '../lib/petLabel.js';
+import { getPet } from '../lib/petsStore.js';
+import { sharePetStoryImage } from '../lib/petStoryImage.js';
 
 /**
  * Cadastro concluído — fiel à tela "success" de `papazilla-prototype`.
@@ -15,6 +17,7 @@ import { describePet } from '../lib/petLabel.js';
  * engajamento do cadastro, antes de pedir pra assinar.
  */
 interface SuccessState {
+  petId?: string | null;
   name?: string;
   sex?: string;
   weight?: string;
@@ -58,6 +61,22 @@ export function SucessoScreen() {
   const state = (location.state as SuccessState | null) ?? {};
   const { isFemale, noun, article, displayName } = describePet(state);
   const confetti = useMemo(() => buildConfetti(18), []);
+  const pet = state.petId ? getPet(state.petId) : undefined;
+  const [sharing, setSharing] = useState(false);
+  const [shareError, setShareError] = useState<string | null>(null);
+
+  async function shareProfile() {
+    if (!pet || sharing) return;
+    setSharing(true);
+    setShareError(null);
+    try {
+      await sharePetStoryImage(pet);
+    } catch {
+      setShareError('Não foi possível gerar a imagem agora. Tente de novo.');
+    } finally {
+      setSharing(false);
+    }
+  }
 
   function goEat() {
     navigate('/beneficios', { replace: true });
@@ -165,6 +184,12 @@ export function SucessoScreen() {
         <button type="button" className="pz-button pz-button--primary wide" onClick={goEat}>
           Vamos papá!
         </button>
+        {pet ? (
+          <button type="button" className="pz-button pz-button--outline wide" onClick={() => { void shareProfile(); }} disabled={sharing}>
+            {sharing ? 'Gerando imagem…' : `Compartilhar o perfil ${describePet(pet).preposition} ${pet.name || noun}`}
+          </button>
+        ) : null}
+        {shareError ? <p className="success-view__error" role="status">{shareError}</p> : null}
         <button type="button" className="pz-button pz-button--text" onClick={addAnother}>
           Cadastrar outro Monstrinho
         </button>

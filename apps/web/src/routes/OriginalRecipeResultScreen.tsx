@@ -74,7 +74,7 @@ export function OriginalRecipeResultScreen() {
     if (!recipe || sharing) return;
     setSharing(true);
     try {
-      await shareRecipeStoryImage({ recipe, petPlans: plans, formulation: planChoices.formulation, format: 'Os dois' });
+      await shareRecipeStoryImage({ recipe, petPlans: plans, formulation: planChoices.formulation, format: 'Os dois', title: original?.title });
     } catch {
       toast('Não foi possível gerar a imagem agora. Tente de novo.');
     } finally {

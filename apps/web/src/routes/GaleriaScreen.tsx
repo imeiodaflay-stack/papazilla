@@ -31,7 +31,7 @@ export function GaleriaScreen() {
 
       <main className="app-view__main">
         {photos.length === 0 ? (
-          <section className="gallery-empty">
+          <section className="collection-empty">
             <span><img src={galeriaIcon} alt="" /></span>
             <h2>Sua galeria está começando</h2>
             <p>As fotos dos preparos dos seus Monstrinhos vão aparecer aqui.</p>
