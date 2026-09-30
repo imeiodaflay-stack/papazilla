@@ -98,7 +98,7 @@ export const ORIGINAL_RECIPES: OriginalRecipeSummary[] = [
     about: ['Gelatina de caldo de pé de galinha com uma pitada de cúrcuma, que dá a cor dourada.'],
   },
   {
-    slug: 'chips-de-banana', title: 'Chips de Banana', subtitle: 'Pronto rapidinho na air-fryer', likes: 53, image: chipsImage, kind: 'treat',
+    slug: 'chips-de-banana', title: 'Chips de Banana', subtitle: 'Mais natural impossível', likes: 53, image: chipsImage, kind: 'treat',
     treat: TREAT_FORMULAS['chips-de-banana'],
     about: ['Banana desidratada, crocante ou borrachuda conforme o tempo. Um ingrediente só.'],
   },
