@@ -6,6 +6,7 @@ import infoIcon from '../assets/icons/info.png';
 import { RecipePetSelector } from '../components/RecipePetSelector.js';
 import { getActivePet, listPets } from '../lib/petsStore.js';
 import { findOriginalRecipe } from '../lib/originalRecipes.js';
+import { treatDailyMax } from '../lib/originalTreats.js';
 import { buildPetPlan } from '../lib/recipeEngine.js';
 import { formatGrams, mealsCount } from '../lib/recipeDisplay.js';
 import { getSubscription, hasActiveAccess } from '../lib/subscription.js';
@@ -55,7 +56,7 @@ export function OriginalRecipeConfigScreen() {
     pet,
     detail: `${pet.weight ? `${pet.weight} kg · ` : ''}${pet.goal || (pet.lifeStage === 'Filhote' ? 'Filhote' : 'Adulto')}`,
     amount: isTreat
-      ? `até ${formatGrams(plan.treatsGramsPerDay.max)} por dia`
+      ? `até ${formatGrams(treatDailyMax(plan, original.treat))} por dia`
       : `${formatGrams(plan.totalGramsPerDay)} por dia · ${mealOverrides[pet.id] ?? mealsCount(plan, pet)} refeições`,
   }));
 
@@ -161,7 +162,7 @@ export function OriginalRecipeConfigScreen() {
               return (
                 <div key={pet.id}>
                   <img src={pet.photoPath || receitaIcon} alt={pet.photoPath ? `Foto de ${pet.name}` : ''} />
-                  <span><strong>{pet.name}</strong><small>{isTreat ? `até ${formatGrams(plan.treatsGramsPerDay.max)} por dia` : `${count} ${count === 1 ? 'refeição' : 'refeições'} por dia`}</small></span>
+                  <span><strong>{pet.name}</strong><small>{isTreat ? `até ${formatGrams(treatDailyMax(plan, original.treat))} por dia` : `${count} ${count === 1 ? 'refeição' : 'refeições'} por dia`}</small></span>
                   {!isTreat ? <button type="button" onClick={() => cycleMeals(pet.id, count)}>Alterar</button> : null}
                 </div>
               );

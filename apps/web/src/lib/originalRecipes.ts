@@ -5,6 +5,7 @@ import baratoImage from '../assets/originals/barato-nutritivo.jpeg';
 import frozenImage from '../assets/originals/frozen-antioxidante.jpeg';
 import gelatinaImage from '../assets/originals/gelatina-dourada.jpeg';
 import chipsImage from '../assets/originals/chips-banana.jpeg';
+import { TREAT_FORMULAS, type TreatFormula } from './originalTreats.js';
 
 export type OriginalKind = 'meal' | 'treat';
 
@@ -31,12 +32,20 @@ export interface OriginalRecipeSummary {
   likes: number;
   image: string;
   kind: OriginalKind;
-  /** `undefined` = fórmula ainda em validação (ver escopo-mvp.md / handover 2026-09-23). */
+  /** Fórmula das Originals "meal" (motor AN cozida). */
   formula?: OriginalFormula;
+  /** Receita dos petiscos (`originalTreats.ts`). */
+  treat?: TreatFormula;
+  /** Texto de "Mais sobre esta receita". */
+  about: string[];
 }
 
 export const ORIGINAL_RECIPES: OriginalRecipeSummary[] = [
-  { slug: 'snack-pa-pum', title: 'Snack Pá-pum', subtitle: 'Proteico e com 2 ingredientes', likes: 38, image: snackImage, kind: 'treat' },
+  {
+    slug: 'snack-pa-pum', title: 'Snack Pá-pum', subtitle: 'Proteico e com 2 ingredientes', likes: 38, image: snackImage, kind: 'treat',
+    treat: TREAT_FORMULAS['snack-pa-pum'],
+    about: ['Petisco de frango e ovo, bom para adestramento: as gotinhas são pequenas e fáceis de dosar.'],
+  },
   {
     slug: 'basico-brasileiro',
     title: 'Básico Brasileiro',
@@ -52,6 +61,10 @@ export const ORIGINAL_RECIPES: OriginalRecipeSummary[] = [
       formulation: 'padrao',
       selection: { proteins: ['frango_peito'], organs: [], carbs: ['arroz_branco'], vegetables: ['cenoura'] },
     },
+    about: [
+      'Frango, arroz e cenoura: a combinação mais simples e fácil de achar em qualquer mercado.',
+      'Boa porta de entrada para quem está começando na comida natural cozida.',
+    ],
   },
   {
     slug: 'barato-nutritivo',
@@ -69,10 +82,26 @@ export const ORIGINAL_RECIPES: OriginalRecipeSummary[] = [
       formulation: 'padrao',
       selection: { proteins: ['frango_coxa'], organs: [], carbs: ['mandioca'], vegetables: ['chuchu'] },
     },
+    about: [
+      'Coxa e sobrecoxa de frango, mandioca e chuchu: ingredientes que costumam custar menos e rendem bem.',
+      'Tire a pele e os ossos do frango antes de cozinhar.',
+    ],
   },
-  { slug: 'frozen-antioxidante', title: 'Frozen Antioxidante', subtitle: 'Geladinho funcional', likes: 91, image: frozenImage, kind: 'treat' },
-  { slug: 'gelatina-dourada', title: 'Gelatina Dourada', subtitle: 'Com poder anti-inflamatório', likes: 46, image: gelatinaImage, kind: 'treat' },
-  { slug: 'chips-de-banana', title: 'Chips de Banana', subtitle: 'Pronto rapidinho na air-fryer', likes: 53, image: chipsImage, kind: 'treat' },
+  {
+    slug: 'frozen-antioxidante', title: 'Frozen Antioxidante', subtitle: 'Geladinho funcional', likes: 91, image: frozenImage, kind: 'treat',
+    treat: TREAT_FORMULAS['frozen-antioxidante'],
+    about: ['Geladinho de iogurte com frutas vermelhas, bom para dias quentes.'],
+  },
+  {
+    slug: 'gelatina-dourada', title: 'Gelatina Dourada', subtitle: 'Com poder anti-inflamatório', likes: 46, image: gelatinaImage, kind: 'treat',
+    treat: TREAT_FORMULAS['gelatina-dourada'],
+    about: ['Gelatina de caldo de pé de galinha com uma pitada de cúrcuma, que dá a cor dourada.'],
+  },
+  {
+    slug: 'chips-de-banana', title: 'Chips de Banana', subtitle: 'Pronto rapidinho na air-fryer', likes: 53, image: chipsImage, kind: 'treat',
+    treat: TREAT_FORMULAS['chips-de-banana'],
+    about: ['Banana desidratada, crocante ou borrachuda conforme o tempo. Um ingrediente só.'],
+  },
 ];
 
 export function findOriginalRecipe(slug: string | undefined): OriginalRecipeSummary | undefined {
