@@ -93,7 +93,7 @@ export const ORIGINAL_RECIPES: OriginalRecipeSummary[] = [
     about: ['Geladinho de iogurte com frutas vermelhas, bom para dias quentes.'],
   },
   {
-    slug: 'gelatina-dourada', title: 'Gelatina Dourada', subtitle: 'Com poder anti-inflamatório', likes: 46, image: gelatinaImage, kind: 'treat',
+    slug: 'gelatina-dourada', title: 'Gelatina Dourada', subtitle: 'Caldinho que vira petisco', likes: 46, image: gelatinaImage, kind: 'treat',
     treat: TREAT_FORMULAS['gelatina-dourada'],
     about: ['Gelatina de caldo de pé de galinha com uma pitada de cúrcuma, que dá a cor dourada.'],
   },
