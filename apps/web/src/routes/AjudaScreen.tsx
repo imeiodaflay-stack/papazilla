@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import mensagemIcon from '../assets/icons/mensagem.png';
 import { useScrollAwareFooter } from '../hooks/useScrollAwareFooter.js';
+import { goBackOr } from '../lib/navigation.js';
 
 /**
  * Central de Ajuda — FAQ curta + canal de contato, conforme `escopo-mvp.md`
@@ -57,7 +58,7 @@ export function AjudaScreen() {
           type="button"
           className="flow-header__back"
           aria-label="Voltar para Minha conta"
-          onClick={() => navigate('/conta')}
+          onClick={() => goBackOr(navigate, '/conta')}
         >
           ←
         </button>

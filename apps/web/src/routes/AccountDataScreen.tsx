@@ -4,6 +4,7 @@ import excluirIcon from '../assets/icons/excluir.png';
 import infoIcon from '../assets/icons/info.png';
 import { deleteAccount, downloadAccountData } from '../lib/accountData.js';
 import { setAuthenticated } from '../lib/session.js';
+import { goBackOr } from '../lib/navigation.js';
 
 /**
  * Dados da conta — sem tela equivalente no protótipo (lá era um toast "as
@@ -49,7 +50,7 @@ export function AccountDataScreen() {
   return (
     <div className="flow-screen">
       <header className="flow-header">
-        <button type="button" className="flow-header__back" aria-label="Voltar para Minha conta" onClick={() => navigate('/conta')}>
+        <button type="button" className="flow-header__back" aria-label="Voltar para Minha conta" onClick={() => goBackOr(navigate, '/conta')}>
           ←
         </button>
         <div>

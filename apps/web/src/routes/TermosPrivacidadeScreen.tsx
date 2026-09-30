@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { goBackOr } from '../lib/navigation.js';
 
 /**
  * Termos e privacidade — minuta redigida a partir do que o produto
@@ -110,7 +111,7 @@ export function TermosPrivacidadeScreen() {
   return (
     <div className="flow-screen">
       <header className="flow-header">
-        <button type="button" className="flow-header__back" aria-label="Voltar para Minha conta" onClick={() => navigate('/conta')}>
+        <button type="button" className="flow-header__back" aria-label="Voltar para Minha conta" onClick={() => goBackOr(navigate, '/conta')}>
           ←
         </button>
         <div>

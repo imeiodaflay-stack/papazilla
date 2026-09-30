@@ -15,6 +15,7 @@ import { ANNUAL_PRICE, formatBRL, getSubscription, hasActiveAccess } from '../li
 import { setAuthenticated } from '../lib/session.js';
 import { getUserProfile, setUserAvatar } from '../lib/userProfile.js';
 import { fileToDataUrl, PhotoUploadError, uploadPhoto } from '../lib/photoUpload.js';
+import { goBackOr } from '../lib/navigation.js';
 
 /**
  * Minha conta — fiel à tela "user-profile" de `papazilla-prototype`: identidade,
@@ -110,7 +111,7 @@ export function ContaScreen() {
   return (
     <div className="user-profile-view">
       <header className="user-profile-header">
-        <button type="button" className="flow-header__back" aria-label="Voltar" onClick={() => navigate(-1)}>
+        <button type="button" className="flow-header__back" aria-label="Voltar" onClick={() => goBackOr(navigate, '/zilla')}>
           ←
         </button>
         <div>

@@ -4,6 +4,7 @@ import perfilIcon from '../assets/icons/perfil.png';
 import { getUserProfile, setUserProfile } from '../lib/userProfile.js';
 import { fileToDataUrl, PhotoUploadError, uploadPhoto } from '../lib/photoUpload.js';
 import { useScrollAwareFooter } from '../hooks/useScrollAwareFooter.js';
+import { goBackOr } from '../lib/navigation.js';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -56,7 +57,7 @@ export function UserProfileEditScreen() {
   return (
     <div className="flow-screen">
       <header className="flow-header">
-        <button type="button" className="flow-header__back" aria-label="Voltar para Minha conta" onClick={() => navigate('/conta')}>
+        <button type="button" className="flow-header__back" aria-label="Voltar para Minha conta" onClick={() => goBackOr(navigate, '/conta')}>
           ←
         </button>
         <div>
@@ -119,7 +120,7 @@ export function UserProfileEditScreen() {
       </div>
 
       <footer className={`flow-footer scroll-aware-footer${dividerVisible ? ' is-divider-visible' : ''}`}>
-        <button type="button" className="pz-button pz-button--outline" onClick={() => navigate('/conta')}>
+        <button type="button" className="pz-button pz-button--outline" onClick={() => goBackOr(navigate, '/conta')}>
           Cancelar
         </button>
         <button type="button" className="pz-button pz-button--primary" disabled={saveDisabled} onClick={save}>

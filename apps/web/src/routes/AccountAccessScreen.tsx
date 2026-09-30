@@ -3,6 +3,7 @@ import sucessoIcon from '../assets/icons/sucesso.png';
 import infoIcon from '../assets/icons/info.png';
 import { getUserProfile } from '../lib/userProfile.js';
 import { getAuthProvider } from '../lib/session.js';
+import { goBackOr } from '../lib/navigation.js';
 
 const PROVIDER_LABEL: Record<string, string> = {
   google: 'Google',
@@ -27,7 +28,7 @@ export function AccountAccessScreen() {
   return (
     <div className="flow-screen">
       <header className="flow-header">
-        <button type="button" className="flow-header__back" aria-label="Voltar para Minha conta" onClick={() => navigate('/conta')}>
+        <button type="button" className="flow-header__back" aria-label="Voltar para Minha conta" onClick={() => goBackOr(navigate, '/conta')}>
           ←
         </button>
         <div>
