@@ -1,5 +1,7 @@
 # Papazilla
 
+> Manutenção dos Termos de Uso e da Política de Privacidade: consulte [LEGAL.md](LEGAL.md). As versões públicas do site e a tela autenticada do app devem ser atualizadas juntas.
+
 Alimentação natural cozida para cães. Cadastre seus cães e prepare uma receita
 completa, confiável e prática para eles.
 

@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter, Navigate, redirectDocument } from 'react-router-dom';
 import { AppShell } from './components/AppShell.js';
 import { SplashScreen } from './routes/SplashScreen.js';
 import { AuthScreen } from './routes/AuthScreen.js';
@@ -46,8 +46,8 @@ export const router = createBrowserRouter([
   {
     element: <RouteScrollReset />,
     children: [
-  // `/` vai receber a landing (site). Até ela existir, leva para o splash.
-  { path: '/', element: <Navigate to="/welcome" replace /> },
+  // A landing é servida como HTML estático; navegação interna também a abre.
+  { path: '/', loader: ({ request }) => redirectDocument('/home.html' + new URL(request.url).search) },
   { path: '/welcome', element: <SplashScreen /> },
   { path: '/signup', element: <AuthScreen /> },
   { path: '/entrar', element: <Navigate to="/signup" replace /> },
