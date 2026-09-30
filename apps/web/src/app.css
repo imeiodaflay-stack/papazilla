@@ -628,17 +628,10 @@
   border-color: #211713;
   color: #fff;
 }
-.apple-mark {
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 1.25rem !important;
-}
-.google-mark {
-  font-family: Arial, sans-serif;
-  font-weight: 800;
-  background: conic-gradient(from -45deg, #4285f4 0 25%, #34a853 0 50%, #fbbc05 0 75%, #ea4335 0);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
+.social-mark img {
+  display: block;
+  width: 20px;
+  height: 20px;
 }
 .social-button--email > span {
   color: var(--pz-accent-ink);

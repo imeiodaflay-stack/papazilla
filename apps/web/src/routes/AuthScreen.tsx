@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import lockup from '../assets/papazilla-lockup.png';
+import appleIcon from '../assets/icons/apple.svg';
+import googleIcon from '../assets/icons/google.svg';
 import mailIcon from '../assets/icons/mensagem.png';
 import helloIcon from '../assets/icons/perfil.png';
 import { setAuthenticated } from '../lib/session.js';
@@ -19,7 +21,6 @@ import { supabase } from '../lib/supabase.js';
  */
 type AuthMode = 'options' | 'email' | 'code' | 'name';
 
-const APPLE_GLYPH = '';
 
 export function AuthScreen() {
   const navigate = useNavigate();
@@ -95,7 +96,7 @@ export function AuthScreen() {
                   </>
                 ) : (
                   <>
-                    <span className="google-mark">G</span>
+                    <span className="social-mark" aria-hidden="true"><img src={googleIcon} alt="" width="20" height="20" /></span>
                     Continuar com Google
                   </>
                 )}
@@ -105,7 +106,7 @@ export function AuthScreen() {
                 className="social-button social-button--apple"
                 onClick={() => setMode('name')}
               >
-                <span className="apple-mark">{APPLE_GLYPH}</span>
+                <span className="social-mark" aria-hidden="true"><img src={appleIcon} alt="" width="20" height="20" /></span>
                 Continuar com Apple
               </button>
               <div className="auth-divider">
