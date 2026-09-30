@@ -13,6 +13,7 @@ import { AppNav } from '../components/AppNav.js';
 import { AccountAvatarLink } from '../components/AccountAvatarLink.js';
 import { deletePet, getPet, listPets, setActivePetId } from '../lib/petsStore.js';
 import { describePet, neuteredLabel } from '../lib/petLabel.js';
+import { sharePetStoryImage } from '../lib/petStoryImage.js';
 
 /**
  * Perfil do pet — fiel à tela "pet-detail" de `papazilla-prototype`: retrato,
@@ -35,6 +36,7 @@ export function PetDetailScreen({ petIdOverride, isSinglePetRoot = false }: PetD
   const toastTimer = useRef<number>();
   const [showMore, setShowMore] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [sharing, setSharing] = useState(false);
 
   const pet = petId ? getPet(petId) : undefined;
   const pets = listPets();
@@ -65,6 +67,18 @@ export function PetDetailScreen({ petIdOverride, isSinglePetRoot = false }: PetD
   function switchPet(id: string) {
     setActivePetId(id);
     navigate(`/zilla/${id}`);
+  }
+
+  async function shareProfile() {
+    if (!pet || sharing) return;
+    setSharing(true);
+    try {
+      await sharePetStoryImage(pet);
+    } catch {
+      toast('Não foi possível gerar a imagem agora. Tente de novo.');
+    } finally {
+      setSharing(false);
+    }
   }
 
   function confirmDelete() {
@@ -137,6 +151,15 @@ export function PetDetailScreen({ petIdOverride, isSinglePetRoot = false }: PetD
               •••
             </button>
           </section>
+
+          <button
+            type="button"
+            className="pz-button pz-button--outline wide pet-share-button"
+            onClick={() => { void shareProfile(); }}
+            disabled={sharing}
+          >
+            {sharing ? 'Gerando imagem…' : `Compartilhar o perfil ${describePet(pet).preposition} ${displayName}`}
+          </button>
 
           {showMore && !confirmingDelete ? (
             <div className="more-menu">
