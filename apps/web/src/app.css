@@ -684,7 +684,8 @@
   font-size: 0.875rem;
   line-height: 1.45;
 }
-.auth-footer button {
+.auth-footer button,
+.auth-footer a {
   padding: 0;
   border: 0;
   background: transparent;

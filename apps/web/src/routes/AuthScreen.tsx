@@ -5,7 +5,9 @@ import appleIcon from '../assets/icons/apple.svg';
 import googleIcon from '../assets/icons/google.svg';
 import mailIcon from '../assets/icons/mensagem.png';
 import helloIcon from '../assets/icons/perfil.png';
-import { setAuthenticated } from '../lib/session.js';
+import { initAuth, setAuthenticated } from '../lib/session.js';
+import { loadPetsForOwner } from '../lib/petsStore.js';
+import { getUserProfile, setUserProfile } from '../lib/userProfile.js';
 import { supabase } from '../lib/supabase.js';
 
 /**
@@ -18,7 +20,8 @@ import { supabase } from '../lib/supabase.js';
  * e volta em `/auth/callback`, que decide o destino. Sem chaves (Fase 0 local
  * sem `.env.local`), cai no fluxo simulado antigo pra continuar navegável.
  * Apple usa o mesmo caminho (`signInWithOAuth` com provider 'apple').
- * E-mail ainda é só o fluxo simulado.
+ * E-mail usa código de 6 dígitos do Supabase (`signInWithOtp` + `verifyOtp`).
+ * O modelo de e-mail "Magic Link" do Supabase precisa conter {{ .Token }}.
  */
 type AuthMode = 'options' | 'email' | 'code' | 'name';
 
@@ -31,6 +34,7 @@ export function AuthScreen() {
   const [name, setName] = useState('');
   const [googleBusy, setGoogleBusy] = useState(false);
   const [appleBusy, setAppleBusy] = useState(false);
+  const [emailBusy, setEmailBusy] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const toastTimer = useRef<number>();
 
@@ -87,6 +91,73 @@ export function AuthScreen() {
         setAppleBusy(false);
         showToast('Não foi possível conectar com a Apple. Tente de novo.');
       });
+  }
+
+  /** Envia (ou reenvia) o código de acesso por e-mail. */
+  async function sendEmailCode(isResend = false) {
+    const address = email.trim().toLowerCase();
+    if (!supabase) {
+      setMode('code');
+      return;
+    }
+    setEmailBusy(true);
+    const { error } = await supabase.auth.signInWithOtp({
+      email: address,
+      options: { shouldCreateUser: true, emailRedirectTo: `${window.location.origin}/auth/callback` },
+    });
+    setEmailBusy(false);
+    if (error) {
+      const tooSoon = error.status === 429 || /seconds|rate/i.test(error.message);
+      showToast(
+        tooSoon
+          ? 'Espere um minutinho antes de pedir outro código.'
+          : 'Não foi possível enviar o código. Confira o e-mail e tente de novo.',
+      );
+      return;
+    }
+    setEmail(address);
+    setCode('');
+    setMode('code');
+    if (isResend) showToast('Enviamos um novo código.');
+  }
+
+  /** Confere o código; se a conta ainda não tem nome, pergunta antes de seguir. */
+  async function verifyEmailCode() {
+    if (!supabase) {
+      setMode('name');
+      return;
+    }
+    setEmailBusy(true);
+    const { data, error } = await supabase.auth.verifyOtp({ email, token: code, type: 'email' });
+    if (error || !data.user) {
+      setEmailBusy(false);
+      showToast('Código inválido ou expirado. Confira ou peça um novo.');
+      return;
+    }
+    await initAuth();
+    setAuthenticated(true);
+    await loadPetsForOwner(data.user.id);
+    setEmailBusy(false);
+    const knownName =
+      (data.user.user_metadata?.full_name as string | undefined) || getUserProfile()?.name || '';
+    if (knownName.trim()) {
+      navigate('/welcome', { replace: true });
+      return;
+    }
+    setMode('name');
+  }
+
+  /** Guarda o nome da conta criada por e-mail e segue para o splash. */
+  async function saveNameAndContinue() {
+    const trimmed = name.trim();
+    if (supabase) {
+      setEmailBusy(true);
+      await supabase.auth.updateUser({ data: { full_name: trimmed } });
+      setEmailBusy(false);
+    }
+    const current = getUserProfile();
+    setUserProfile({ name: trimmed, email: current?.email || email, avatarUrl: current?.avatarUrl });
+    finishAuth();
   }
 
   return (
@@ -190,10 +261,10 @@ export function AuthScreen() {
             <button
               type="button"
               className="pz-button pz-button--primary wide auth-main-action"
-              onClick={() => setMode('code')}
-              disabled={email.trim() === ''}
+              onClick={() => void sendEmailCode()}
+              disabled={emailBusy || !/^\S+@\S+\.\S+$/.test(email.trim())}
             >
-              Enviar código →
+              {emailBusy ? 'Enviando…' : 'Enviar código →'}
             </button>
           </>
         )}
@@ -229,15 +300,16 @@ export function AuthScreen() {
             <button
               type="button"
               className="pz-button pz-button--primary wide auth-main-action"
-              onClick={() => setMode('name')}
-              disabled={code.length < 6}
+              onClick={() => void verifyEmailCode()}
+              disabled={emailBusy || code.length < 6}
             >
-              Confirmar código →
+              {emailBusy ? 'Conferindo…' : 'Confirmar código →'}
             </button>
             <button
               type="button"
               className="pz-button pz-button--text auth-resend"
-              onClick={() => showToast('Um novo código foi enviado.')}
+              onClick={() => void sendEmailCode(true)}
+              disabled={emailBusy}
             >
               Reenviar código
             </button>
@@ -246,9 +318,6 @@ export function AuthScreen() {
 
         {mode === 'name' && (
           <>
-            <button type="button" className="auth-inline-back" onClick={() => setMode('options')}>
-              ← Voltar
-            </button>
             <div className="auth-step-art auth-step-art--hello">
               <img src={helloIcon} alt="" />
             </div>
@@ -264,8 +333,8 @@ export function AuthScreen() {
             <button
               type="button"
               className="pz-button pz-button--primary wide auth-main-action"
-              onClick={finishAuth}
-              disabled={name.trim() === ''}
+              onClick={() => void saveNameAndContinue()}
+              disabled={emailBusy || name.trim() === ''}
             >
               Conhecer o Zilla →
             </button>
@@ -276,16 +345,13 @@ export function AuthScreen() {
       <footer className="auth-footer">
         <p>
           Ao continuar, você concorda com nossos{' '}
-          <button type="button" onClick={() => showToast('Termos de Uso será aberta aqui.')}>
+          <a href="/termos" target="_blank" rel="noopener">
             Termos de Uso
-          </button>{' '}
+          </a>{' '}
           e nossa{' '}
-          <button
-            type="button"
-            onClick={() => showToast('Política de Privacidade será aberta aqui.')}
-          >
+          <a href="/privacidade" target="_blank" rel="noopener">
             Política de Privacidade
-          </button>
+          </a>
           .
         </p>
       </footer>
