@@ -12,7 +12,7 @@ import potinhoIcon from '../assets/icons/potinho.png';
 import erroIcon from '../assets/icons/erro.png';
 import graficoBarrasIcon from '../assets/icons/grafico-barras.png';
 import sucessoIcon from '../assets/icons/sucesso.png';
-import sheetIcon from '../assets/icons/sheet.png';
+import calculatorIcon from '../assets/icons/calculator.webp';
 import graficoPizzaIcon from '../assets/icons/grafico-pizza.png';
 
 export type CuriosityCategory = 'preparo' | 'seguranca' | 'nutricao';
@@ -23,7 +23,7 @@ export const ART_ICON: Record<string, string> = {
   alert: erroIcon,
   body: graficoBarrasIcon,
   clean: sucessoIcon,
-  study: sheetIcon,
+  study: calculatorIcon,
   portion: graficoPizzaIcon,
 };
 

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
-import sheetIcon from '../assets/icons/sheet.png';
+import receitaIcon from '../assets/icons/receita.png';
 import perfilIcon from '../assets/icons/perfil.png';
 import patinhaIcon from '../assets/icons/patinha.png';
 import sucessoIcon from '../assets/icons/sucesso.png';
@@ -62,7 +62,7 @@ export function AnamnesisDetailScreen() {
           <strong>Respostas atuais</strong>
         </div>
         <span className="flow-header__avatar">
-          <img src={sheetIcon} alt="" />
+          <img src={receitaIcon} alt="" />
         </span>
       </header>
 
