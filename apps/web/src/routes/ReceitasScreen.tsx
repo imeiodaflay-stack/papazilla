@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import buscaIcon from '../assets/icons/busca.png';
 import potinhoIcon from '../assets/icons/potinho.png';
+import salvasIcon from '../assets/icons/salvo.png';
 import { AppNav } from '../components/AppNav.js';
 import { listPets } from '../lib/petsStore.js';
 import { listRecipes } from '../lib/recipeRepository.js';
@@ -46,25 +47,27 @@ export function ReceitasScreen() {
           <p className="eyebrow">Sua cozinha</p>
           <h1>Receitas salvas</h1>
         </div>
-        <button
-          type="button"
-          className="recipe-search"
-          aria-label="Buscar receitas"
-          onClick={() => toast('A busca por nome ou ingrediente será aberta aqui.')}
-        >
-          <img src={buscaIcon} alt="" />
-        </button>
+        {recipes.length > 0 ? (
+          <button
+            type="button"
+            className="recipe-search"
+            aria-label="Buscar receitas"
+            onClick={() => toast('A busca por nome ou ingrediente será aberta aqui.')}
+          >
+            <img src={buscaIcon} alt="" />
+          </button>
+        ) : null}
       </header>
 
       <main className="app-view__main">
-        <div className="saved-content">
           {recipes.length === 0 ? (
-            <div className="pz-card">
-              <p>Nenhuma receita salva ainda.</p>
-              <p className="pz-note">Monte uma receita no Papá para ela aparecer aqui.</p>
-            </div>
+            <section className="collection-empty" aria-labelledby="saved-empty-title">
+              <span><img src={salvasIcon} alt="" /></span>
+              <h2 id="saved-empty-title">Nenhuma receita salva ainda</h2>
+              <p>Monte uma receita no Papá para ela aparecer aqui.</p>
+            </section>
           ) : (
-            <>
+            <div className="saved-content">
               {pets.length > 0 ? (
                 <div className="recipe-filters" role="group" aria-label="Filtrar receitas">
                   <button type="button" className={filter === 'all' ? 'is-selected' : undefined} onClick={() => setFilter('all')}>
@@ -142,9 +145,8 @@ export function ReceitasScreen() {
                   );
                 })}
               </div>}
-            </>
+            </div>
           )}
-        </div>
       </main>
 
       <AppNav />
