@@ -22,8 +22,35 @@ import { supabase } from '../lib/supabase.js';
  * Apple usa o mesmo caminho (`signInWithOAuth` com provider 'apple').
  * E-mail usa código de 6 dígitos do Supabase (`signInWithOtp` + `verifyOtp`).
  * O modelo de e-mail "Magic Link" do Supabase precisa conter {{ .Token }}.
+ * Antes de enviar o código, `/api/auth-providers` avisa se o e-mail já tem
+ * conta criada com Google ou Apple (tela 'existing').
  */
-type AuthMode = 'options' | 'email' | 'code' | 'name';
+type AuthMode = 'options' | 'email' | 'existing' | 'code' | 'name';
+type SocialProvider = 'google' | 'apple';
+
+const PROVIDER_LABEL: Record<SocialProvider, string> = { google: 'Google', apple: 'Apple' };
+
+/**
+ * Pergunta ao servidor se o e-mail já tem conta criada com Google ou Apple.
+ * Qualquer falha (rede, rodando local sem as Functions) vira lista vazia e o
+ * login por código segue normalmente.
+ */
+async function socialProvidersFor(address: string): Promise<SocialProvider[]> {
+  try {
+    const res = await fetch('/api/auth-providers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: address }),
+    });
+    if (!res.ok) return [];
+    const body = (await res.json()) as { providers?: unknown };
+    const list = Array.isArray(body.providers) ? body.providers : [];
+    if (list.includes('email')) return [];
+    return list.filter((p): p is SocialProvider => p === 'google' || p === 'apple');
+  } catch {
+    return [];
+  }
+}
 
 
 export function AuthScreen() {
@@ -35,6 +62,7 @@ export function AuthScreen() {
   const [googleBusy, setGoogleBusy] = useState(false);
   const [appleBusy, setAppleBusy] = useState(false);
   const [emailBusy, setEmailBusy] = useState(false);
+  const [existingProviders, setExistingProviders] = useState<SocialProvider[]>([]);
   const [toast, setToast] = useState<string | null>(null);
   const toastTimer = useRef<number>();
 
@@ -94,13 +122,23 @@ export function AuthScreen() {
   }
 
   /** Envia (ou reenvia) o código de acesso por e-mail. */
-  async function sendEmailCode(isResend = false) {
+  async function sendEmailCode(isResend = false, skipProviderCheck = false) {
     const address = email.trim().toLowerCase();
     if (!supabase) {
       setMode('code');
       return;
     }
     setEmailBusy(true);
+    if (!isResend && !skipProviderCheck) {
+      const providers = await socialProvidersFor(address);
+      if (providers.length > 0) {
+        setEmailBusy(false);
+        setEmail(address);
+        setExistingProviders(providers);
+        setMode('existing');
+        return;
+      }
+    }
     const { error } = await supabase.auth.signInWithOtp({
       email: address,
       options: { shouldCreateUser: true, emailRedirectTo: `${window.location.origin}/auth/callback` },
@@ -265,6 +303,60 @@ export function AuthScreen() {
               disabled={emailBusy || !/^\S+@\S+\.\S+$/.test(email.trim())}
             >
               {emailBusy ? 'Enviando…' : 'Enviar código →'}
+            </button>
+          </>
+        )}
+
+        {mode === 'existing' && (
+          <>
+            <button type="button" className="auth-inline-back" onClick={() => setMode('email')}>
+              ← Alterar e-mail
+            </button>
+            <div className="auth-step-art">
+              <span>@</span>
+            </div>
+            <div className="auth-step-copy">
+              <p className="eyebrow">Você já tem conta</p>
+              <h1>
+                Entre com {existingProviders.map((p) => PROVIDER_LABEL[p]).join(' ou ')}
+              </h1>
+              <p>
+                O e-mail <strong>{email}</strong> já está cadastrado no Papazilla com login pelo{' '}
+                {existingProviders.map((p) => PROVIDER_LABEL[p]).join(' ou pela ')}. Entre por lá
+                para encontrar seus Monstrinhos e receitas.
+              </p>
+            </div>
+            <div className="auth-actions">
+              {existingProviders.includes('google') && (
+                <button
+                  type="button"
+                  className="social-button social-button--google"
+                  onClick={loginWithGoogle}
+                  disabled={googleBusy}
+                >
+                  <span className="social-mark" aria-hidden="true"><img src={googleIcon} alt="" width="20" height="20" /></span>
+                  {googleBusy ? 'Conectando com Google…' : 'Continuar com Google'}
+                </button>
+              )}
+              {existingProviders.includes('apple') && (
+                <button
+                  type="button"
+                  className="social-button social-button--apple"
+                  onClick={loginWithApple}
+                  disabled={appleBusy}
+                >
+                  <span className="social-mark" aria-hidden="true"><img src={appleIcon} alt="" width="20" height="20" /></span>
+                  {appleBusy ? 'Conectando com Apple…' : 'Continuar com Apple'}
+                </button>
+              )}
+            </div>
+            <button
+              type="button"
+              className="pz-button pz-button--text auth-resend"
+              onClick={() => void sendEmailCode(false, true)}
+              disabled={emailBusy}
+            >
+              {emailBusy ? 'Enviando…' : 'Prefiro receber um código por e-mail'}
             </button>
           </>
         )}
