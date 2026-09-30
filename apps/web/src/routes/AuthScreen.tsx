@@ -17,7 +17,8 @@ import { supabase } from '../lib/supabase.js';
  * chaves configuradas (`lib/supabase.ts`): o navegador sai pra tela do Google
  * e volta em `/auth/callback`, que decide o destino. Sem chaves (Fase 0 local
  * sem `.env.local`), cai no fluxo simulado antigo pra continuar navegável.
- * Apple e e-mail ainda são só o fluxo simulado — entram numa próxima fatia.
+ * Apple usa o mesmo caminho (`signInWithOAuth` com provider 'apple').
+ * E-mail ainda é só o fluxo simulado.
  */
 type AuthMode = 'options' | 'email' | 'code' | 'name';
 
@@ -29,6 +30,7 @@ export function AuthScreen() {
   const [code, setCode] = useState('');
   const [name, setName] = useState('');
   const [googleBusy, setGoogleBusy] = useState(false);
+  const [appleBusy, setAppleBusy] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const toastTimer = useRef<number>();
 
@@ -60,6 +62,30 @@ export function AuthScreen() {
         if (!error) return; // sucesso: o navegador já está saindo para o Google
         setGoogleBusy(false);
         showToast('Não foi possível conectar com o Google. Tente de novo.');
+      });
+  }
+
+  /**
+   * Sign in with Apple pelo Supabase (fluxo OAuth na web). Exige o provedor
+   * Apple ativo no Supabase (Services ID + chave secreta gerada do .p8, que
+   * vence a cada 6 meses). A Apple só envia o nome no primeiro login; se vier
+   * vazio, o perfil fica sem nome e a pessoa pode preencher em Minha conta.
+   */
+  function loginWithApple() {
+    setAppleBusy(true);
+    if (!supabase) {
+      window.setTimeout(finishAuth, 650);
+      return;
+    }
+    supabase.auth
+      .signInWithOAuth({
+        provider: 'apple',
+        options: { redirectTo: `${window.location.origin}/auth/callback` },
+      })
+      .then(({ error }) => {
+        if (!error) return; // sucesso: o navegador já está saindo para a Apple
+        setAppleBusy(false);
+        showToast('Não foi possível conectar com a Apple. Tente de novo.');
       });
   }
 
@@ -104,10 +130,20 @@ export function AuthScreen() {
               <button
                 type="button"
                 className="social-button social-button--apple"
-                onClick={() => setMode('name')}
+                onClick={loginWithApple}
+                disabled={appleBusy}
               >
-                <span className="social-mark" aria-hidden="true"><img src={appleIcon} alt="" width="20" height="20" /></span>
-                Continuar com Apple
+                {appleBusy ? (
+                  <>
+                    <span className="auth-spinner" aria-hidden="true" />
+                    Conectando com Apple…
+                  </>
+                ) : (
+                  <>
+                    <span className="social-mark" aria-hidden="true"><img src={appleIcon} alt="" width="20" height="20" /></span>
+                    Continuar com Apple
+                  </>
+                )}
               </button>
               <div className="auth-divider">
                 <span>ou</span>
