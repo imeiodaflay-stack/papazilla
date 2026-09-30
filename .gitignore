@@ -33,3 +33,6 @@ npm-debug.log*
 coverage/
 .vercel
 .env*
+
+# chaves privadas da Apple (Sign in with Apple)
+*.p8
