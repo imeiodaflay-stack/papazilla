@@ -92,6 +92,44 @@ export function drawSquiggle(ctx: CanvasRenderingContext2D, x: number, y: number
   ctx.restore();
 }
 
+/** Fileira de placas arredondadas — referência sutil aos espinhos da Zilla. */
+export function drawSpikes(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  count: number,
+  size: number,
+  color: string,
+): void {
+  ctx.save();
+  ctx.fillStyle = color;
+  for (let i = 0; i < count; i += 1) {
+    const sx = x + i * size * 0.72;
+    ctx.beginPath();
+    ctx.moveTo(sx, y);
+    ctx.quadraticCurveTo(sx + size * 0.45, y - size, sx + size * 0.9, y);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+/** Patinha vetorial, reutilizável sem depender de outro asset. */
+export function drawPaw(ctx: CanvasRenderingContext2D, cx: number, cy: number, size: number, color: string): void {
+  ctx.save();
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + size * 0.18, size * 0.31, size * 0.25, 0, 0, Math.PI * 2);
+  ctx.fill();
+  const toes: [number, number][] = [[-0.29, -0.18], [-0.1, -0.32], [0.12, -0.32], [0.31, -0.16]];
+  for (const [dx, dy] of toes) {
+    ctx.beginPath();
+    ctx.ellipse(cx + size * dx, cy + size * dy, size * 0.105, size * 0.14, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
 /** Quebra `text` em até `maxLines` linhas que cabem em `maxWidth`; desenha e devolve o y final. */
 export function drawWrappedText(
   ctx: CanvasRenderingContext2D,
@@ -142,7 +180,7 @@ export function drawWordmark(ctx: CanvasRenderingContext2D, wordmark: HTMLImageE
 
 /** Rodapé com a chamada pro site. */
 export function drawStoryFooter(ctx: CanvasRenderingContext2D, margin: number): void {
-  const footerY = STORY_HEIGHT - 132;
+  const footerY = STORY_HEIGHT - 126;
   ctx.strokeStyle = STORY_COLORS.border;
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -151,11 +189,11 @@ export function drawStoryFooter(ctx: CanvasRenderingContext2D, margin: number): 
   ctx.stroke();
   ctx.textAlign = 'center';
   ctx.fillStyle = STORY_COLORS.ink;
-  ctx.font = '700 36px Nunito';
+  ctx.font = '700 31px Nunito, "Avenir Next", sans-serif';
   ctx.fillText(STORY_CTA, STORY_WIDTH / 2, footerY);
   ctx.fillStyle = STORY_COLORS.coral;
-  ctx.font = '700 46px Fredoka';
-  ctx.fillText(STORY_URL, STORY_WIDTH / 2, footerY + 60);
+  ctx.font = '700 40px Fredoka, "Arial Rounded MT Bold", "Avenir Next", sans-serif';
+  ctx.fillText(STORY_URL, STORY_WIDTH / 2, footerY + 54);
   ctx.textAlign = 'left';
 }
 

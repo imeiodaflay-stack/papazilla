@@ -19,8 +19,9 @@ import calendarIconUrl from '../assets/icons/calendario.png';
 import { describePet, joinPt } from './petLabel.js';
 import { FORMULATION_LABELS, formatGrams, mealSize } from './recipeDisplay.js';
 import {
-  STORY_COLORS as C, STORY_HEIGHT as HEIGHT, STORY_WIDTH as WIDTH, canvasToBlob, drawDash, drawSquiggle,
-  drawStoryFooter, drawWordmark, ensureFontsReady, loadImage, roundRect, shareStoryBlob, wrapLines,
+  STORY_COLORS as C, STORY_HEIGHT as HEIGHT, STORY_WIDTH as WIDTH, canvasToBlob, drawDash, drawPaw,
+  drawSpikes, drawSquiggle, drawStoryFooter, drawWordmark, ensureFontsReady, loadImage, roundRect,
+  shareStoryBlob, wrapLines,
 } from './storyCanvas.js';
 
 const MARGIN = 88;
@@ -32,6 +33,13 @@ const CREME = C.creme;
 const CORAL = C.coral;
 const PESSEGO = C.pessego;
 const BORDER = C.border;
+
+function drawCover(ctx: CanvasRenderingContext2D, img: HTMLImageElement, x: number, y: number, w: number, h: number): void {
+  const scale = Math.max(w / img.width, h / img.height);
+  const sw = w / scale;
+  const sh = h / scale;
+  ctx.drawImage(img, (img.width - sw) / 2, (img.height - sh) / 2, sw, sh, x, y, w, h);
+}
 
 export interface RecipeStoryData {
   recipe: Recipe;
@@ -72,9 +80,11 @@ function fornalhaLabel(petPlans: RecipeStoryData['petPlans']): string {
 
 export async function generateRecipeStoryImage({ recipe, petPlans, formulation, format, title }: RecipeStoryData): Promise<Blob> {
   await ensureFontsReady();
-  const [wordmark, mascot, bowlIcon, calendarIcon] = await Promise.all([
+  const petPhotoPath = petPlans.find(({ pet }) => Boolean(pet.photoPath))?.pet.photoPath;
+  const [wordmark, mascot, petPhoto, bowlIcon, calendarIcon] = await Promise.all([
     loadImage(wordmarkUrl).catch(() => null),
     loadImage(mascotUrl).catch(() => null),
+    petPhotoPath ? loadImage(petPhotoPath, !petPhotoPath.startsWith('data:')).catch(() => null) : Promise.resolve(null),
     loadImage(bowlIconUrl).catch(() => null),
     loadImage(calendarIconUrl).catch(() => null),
   ]);
@@ -88,11 +98,16 @@ export async function generateRecipeStoryImage({ recipe, petPlans, formulation, 
   // Fundo
   ctx.fillStyle = CREME;
   ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  ctx.fillStyle = C.surfaceSoft;
+  ctx.beginPath();
+  ctx.arc(WIDTH + 32, 720, 245, 0, Math.PI * 2);
+  ctx.fill();
+  drawSpikes(ctx, 96, 210, 4, 78, C.verdeSoft);
 
   let y = drawWordmark(ctx, wordmark, 84, 300) + 44;
 
   // Cartão principal: fornalha de quem, título e total pronto, com a Zilla
-  const heroH = 404;
+  const heroH = 430;
   const heroGrad = ctx.createLinearGradient(MARGIN, y, WIDTH - MARGIN, y + heroH);
   heroGrad.addColorStop(0, '#fce6db');
   heroGrad.addColorStop(1, PESSEGO);
@@ -105,33 +120,62 @@ export async function generateRecipeStoryImage({ recipe, petPlans, formulation, 
 
   ctx.textBaseline = 'alphabetic';
   ctx.fillStyle = CORAL;
-  ctx.font = '800 30px Nunito';
-  ctx.fillText(fornalhaLabel(petPlans).toUpperCase(), MARGIN + 52, y + 64, 560);
+  ctx.font = '800 30px Nunito, "Avenir Next", sans-serif';
+  drawPaw(ctx, MARGIN + 72, y + 57, 44, CORAL);
+  ctx.fillText(fornalhaLabel(petPlans).toUpperCase(), MARGIN + 108, y + 67, 510);
 
   ctx.fillStyle = INK;
-  ctx.font = '600 52px Fredoka';
+  ctx.font = '600 56px Fredoka, "Arial Rounded MT Bold", "Avenir Next", sans-serif';
   const titleLines = wrapLines(ctx, title?.trim() || 'Receita da semana', 470, 2);
   titleLines.forEach((line, i) => ctx.fillText(line, MARGIN + 52, y + 128 + i * 58));
 
+  ctx.fillStyle = CORAL;
+  ctx.font = '800 23px Nunito, "Avenir Next", sans-serif';
+  ctx.fillText('RENDE', MARGIN + 52, y + 270);
   ctx.fillStyle = INK;
-  ctx.font = '700 104px Fredoka';
-  ctx.fillText(formatGrams(recipe.totalCookedGrams), MARGIN + 52, y + 312);
+  ctx.font = '700 100px Fredoka, "Arial Rounded MT Bold", "Avenir Next", sans-serif';
+  ctx.fillText(formatGrams(recipe.totalCookedGrams), MARGIN + 52, y + 352);
   ctx.fillStyle = INK_MUTED;
-  ctx.font = '700 32px Nunito';
-  ctx.fillText(`prontos · ${recipe.days} ${recipe.days === 1 ? 'dia' : 'dias'}`, MARGIN + 52, y + 360);
-  drawSquiggle(ctx, MARGIN + 52, y + 386, 240, CORAL);
+  ctx.font = '700 32px Nunito, "Avenir Next", sans-serif';
+  ctx.fillText(`de comida pronta · ${recipe.days} ${recipe.days === 1 ? 'dia' : 'dias'}`, MARGIN + 52, y + 397);
+  drawSquiggle(ctx, MARGIN + 52, y + 416, 260, CORAL);
 
-  if (mascot) {
+  if (petPhoto) {
+    const photoSize = 330;
+    const photoX = WIDTH - MARGIN - photoSize - 18;
+    const photoY = y + 48;
+    ctx.save();
+    ctx.shadowColor = 'rgb(74 45 34 / 18%)';
+    ctx.shadowBlur = 24;
+    ctx.shadowOffsetY = 12;
+    ctx.fillStyle = '#ffffff';
+    roundRect(ctx, photoX - 12, photoY - 12, photoSize + 24, photoSize + 24, 54);
+    ctx.fill();
+    ctx.restore();
+    ctx.save();
+    roundRect(ctx, photoX, photoY, photoSize, photoSize, 44);
+    ctx.clip();
+    drawCover(ctx, petPhoto, photoX, photoY, photoSize, photoSize);
+    ctx.restore();
+    ctx.fillStyle = C.verde;
+    roundRect(ctx, photoX + 174, photoY + photoSize - 54, 146, 42, 21);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '800 21px Nunito, "Avenir Next", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(petPlans.find(({ pet }) => pet.photoPath)?.pet.name || 'Monstrinho', photoX + 247, photoY + photoSize - 25);
+    ctx.textAlign = 'left';
+  } else if (mascot) {
     // A imagem de marca inclui a Zilla com o potinho na metade superior; o
     // recorte mantém a ilustração original sem puxar o wordmark de baixo.
-    ctx.drawImage(mascot, 65, 0, 510, 420, WIDTH - MARGIN - 370, y + 100, 370, 305);
+    ctx.drawImage(mascot, 65, 0, 510, 420, WIDTH - MARGIN - 398, y + 88, 410, 338);
   }
 
   y += heroH + 36;
 
-  // Proporção da receita: pizza + legenda
+  // Proporção da receita: barra segmentada, mais legível em telas pequenas.
   const slices = recipeProportion(recipe);
-  const pieH = 296;
+  const pieH = 236;
   ctx.fillStyle = '#ffffff';
   ctx.strokeStyle = BORDER;
   ctx.lineWidth = 2;
@@ -139,47 +183,44 @@ export async function generateRecipeStoryImage({ recipe, petPlans, formulation, 
   ctx.fill();
   ctx.stroke();
 
-  const pieR = 108;
-  const pieCx = MARGIN + 48 + pieR;
-  const pieCy = y + pieH / 2;
-  let angle = -Math.PI / 2;
-  for (const slice of slices) {
-    const next = angle + slice.share * Math.PI * 2;
-    ctx.fillStyle = slice.color;
-    ctx.beginPath();
-    ctx.moveTo(pieCx, pieCy);
-    ctx.arc(pieCx, pieCy, pieR, angle, next);
-    ctx.closePath();
-    ctx.fill();
-    if (slices.length > 1) {
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 5;
-      ctx.stroke();
-    }
-    angle = next;
-  }
-
-  const legendX = pieCx + pieR + 64;
   ctx.fillStyle = INK;
-  ctx.font = '800 36px Nunito';
-  ctx.fillText('Proporção da receita', legendX, y + 64);
+  ctx.font = '800 36px Nunito, "Avenir Next", sans-serif';
+  ctx.fillText('O equilíbrio da fornalha', MARGIN + 40, y + 55);
   ctx.fillStyle = INK_LABEL;
-  ctx.font = '700 26px Nunito';
-  ctx.fillText(FORMULATION_LABELS[formulation], legendX, y + 100);
-  const legendTop = y + 100 + Math.max(0, (pieH - 130 - slices.length * 42) / 2);
+  ctx.font = '700 24px Nunito, "Avenir Next", sans-serif';
+  ctx.textAlign = 'right';
+  ctx.fillText(FORMULATION_LABELS[formulation], WIDTH - MARGIN - 40, y + 55);
+  ctx.textAlign = 'left';
+
+  const barX = MARGIN + 40;
+  const barY = y + 82;
+  const barW = CONTENT_WIDTH - 80;
+  const barH = 48;
+  ctx.save();
+  roundRect(ctx, barX, barY, barW, barH, 24);
+  ctx.clip();
+  let offset = barX;
+  slices.forEach((slice) => {
+    const segmentW = barW * slice.share;
+    ctx.fillStyle = slice.color;
+    ctx.fillRect(offset, barY, segmentW + 1, barH);
+    offset += segmentW;
+  });
+  ctx.restore();
+
+  const itemW = barW / Math.max(slices.length, 1);
   slices.forEach((slice, i) => {
-    const ly = legendTop + 50 + i * 42;
+    const lx = barX + i * itemW;
+    const ly = y + 178;
     ctx.fillStyle = slice.color;
     ctx.beginPath();
-    ctx.arc(legendX + 12, ly - 10, 12, 0, Math.PI * 2);
+    ctx.arc(lx + 10, ly - 8, 10, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = INK;
-    ctx.font = '700 30px Nunito';
-    ctx.fillText(slice.label, legendX + 38, ly);
-    ctx.font = '800 30px Nunito';
-    ctx.textAlign = 'right';
-    ctx.fillText(`${Math.round(slice.share * 100)}%`, WIDTH - MARGIN - 44, ly);
-    ctx.textAlign = 'left';
+    ctx.font = '700 24px Nunito, "Avenir Next", sans-serif';
+    ctx.fillText(slice.label, lx + 28, ly);
+    ctx.font = '800 29px Nunito, "Avenir Next", sans-serif';
+    ctx.fillText(`${Math.round(slice.share * 100)}%`, lx + 28, ly + 34);
   });
 
   y += pieH + 36;
@@ -231,16 +272,16 @@ export async function generateRecipeStoryImage({ recipe, petPlans, formulation, 
   ctx.stroke();
 
   ctx.fillStyle = INK;
-  ctx.font = '800 40px Nunito';
-  ctx.fillText('O que pesar', MARGIN + 44, y + 68);
+  ctx.font = '800 40px Nunito, "Avenir Next", sans-serif';
+  ctx.fillText('O que vai para o potinho', MARGIN + 44, y + 68);
   ctx.fillStyle = INK_LABEL;
-  ctx.font = '700 25px Nunito';
+  ctx.font = '700 25px Nunito, "Avenir Next", sans-serif';
   ctx.textAlign = 'right';
   ctx.fillText(format === 'Quantidade dos alimentos crus' ? 'peso cru' : 'peso pronto', WIDTH - MARGIN - 44, y + 68);
   ctx.textAlign = 'left';
 
   let rowY = y + 92;
-  ctx.font = '700 32px Nunito';
+  ctx.font = '700 32px Nunito, "Avenir Next", sans-serif';
   for (const row of visibleRows) {
     rowY += rowH;
     ctx.fillStyle = '#fff8f4';
@@ -251,7 +292,7 @@ export async function generateRecipeStoryImage({ recipe, petPlans, formulation, 
     ctx.fill();
 
     ctx.fillStyle = INK;
-    ctx.font = '700 30px Nunito';
+    ctx.font = '700 30px Nunito, "Avenir Next", sans-serif';
     ctx.textAlign = 'left';
     const label = row.label.length > 30 ? `${row.label.slice(0, 29)}…` : row.label;
     ctx.fillText(label, MARGIN + 44, rowY - 16);
@@ -259,7 +300,7 @@ export async function generateRecipeStoryImage({ recipe, petPlans, formulation, 
     const weight = format === 'Quantidade dos alimentos crus' ? row.rawGrams : row.cookedGrams;
     const amountTxt = weight !== undefined ? `≈ ${formatGrams(weight)}` : row.note ?? '—';
     ctx.fillStyle = INK;
-    ctx.font = '800 30px Nunito';
+    ctx.font = '800 30px Nunito, "Avenir Next", sans-serif';
     ctx.textAlign = 'right';
     ctx.fillText(amountTxt, WIDTH - MARGIN - 44, rowY - 16);
     ctx.textAlign = 'left';
@@ -267,7 +308,7 @@ export async function generateRecipeStoryImage({ recipe, petPlans, formulation, 
   if (extraCount > 0) {
     rowY += 56;
     ctx.fillStyle = INK_LABEL;
-    ctx.font = '700 28px Nunito';
+    ctx.font = '700 28px Nunito, "Avenir Next", sans-serif';
     ctx.fillText(`+ ${extraCount} ${extraCount === 1 ? 'ingrediente' : 'ingredientes'}`, MARGIN + 44, rowY - 12);
   }
 
@@ -303,9 +344,9 @@ export async function generateRecipeStoryImage({ recipe, petPlans, formulation, 
 
       ctx.textAlign = 'center';
       ctx.fillStyle = '#4c5a16';
-      ctx.font = '700 28px Nunito';
+      ctx.font = '700 28px Nunito, "Avenir Next", sans-serif';
       ctx.fillText(label, cx, y + 116);
-      ctx.font = '700 50px Fredoka';
+      ctx.font = '700 50px Fredoka, "Arial Rounded MT Bold", "Avenir Next", sans-serif';
       ctx.fillText(value, cx, y + 172);
       ctx.textAlign = 'left';
     });
@@ -317,10 +358,10 @@ export async function generateRecipeStoryImage({ recipe, petPlans, formulation, 
     for (const { pet, plan } of visiblePetPlans) {
       py += petRowH;
       ctx.fillStyle = '#4c5a16';
-      ctx.font = '800 36px Nunito';
+      ctx.font = '800 36px Nunito, "Avenir Next", sans-serif';
       ctx.textAlign = 'left';
       ctx.fillText(pet.name, MARGIN + 44, py - 40);
-      ctx.font = '700 30px Nunito';
+      ctx.font = '700 30px Nunito, "Avenir Next", sans-serif';
       ctx.textAlign = 'right';
       ctx.fillText(
         `${formatGrams(plan.totalGramsPerDay)}/dia · ${formatGrams(mealSize(plan, pet))}/ref.`,
@@ -332,7 +373,7 @@ export async function generateRecipeStoryImage({ recipe, petPlans, formulation, 
     if (extraPetsCount > 0) {
       py += 56;
       ctx.fillStyle = '#4c5a16';
-      ctx.font = '700 28px Nunito';
+      ctx.font = '700 28px Nunito, "Avenir Next", sans-serif';
       ctx.textAlign = 'left';
       ctx.fillText(`+ ${extraPetsCount} ${extraPetsCount === 1 ? 'monstrinho' : 'monstrinhos'}`, MARGIN + 44, py - 12);
     }
