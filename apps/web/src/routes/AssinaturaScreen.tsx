@@ -73,6 +73,10 @@ export function AssinaturaScreen() {
   const backTo = closePath(returnTo);
   const profile = getUserProfile();
   const activePet = getActivePet();
+  const monthlyEquivalent = (ANNUAL_PRICE / 12).toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
   const { preposition, displayName } = describePet(activePet);
 
   const [method, setMethod] = useState<PaymentMethod>('pix');
@@ -199,8 +203,17 @@ export function AssinaturaScreen() {
               <li><span aria-hidden="true">✓</span><p><strong>Toda a matilha organizada</strong><small>Receitas salvas e histórico de fornalhas.</small></p></li>
             </ul>
 
-            <section className="paywall-offer">
-              <div className="paywall-offer__price"><span className="paywall-offer__launch">Preço de lançamento até {LAUNCH_PRICE_UNTIL}</span><strong>{formatBRL(ANNUAL_PRICE)}<small>/ano</small></strong><span className="paywall-offer__hint">Menos de R$ 9 por mês, pago uma vez por ano</span><span className="paywall-offer__later">Depois, {formatBRL(FULL_ANNUAL_PRICE)} por ano.</span></div>
+            <section className="paywall-offer" aria-label="Preço da assinatura anual">
+              <span className="paywall-offer__launch">Preço de lançamento até {LAUNCH_PRICE_UNTIL}</span>
+              <div className="paywall-offer__equivalent">
+                <span>Equivale a</span>
+                <div className="paywall-offer__amount"><small>R$</small><strong>{monthlyEquivalent}</strong><em>por mês</em></div>
+              </div>
+              <div className="paywall-offer__billing">
+                <span className="paywall-offer__calendar" aria-hidden="true">12</span>
+                <p><strong>Cobrança anual</strong><small>{formatBRL(ANNUAL_PRICE)} uma vez por ano</small></p>
+              </div>
+              <span className="paywall-offer__later">Depois, {formatBRL(FULL_ANNUAL_PRICE)} por ano.</span>
               <p className="annual-commitment">Um pagamento libera 12 meses de receitas personalizadas para toda a sua matilha.</p>
             </section>
 

@@ -3091,48 +3091,98 @@
 }
 
 .paywall-offer {
+  position: relative;
+  display: grid;
+  gap: 0.62rem;
   overflow: hidden;
   margin-top: 0.3rem;
+  padding: 1.05rem;
   border: 1.5px solid var(--pz-verde-strong);
   border-radius: 20px;
-  background: #fff;
+  background:
+    radial-gradient(circle at 100% 0, rgb(173 176 71 / 15%), transparent 38%),
+    #fff;
   box-shadow: 0 0 0 2px rgb(113 106 17 / 8%);
   color: var(--pz-ink);
 }
-.paywall-offer__price {
-  display: grid;
-  gap: 0.2rem;
-  padding: 0.9rem 0.9rem 0.85rem;
+.paywall-offer__launch {
+  width: fit-content;
+  padding: 0.38rem 0.62rem;
+  border-radius: 999px;
+  background: var(--pz-success-bg);
+  color: var(--pz-secondary-ink);
+  font: 900 0.7rem / 1 var(--pz-font-support);
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
 }
-.paywall-offer__price > strong {
+.paywall-offer__equivalent {
+  display: grid;
+  gap: 0.08rem;
+}
+.paywall-offer__equivalent > span {
+  color: var(--pz-ink-label);
+  font: 800 0.875rem / 1.2 var(--pz-font-support);
+}
+.paywall-offer__amount {
   display: flex;
   align-items: baseline;
-  gap: 0.25rem;
   color: var(--pz-chocolate);
-  font: 900 1.85rem / 1.05 var(--pz-font-display);
-  letter-spacing: -0.02em;
 }
-.paywall-offer__price > strong > small {
+.paywall-offer__amount small {
+  margin-right: 0.28rem;
+  font: 900 1.1rem / 1 var(--pz-font-display);
+}
+.paywall-offer__amount strong {
+  font: 900 3.45rem / 0.98 var(--pz-font-display);
+  letter-spacing: -0.055em;
+}
+.paywall-offer__amount em {
+  margin-left: 0.5rem;
+  color: var(--pz-accent-ink);
+  font: 800 0.9rem / 1 var(--pz-font-support);
+  font-style: normal;
+}
+.paywall-offer__billing {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 0.65rem;
+  align-items: center;
+  padding: 0.72rem 0.78rem;
+  border-radius: 14px;
+  background: var(--pz-bg);
+}
+.paywall-offer__calendar {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--pz-coral);
+  color: #fff;
+  font: 900 0.78rem / 1 var(--pz-font-support);
+}
+.paywall-offer__billing p {
+  display: grid;
+  gap: 0.08rem;
+  margin: 0;
+}
+.paywall-offer__billing strong {
+  color: var(--pz-chocolate);
+  font: 850 0.875rem / 1.2 var(--pz-font-support);
+}
+.paywall-offer__billing small {
   color: var(--pz-ink-label);
-  font: 700 0.875rem / 1 var(--pz-font-support);
-}
-.paywall-offer__hint {
-  color: var(--pz-accent-ink);
-  font: 700 0.875rem / 1.3 var(--pz-font-support);
-}
-.paywall-offer__launch {
-  color: var(--pz-accent-ink);
-  font: 800 0.75rem / 1.2 var(--pz-font-support);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font: 650 0.8rem / 1.25 var(--pz-font-support);
 }
 .paywall-offer__later {
   color: var(--pz-ink-label);
-  font: 600 0.8125rem / 1.3 var(--pz-font-support);
+  font: 650 0.8rem / 1.25 var(--pz-font-support);
 }
 
 .annual-commitment {
-  margin: 0 0.9rem 0.85rem;
+  margin: 0.05rem 0 0;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--pz-border);
   color: var(--pz-ink-label);
   font-size: 0.875rem;
   line-height: 1.35;
