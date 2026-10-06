@@ -101,24 +101,7 @@ export function PetDetailScreen({ petIdOverride, isSinglePetRoot = false }: PetD
             ←
           </button>
         )}
-        <label className="pet-switcher">
-          <span>Visualizando</span>
-          {pets.length > 1 ? (
-            <select
-              aria-label="Trocar de pet"
-              value={pet.id}
-              onChange={(e) => switchPet(e.target.value)}
-            >
-              {pets.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {describePet(p).displayName}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <strong>{displayName}</strong>
-          )}
-        </label>
+        <span className="pet-header-name">{displayName}</span>
         <AccountAvatarLink />
       </header>
 
@@ -197,6 +180,32 @@ export function PetDetailScreen({ petIdOverride, isSinglePetRoot = false }: PetD
               </div>
             </div>
           ) : null}
+
+          {pets.length > 1 && (
+            <nav className="pet-pack-switcher" aria-label="Trocar de Monstrinho">
+              {pets.map((p) => {
+                const { displayName: pName } = describePet(p);
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    className={`pet-pack-chip${p.id === pet.id ? ' pet-pack-chip--active' : ''}`}
+                    aria-current={p.id === pet.id ? 'true' : undefined}
+                    onClick={() => p.id !== pet.id && switchPet(p.id)}
+                  >
+                    {p.photoPath ? (
+                      <img src={p.photoPath} alt="" className="pet-pack-chip__avatar" />
+                    ) : (
+                      <span className="pet-pack-chip__initial" aria-hidden="true">
+                        {pName.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                    <span>{pName}</span>
+                  </button>
+                );
+              })}
+            </nav>
+          )}
 
           <section className="pet-section">
             <div className="pet-section__heading">
