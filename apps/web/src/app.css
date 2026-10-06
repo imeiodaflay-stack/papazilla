@@ -2210,10 +2210,10 @@
 .home-personalized-card .pz-button {
   grid-column: 1 / -1;
   grid-row: 2;
-  margin-top: 0;
-  border-radius: 0 0 28px 28px;
+  margin: 0 1rem 1rem;
+  border-radius: 18px;
   padding-top: 1rem;
-  padding-bottom: 1.15rem;
+  padding-bottom: 1rem;
 }
 .home-originals {
   display: grid;
