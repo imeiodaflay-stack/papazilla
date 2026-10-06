@@ -556,8 +556,8 @@
   color: var(--pz-success-ink);
   font: 800 0.875rem / 1 var(--pz-font-support);
 }
-.auth-header > span::before {
-  content: '✓';
+.auth-header > span > span[aria-hidden] {
+  color: var(--pz-verde-strong);
 }
 
 .auth-body {
@@ -583,7 +583,7 @@
 }
 .auth-hero__lockup {
   width: min(265px, 74vw);
-  height: min(230px, 29vh);
+  height: min(200px, 24vh);
   margin: 0 auto 0.55rem;
   object-fit: contain;
 }
@@ -715,11 +715,11 @@
   flex: 0 0 88px;
   width: 88px;
   height: 88px;
-  margin: clamp(1.25rem, 5vh, 3rem) auto 1.2rem;
+  margin: clamp(1rem, 4vh, 2.5rem) auto 1.2rem;
   border-radius: 50%;
   background: var(--pz-surface-soft);
   color: var(--pz-accent-ink);
-  font: 600 2rem / 1 var(--pz-font-display);
+  font: 800 1.75rem / 1 var(--pz-font-display);
 }
 .auth-step-art--mail {
   background: #eef0d7;

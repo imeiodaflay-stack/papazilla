@@ -204,7 +204,7 @@ export function AuthScreen() {
       <span className="auth-screen__decoration auth-screen__decoration--two" aria-hidden="true" />
 
       <header className="auth-header">
-        <span>Conta segura</span>
+        <span><span aria-hidden="true">✓</span> Conta segura</span>
       </header>
 
       <div className="auth-body">
