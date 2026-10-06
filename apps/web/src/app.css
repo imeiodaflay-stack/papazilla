@@ -2237,8 +2237,8 @@
   overflow: hidden;
   padding: 1.15rem;
   border-radius: 28px;
-  background: var(--pz-verde);
-  box-shadow: 0 10px 24px rgba(113, 106, 17, 0.15);
+  background: var(--pz-surface-soft);
+  box-shadow: 0 10px 24px rgba(74, 45, 34, 0.1);
 }
 .home-personalized-card__zilla {
   align-self: center;
@@ -2253,17 +2253,17 @@
 }
 .home-personalized-card__copy small,
 .home-originals__heading small {
-  color: var(--pz-creme);
+  color: var(--pz-accent-ink);
   font: 700 0.6875rem / 1 var(--pz-font-body);
   letter-spacing: 0.07em;
 }
 .home-personalized-card h2 {
   margin: 0.25rem 0 0.45rem;
-  color: var(--pz-creme);
+  color: var(--pz-chocolate);
   font: 800 1.35rem / 1.1 var(--pz-font-support);
 }
 .home-personalized-card p {
-  color: var(--pz-creme);
+  color: var(--pz-ink);
   font-size: 0.8125rem;
   line-height: 1.42;
 }
@@ -2413,6 +2413,10 @@
 .pz-badge--success {
   background: var(--pz-success-bg);
   color: var(--pz-success-ink);
+}
+.pz-badge--pack {
+  background: var(--pz-chocolate);
+  color: var(--pz-creme);
 }
 
 /* ============================================================
@@ -3020,44 +3024,46 @@
 
 .paywall-hero {
   display: grid;
-  grid-template-columns: 92px 1fr;
-  gap: 0.7rem;
-  align-items: center;
+  grid-template-rows: auto auto;
+  place-items: center;
+  text-align: center;
   overflow: hidden;
-  padding: 0.85rem 0.9rem 0.85rem 0;
-  border-radius: 24px;
-  background: linear-gradient(145deg, #fce6db, var(--pz-pessego));
+  padding: 2rem 1.5rem 1.5rem;
+  border-radius: 28px;
+  background: var(--pz-coral);
 }
 .paywall-hero__art {
   position: relative;
-  align-self: stretch;
-  min-height: 126px;
-  overflow: hidden;
+  width: 148px;
+  height: 160px;
+  margin-bottom: 0.5rem;
 }
 .paywall-hero__art img {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 118px;
-  height: 132px;
+  width: 148px;
+  height: 160px;
   object-fit: contain;
   mix-blend-mode: multiply;
   transform: translate(-50%, -50%);
 }
 .paywall-hero h1 {
-  margin: 0.28rem 0 0.4rem;
-  font: 600 1.43rem / 1.05 var(--pz-font-display);
+  margin: 0 0 0.5rem;
+  font: 700 1.5rem / 1.1 var(--pz-font-display);
   letter-spacing: -0.02em;
-  color: var(--pz-chocolate);
+  color: var(--pz-creme);
+  text-wrap: balance;
+}
+.paywall-hero > div {
+  display: grid;
+  gap: 0;
 }
 .paywall-hero > div > p:last-child {
   margin: 0;
-  color: var(--pz-ink-muted);
+  color: rgba(255, 248, 243, 0.82);
   font-size: 0.875rem;
   line-height: 1.4;
-}
-.paywall-hero .eyebrow {
-  font-size: 0.875rem;
 }
 
 .paywall-benefits {
@@ -5397,7 +5403,7 @@
   right: 13px;
 }
 .curiosity-art--alert {
-  background: linear-gradient(145deg, #f8d8ca, #f5b99f);
+  background: linear-gradient(145deg, var(--pz-surface-soft), #f5c4b0);
 }
 .curiosity-art--body {
   background: linear-gradient(145deg, #dce7b9, #eef0d7);

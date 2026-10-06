@@ -138,7 +138,7 @@ export function PetDetailScreen({ petIdOverride, isSinglePetRoot = false }: PetD
               </div>
             )}
             <div className="pet-hero-card__identity">
-              <span className="pz-badge pz-badge--success">Parte da matilha</span>
+              <span className="pz-badge pz-badge--pack">Parte da matilha</span>
               <h2>{displayName}</h2>
               <p>{identity}</p>
             </div>
@@ -152,17 +152,16 @@ export function PetDetailScreen({ petIdOverride, isSinglePetRoot = false }: PetD
             </button>
           </section>
 
-          <button
-            type="button"
-            className="pz-button pz-button--outline wide pet-share-button"
-            onClick={() => { void shareProfile(); }}
-            disabled={sharing}
-          >
-            {sharing ? 'Gerando imagem…' : `Compartilhar o perfil ${describePet(pet).preposition} ${displayName}`}
-          </button>
-
           {showMore && !confirmingDelete ? (
             <div className="more-menu">
+              <button
+                type="button"
+                className="more-menu__item"
+                onClick={() => { setShowMore(false); void shareProfile(); }}
+                disabled={sharing}
+              >
+                {sharing ? 'Gerando imagem…' : `Compartilhar perfil ${describePet(pet).preposition} ${displayName}`}
+              </button>
               <button type="button" className="more-menu__item more-menu__item--danger" onClick={() => setConfirmingDelete(true)}>
                 Excluir Monstrinho
               </button>
@@ -218,7 +217,7 @@ export function PetDetailScreen({ petIdOverride, isSinglePetRoot = false }: PetD
               <article>
                 <img src={idadeIcon} alt="" className="pet-profile-fact__brand-icon" />
                 <small>Idade</small>
-                <strong>{pet.age || 'Não informada'}</strong>
+                <strong>{pet.age ? (/^\d+$/.test(String(pet.age)) ? `${pet.age} anos` : String(pet.age)) : 'Não informada'}</strong>
               </article>
               <article>
                 <img src={pesoIcon} alt="" className="pet-profile-fact__brand-icon" />
