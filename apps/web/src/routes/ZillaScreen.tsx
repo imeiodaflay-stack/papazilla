@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import wordmark from '../assets/papazilla-wordmark.png';
-import zilla from '../assets/zilla-frente.png';
+import wordmark from '../assets/papazilla-wordmark.webp';
+import zilla from '../assets/zilla-frente.webp';
 import { AppNav } from '../components/AppNav.js';
 import { AccountAvatarLink } from '../components/AccountAvatarLink.js';
 

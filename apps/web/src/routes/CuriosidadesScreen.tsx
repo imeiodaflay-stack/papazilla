@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import zillaLendo from '../assets/zilla-lendo.png';
+import zillaLendo from '../assets/zilla-lendo.webp';
 import buscaIcon from '../assets/icons/busca.png';
 import { AppNav } from '../components/AppNav.js';
 import { ART_ICON, CATEGORY_LABELS, CURIOSITIES, type CuriosityCategory } from '../lib/curiosities.js';

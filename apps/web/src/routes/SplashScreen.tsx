@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import lockup from '../assets/papazilla-lockup.png';
+import lockup from '../assets/papazilla-lockup.webp';
 import { hasSeenOnboarding, initAuth, isAuthenticated } from '../lib/session.js';
 
 /**

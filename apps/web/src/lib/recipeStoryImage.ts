@@ -12,8 +12,8 @@
  */
 import type { DailyPlan, FormulationId, Recipe } from '@papazilla/nutrition-engine';
 import type { StoredPet } from './petsStore.js';
-import wordmarkUrl from '../assets/papazilla-wordmark.png';
-import mascotUrl from '../assets/papazilla-lockup.png';
+import wordmarkUrl from '../assets/papazilla-wordmark.webp';
+import mascotUrl from '../assets/papazilla-lockup.webp';
 import bowlIconUrl from '../assets/icons/potinho.png';
 import calendarIconUrl from '../assets/icons/calendario.png';
 import { describePet, joinPt } from './petLabel.js';

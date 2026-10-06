@@ -1,6 +1,6 @@
 import type { FormulationId, RecipeSelection } from '@papazilla/nutrition-engine';
 import snackImage from '../assets/originals/snack-pa-pum.jpeg';
-import basicoImage from '../assets/originals/basico-brasileiro.jpg';
+import basicoImage from '../assets/originals/basico-brasileiro.webp';
 import baratoImage from '../assets/originals/barato-nutritivo.jpeg';
 import frozenImage from '../assets/originals/frozen-antioxidante.jpeg';
 import gelatinaImage from '../assets/originals/gelatina-dourada.jpeg';

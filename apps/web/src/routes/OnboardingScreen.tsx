@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { setSeenOnboarding } from '../lib/session.js';
-import zilla from '../assets/zilla-frente.png';
+import zilla from '../assets/zilla-frente.webp';
 import patinha from '../assets/icons/patinha.png';
 import zillaIcon from '../assets/icons/zilla.png';
 import adicionar from '../assets/icons/adicionar.png';

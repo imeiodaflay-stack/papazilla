@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import lockup from '../assets/papazilla-lockup.png';
+import lockup from '../assets/papazilla-lockup.webp';
 import appleIcon from '../assets/icons/apple.svg';
 import googleIcon from '../assets/icons/google.svg';
 import mailIcon from '../assets/icons/mensagem.png';

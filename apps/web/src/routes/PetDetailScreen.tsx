@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
-import zillaFrente from '../assets/zilla-frente.png';
+import zillaFrente from '../assets/zilla-frente.webp';
 import calendarioIcon from '../assets/icons/calendario.png';
 import idadeIcon from '../assets/icons/idade-estrela.png';
 import pesoIcon from '../assets/icons/peso-balanca.png';

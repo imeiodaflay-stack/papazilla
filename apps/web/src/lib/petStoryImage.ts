@@ -1,6 +1,6 @@
 /** Story compartilhável do perfil do pet, 1080 × 1920, renderizado no app. */
-import wordmarkUrl from '../assets/papazilla-wordmark.png';
-import zillaUrl from '../assets/zilla-frente-transparent.png';
+import wordmarkUrl from '../assets/papazilla-wordmark.webp';
+import zillaUrl from '../assets/zilla-frente-transparent.webp';
 import type { StoredPet } from './petsStore.js';
 import {
   STORY_COLORS as C, STORY_HEIGHT, STORY_WIDTH, canvasToBlob, drawPaw, drawSpikes, drawStoryFooter,

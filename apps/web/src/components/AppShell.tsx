@@ -1,7 +1,7 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import { AppNav } from './AppNav.js';
 import { AccountAvatarLink } from './AccountAvatarLink.js';
-import wordmark from '../assets/papazilla-wordmark.png';
+import wordmark from '../assets/papazilla-wordmark.webp';
 
 /**
  * Casca das telas autenticadas (app-view), fiel a `papazilla-prototype`:

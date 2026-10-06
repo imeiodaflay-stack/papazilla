@@ -8,7 +8,7 @@ import infoIcon from './assets/icons/info.png';
 import potinhoIcon from './assets/icons/potinho.png';
 import receitaIcon from './assets/icons/receita.png';
 import snackImage from './assets/originals/snack-pa-pum.jpeg';
-import mealImage from './assets/originals/basico-brasileiro.jpg';
+import mealImage from './assets/originals/basico-brasileiro.webp';
 import mochaPhoto from './assets/preview/mocha.webp';
 import chloePhoto from './assets/preview/chloe.webp';
 import mochiPhoto from './assets/preview/mochi.webp';

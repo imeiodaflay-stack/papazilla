@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import zilla from '../assets/zilla-frente.png';
+import zilla from '../assets/zilla-frente.webp';
 
 /**
  * Papá sem Monstrinho cadastrado — mostrada em `/papa` enquanto `hasPet()` é

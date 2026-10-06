@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import cartaoIcon from '../assets/icons/cartao.webp';
 import pixIcon from '../assets/icons/pix.webp';
-import zillaFrente from '../assets/zilla-frente-transparent.png';
+import zillaFrente from '../assets/zilla-frente-transparent.webp';
 import { getActivePet } from '../lib/petsStore.js';
 import { describePet } from '../lib/petLabel.js';
 import {

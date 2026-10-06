@@ -3,7 +3,7 @@ import type { DailyPlan, FormulationId, Recipe } from '@papazilla/nutrition-engi
 import potinhoIcon from '../assets/icons/potinho.png';
 import calendarioIcon from '../assets/icons/calendario.png';
 import infoIcon from '../assets/icons/info.png';
-import zillaBowl from '../assets/papazilla-lockup.png';
+import zillaBowl from '../assets/papazilla-lockup.webp';
 import type { StoredPet } from '../lib/petsStore.js';
 import { joinPt } from '../lib/petLabel.js';
 import { matchDietPreferences } from '../lib/dietPreferences.js';
