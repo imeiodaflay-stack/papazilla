@@ -3066,31 +3066,28 @@
   overflow: hidden;
   border-radius: 28px;
   background: var(--pz-coral);
-  min-height: 320px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  min-height: 260px;
 }
 .paywall-hero__art {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
 }
 .paywall-hero__art img {
-  position: absolute;
-  right: -8px;
-  bottom: 0;
-  width: 220px;
-  height: 220px;
+  width: 180px;
+  height: 180px;
   object-fit: contain;
-  object-position: bottom right;
+  object-position: center right;
+  display: block;
   filter: drop-shadow(0 4px 24px rgba(74,45,34,0.22));
+  margin-right: -4px;
 }
 .paywall-hero > div {
-  position: relative;
-  z-index: 1;
-  padding: 1.5rem 1.35rem 1.5rem;
-  max-width: calc(100% - 130px);
+  padding: 1.5rem 0 1.5rem 1.35rem;
+  align-self: center;
 }
 .paywall-hero h1 {
   margin: 0 0 0.4rem;

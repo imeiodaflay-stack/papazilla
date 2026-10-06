@@ -198,11 +198,11 @@ export function AssinaturaScreen() {
         ) : (
           <>
             <div className="paywall-hero">
-              <span className="paywall-hero__art"><img src={zillaChef} alt="Zilla, o chefao do Papazilla" /></span>
               <div>
                 <h1>A receita do seu Monstrinho começa aqui</h1>
                 <p>Da escolha dos ingredientes à porção no potinho, o Papazilla calcula tudo para vocês.</p>
               </div>
+              <span className="paywall-hero__art"><img src={zillaChef} alt="Zilla, o chefao do Papazilla" /></span>
             </div>
 
             <ul className="paywall-benefits" aria-label="Benefícios da assinatura">
