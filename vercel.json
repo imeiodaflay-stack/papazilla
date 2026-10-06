@@ -25,5 +25,11 @@
       "source": "/(.*)",
       "destination": "/app.html"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/subscription-renew",
+      "schedule": "0 12 * * *"
+    }
   ]
 }

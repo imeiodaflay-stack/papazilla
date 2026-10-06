@@ -3296,6 +3296,7 @@
   font: 700 0.76rem / 1.2 var(--pz-font-support);
 }
 .checkout-form-section input,
+.checkout-form-section select,
 .pix-payment textarea {
   width: 100%;
   min-height: 45px;
@@ -3308,6 +3309,7 @@
   font: 500 0.9rem / 1.25 var(--pz-font-body);
 }
 .checkout-form-section input:focus,
+.checkout-form-section select:focus,
 .pix-payment textarea:focus {
   border-color: var(--pz-verde-strong);
   box-shadow: 0 0 0 3px rgb(113 106 17 / 11%);

@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import patinhaIcon from '../assets/icons/patinha.png';
-import { ANNUAL_PRICE, cancelSubscription, formatBRL, formatRenewalDate, getSubscription, hasActiveAccess } from '../lib/subscription.js';
+import { cancelSubscription, formatRenewalDate, getSubscription, hasActiveAccess, subscriptionPriceLabel } from '../lib/subscription.js';
 
 const STATUS_LABEL: Record<string, string> = {
   active: 'Ativo',
@@ -34,11 +34,14 @@ export function GerenciarAssinaturaScreen() {
 
   const isCanceled = subscription.status === 'canceled';
   const isPix = subscription.paymentMethod === 'pix';
+  const renews = !isPix && !isCanceled && subscription.autoRenew;
   const renewalCopy = isPix
     ? 'Ao final do período, você escolhe se quer renovar com um novo Pix.'
     : isCanceled
-    ? 'A renovação foi cancelada — seu acesso continua até a data acima, sem novas cobranças depois disso.'
-    : 'A próxima cobrança anual acontece automaticamente no cartão, na data acima.';
+    ? 'A renovação foi cancelada. Seu acesso continua até a data acima, sem novas cobranças depois disso.'
+    : renews
+    ? 'Na data acima, um novo plano anual é cobrado automaticamente no mesmo cartão, no mesmo número de parcelas.'
+    : 'A renovação automática está desligada. Ao final do período, você escolhe se quer renovar.';
 
   async function handleCancel() {
     setCanceling(true);
@@ -86,10 +89,10 @@ export function GerenciarAssinaturaScreen() {
           <div className="subscription-price">
             <span>
               <small>Forma de pagamento</small>
-              <strong>{formatBRL(ANNUAL_PRICE)}/ano via {isPix ? 'Pix' : 'cartão'}</strong>
+              <strong>{subscriptionPriceLabel(subscription)}</strong>
             </span>
             <span>
-              <small>{isCanceled || isPix ? 'Acesso até' : 'Próxima renovação'}</small>
+              <small>{renews ? 'Próxima renovação' : 'Acesso até'}</small>
               <strong>{formatRenewalDate(subscription)}</strong>
             </span>
           </div>
@@ -107,13 +110,13 @@ export function GerenciarAssinaturaScreen() {
           <div>
             <span aria-hidden="true">↻</span>
             <p>
-              <strong>{isPix ? 'Renovação manual' : isCanceled ? 'Renovação cancelada' : 'Renovação automática'}</strong>
+              <strong>{renews ? 'Renovação automática' : isCanceled ? 'Renovação cancelada' : 'Renovação manual'}</strong>
               <small>{renewalCopy}</small>
             </p>
           </div>
         </section>
 
-        {!isCanceled && !isPix ? (
+        {renews ? (
           <button type="button" className="subscription-cancel" onClick={handleCancel} disabled={canceling}>
             {canceling ? 'Cancelando…' : 'Cancelar renovação'}
           </button>
@@ -121,7 +124,7 @@ export function GerenciarAssinaturaScreen() {
         <p className="subscription-help">
           {isPix
             ? 'Não há cobrança automática no Pix. Perto do vencimento, você poderá gerar um novo pagamento para continuar.'
-            : 'O cancelamento evita a próxima renovação. Seu acesso e eventuais pagamentos do período contratado continuam até o final.'}
+            : 'O cancelamento evita a próxima renovação. As parcelas do plano atual continuam na fatura e o acesso vai até o fim do período.'}
         </p>
       </div>
 

@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { supabaseAdmin } from './_lib/supabaseAdmin.js';
+import { activatePeriod } from './_lib/subscriptionPeriod.js';
 
 /**
  * Recebe a confirmação de pagamento do Asaas. É a ÚNICA coisa que libera
@@ -11,9 +12,14 @@ import { supabaseAdmin } from './_lib/supabaseAdmin.js';
  * aqui) — não é assinatura HMAC, é um token compartilhado fixo.
  *
  * Entrega é "at least once": o mesmo evento pode chegar mais de uma vez.
- * Todo handler abaixo é idempotente por construção (são `update`s por
- * chave, não incrementos).
+ * Todo handler abaixo é idempotente: a liberação de 12 meses passa por
+ * `activatePeriod`, que conta cada pagamento (ou parcelamento) uma vez só.
+ *
+ * Cartão parcelado (2026-10-05): o Asaas manda um evento por parcela. Só a
+ * parcela 1 libera o ano; as outras são ignoradas aqui.
  */
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 function addYears(date: Date, years: number): string {
   const d = new Date(date);
   d.setFullYear(d.getFullYear() + years);
@@ -37,6 +43,8 @@ interface AsaasWebhookPayload {
     customer?: string;
     checkoutSession?: string;
     externalReference?: string | null;
+    installment?: string | null;
+    installmentNumber?: number | null;
   };
 }
 
@@ -92,61 +100,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
       case 'PAYMENT_RECEIVED':
       case 'PAYMENT_CONFIRMED': {
-        const paymentId = payload.payment?.id;
-        const subscriptionId = payload.payment?.subscription;
-        const checkoutId = payload.payment?.checkoutSession;
-        const externalReference = payload.payment?.externalReference;
-        if (!paymentId && !subscriptionId && !checkoutId && !externalReference) break;
+        const payment = payload.payment;
+        if (!payment) break;
+        if (payment.installment && (payment.installmentNumber ?? 1) !== 1) break;
 
-        const values = {
-          status: 'active',
-          current_period_end: addYears(new Date(), 1),
-          ...(subscriptionId ? { asaas_subscription_id: subscriptionId } : {}),
-          ...(payload.payment?.customer ? { asaas_customer_id: payload.payment.customer } : {}),
-        };
+        // Acha a linha da assinatura pelo vínculo mais específico disponível.
+        // `externalReference` (user_id) é o último recurso, para quando o
+        // webhook chega antes de o id do pagamento ser salvo.
+        const matchers: [string, string | null | undefined][] = [
+          ['asaas_payment_id', payment.id],
+          ['asaas_installment_id', payment.installment],
+          ['asaas_checkout_id', payment.checkoutSession],
+          ['asaas_subscription_id', payment.subscription],
+          ['user_id', UUID.test(payment.externalReference ?? '') ? payment.externalReference : null],
+        ];
+        let userId: string | null = null;
+        for (const [column, value] of matchers) {
+          if (!value) continue;
+          const { data, error } = await admin.from('subscriptions').select('user_id').eq(column, value).limit(1);
+          if (error) throw error;
+          if (data?.[0]?.user_id) {
+            userId = data[0].user_id as string;
+            break;
+          }
+        }
+        if (!userId) break;
 
-        // No primeiro pagamento, o Asaas pode enviar PAYMENT_CONFIRMED antes
-        // de SUBSCRIPTION_CREATED. Nesse momento só conhecemos o checkout que
-        // foi salvo ao iniciar a compra. Depois disso, renovações também podem
-        // ser correlacionadas pelo id da assinatura já persistido.
-        let matched = false;
-        if (paymentId) {
-          const { data, error } = await admin
-            .from('subscriptions')
-            .update(values)
-            .eq('asaas_payment_id', paymentId)
-            .select('user_id');
-          if (error) throw error;
-          matched = Boolean(data?.length);
-        }
-        if (checkoutId) {
-          const { data, error } = await admin
-            .from('subscriptions')
-            .update(values)
-            .eq('asaas_checkout_id', checkoutId)
-            .select('user_id');
-          if (error) throw error;
-          matched = matched || Boolean(data?.length);
-        }
-        if (!matched && subscriptionId) {
-          const { data, error } = await admin
-            .from('subscriptions')
-            .update(values)
-            .eq('asaas_subscription_id', subscriptionId)
-            .select('user_id');
-          if (error) throw error;
-          matched = Boolean(data?.length);
-        }
-        // `externalReference` recebe o user_id na criação da cobrança e é o
-        // último vínculo seguro em caso de o webhook chegar antes de o ID do
-        // pagamento/assinatura terminar de ser persistido.
-        if (!matched && externalReference) {
-          const { error } = await admin
-            .from('subscriptions')
-            .update(values)
-            .eq('user_id', externalReference);
-          if (error) throw error;
-        }
+        const activationKey = payment.installment || payment.id;
+        if (!activationKey) break;
+        await activatePeriod(admin, userId, activationKey, {
+          ...(payment.subscription ? { asaas_subscription_id: payment.subscription } : {}),
+          ...(payment.customer ? { asaas_customer_id: payment.customer } : {}),
+        });
         break;
       }
       case 'PAYMENT_OVERDUE': {

@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { asaasFetch } from './_lib/asaas.js';
 import { HttpError, requireUser, supabaseAdmin } from './_lib/supabaseAdmin.js';
-
-const ANNUAL_PRICE = 99.99;
+import { activatePeriod } from './_lib/subscriptionPeriod.js';
+import { CARD_TOTAL, PIX_PRICE, normalizeInstallments } from '../apps/web/src/lib/pricing.js';
 
 type PaymentMethod = 'credit_card' | 'pix';
 
@@ -27,12 +27,20 @@ interface AsaasCustomer {
   id: string;
 }
 
-interface AsaasSubscription {
+interface AsaasPayment {
   id: string;
 }
 
-interface AsaasPayment {
+interface AsaasCardPayment {
   id: string;
+  status?: string;
+  installment?: string | null;
+  creditCardToken?: string;
+  creditCard?: {
+    creditCardToken?: string;
+    creditCardBrand?: string;
+    creditCardNumber?: string;
+  };
 }
 
 interface PixQrCode {
@@ -103,9 +111,11 @@ async function ensureCustomer(
  * esta Function HTTPS e seguem direto para a API de pagamentos; não são
  * persistidos, registrados em log ou devolvidos ao navegador.
  *
- * Crédito cria uma assinatura anual com renovação automática. Pix cria uma
- * cobrança anual avulsa: libera os mesmos 12 meses, com renovação manual por
- * um novo Pix ao fim do período.
+ * Cartão (Flay, 2026-10-05): plano anual de R$ 118,80 em até 12x, cobrado
+ * como parcelamento no cartão (POST /payments com installmentCount). O
+ * Asaas devolve um token do cartão, guardado em `subscription_card_tokens`,
+ * que `/api/subscription-renew` usa para renovar a cada 12 meses.
+ * Pix: R$ 99,90 à vista, libera 12 meses e não renova automaticamente.
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método não permitido.' });
@@ -154,22 +164,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (ccv.length < 3 || ccv.length > 4) throw new HttpError(400, 'Informe um código de segurança válido.');
       if (postalCode.length !== 8) throw new HttpError(400, 'Informe um CEP válido.');
 
+      const installmentCount = normalizeInstallments(req.body?.installmentCount);
       const { error: pendingError } = await admin.from('subscriptions').upsert(
-        { ...pendingBase, asaas_payment_id: null, asaas_subscription_id: null },
+        {
+          ...pendingBase,
+          asaas_payment_id: null,
+          asaas_subscription_id: null,
+          asaas_installment_id: null,
+          installment_count: installmentCount,
+          auto_renew: false,
+        },
         { onConflict: 'user_id' },
       );
       if (pendingError) throw pendingError;
 
-      const subscription = await asaasFetch<AsaasSubscription>('/subscriptions', {
+      const payment = await asaasFetch<AsaasCardPayment>('/payments', {
         method: 'POST',
         body: JSON.stringify({
           customer: customerId,
           billingType: 'CREDIT_CARD',
-          value: ANNUAL_PRICE,
-          nextDueDate: todayInSaoPaulo(),
-          cycle: 'YEARLY',
+          dueDate: todayInSaoPaulo(),
           description: 'Papazilla Anual',
           externalReference: user.id,
+          ...(installmentCount > 1 ? { installmentCount, totalValue: CARD_TOTAL } : { value: CARD_TOTAL }),
           creditCard: {
             holderName: requiredText(creditCard.holderName, 'o nome impresso no cartão'),
             number,
@@ -191,14 +208,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       const { error: updateError } = await admin
         .from('subscriptions')
-        .update({ asaas_subscription_id: subscription.id })
+        .update({ asaas_payment_id: payment.id, asaas_installment_id: payment.installment ?? null, auto_renew: true })
         .eq('user_id', user.id);
       if (updateError) throw updateError;
+
+      const token = payment.creditCard?.creditCardToken ?? payment.creditCardToken;
+      if (token) {
+        const { error: tokenError } = await admin.from('subscription_card_tokens').upsert({
+          user_id: user.id,
+          asaas_credit_card_token: token,
+          card_brand: payment.creditCard?.creditCardBrand ?? null,
+          card_last4: payment.creditCard?.creditCardNumber?.slice(-4) ?? null,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id' });
+        if (tokenError) console.error('[payment-create] token não salvo', tokenError.message);
+      }
+
+      // A resposta do Asaas (servidor a servidor) já diz se o cartão foi
+      // aprovado; o webhook confirma de novo, sem estender duas vezes.
+      if (payment.status === 'CONFIRMED' || payment.status === 'RECEIVED') {
+        await activatePeriod(admin, user.id, payment.installment ?? payment.id);
+      }
       return res.status(200).json({ status: 'processing' });
     }
 
     const { error: pendingError } = await admin.from('subscriptions').upsert(
-      { ...pendingBase, asaas_payment_id: null, asaas_subscription_id: null },
+      { ...pendingBase, asaas_payment_id: null, asaas_subscription_id: null, asaas_installment_id: null, installment_count: null, auto_renew: false },
       { onConflict: 'user_id' },
     );
     if (pendingError) throw pendingError;
@@ -208,7 +243,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       body: JSON.stringify({
         customer: customerId,
         billingType: 'PIX',
-        value: ANNUAL_PRICE,
+        value: PIX_PRICE,
         dueDate: todayInSaoPaulo(),
         description: 'Papazilla Anual',
         externalReference: user.id,

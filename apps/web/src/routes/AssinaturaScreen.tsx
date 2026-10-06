@@ -6,9 +6,11 @@ import zillaFrente from '../assets/zilla-frente.png';
 import { getActivePet } from '../lib/petsStore.js';
 import { describePet } from '../lib/petLabel.js';
 import {
-  ANNUAL_PRICE,
-  FULL_ANNUAL_PRICE,
-  LAUNCH_PRICE_UNTIL,
+  CARD_INSTALLMENT_VALUE,
+  CARD_MAX_INSTALLMENTS,
+  CARD_TOTAL,
+  PIX_PRICE,
+  cardInstallmentValue,
   createTransparentPayment,
   formatBRL,
   getSubscription,
@@ -73,13 +75,14 @@ export function AssinaturaScreen() {
   const backTo = closePath(returnTo);
   const profile = getUserProfile();
   const activePet = getActivePet();
-  const monthlyEquivalent = (ANNUAL_PRICE / 12).toLocaleString('pt-BR', {
+  const installmentAmount = CARD_INSTALLMENT_VALUE.toLocaleString('pt-BR', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
   const { preposition, displayName } = describePet(activePet);
 
-  const [method, setMethod] = useState<PaymentMethod>('pix');
+  const [method, setMethod] = useState<PaymentMethod>('credit_card');
+  const [installments, setInstallments] = useState<number>(CARD_MAX_INSTALLMENTS);
   const [name, setName] = useState(profile?.name ?? '');
   const [email, setEmail] = useState(profile?.email ?? '');
   const [cpf, setCpf] = useState('');
@@ -125,6 +128,7 @@ export function AssinaturaScreen() {
       const expiryDigits = onlyDigits(expiry, 4);
       const result = await createTransparentPayment({
         method,
+        ...(method === 'credit_card' ? { installmentCount: installments } : {}),
         payer: {
           name,
           email,
@@ -184,7 +188,7 @@ export function AssinaturaScreen() {
             <textarea id="pix-code" readOnly value={pix.payload} rows={4} />
             <button type="button" className="pz-button pz-button--primary wide" onClick={() => { void copyPix(); }}>Copiar código Pix</button>
             <p className="pix-payment__status"><span aria-hidden="true" /> Aguardando confirmação do pagamento…</p>
-            <small>O código vale para este pagamento anual de {formatBRL(ANNUAL_PRICE)}.</small>
+            <small>O código vale para este pagamento anual de {formatBRL(PIX_PRICE)}.</small>
           </section>
         ) : (
           <>
@@ -204,24 +208,22 @@ export function AssinaturaScreen() {
             </ul>
 
             <section className="paywall-offer" aria-label="Preço da assinatura anual">
-              <span className="paywall-offer__launch">Preço de lançamento até {LAUNCH_PRICE_UNTIL}</span>
               <div className="paywall-offer__equivalent">
-                <span>Equivale a</span>
-                <div className="paywall-offer__amount"><small>R$</small><strong>{monthlyEquivalent}</strong><em>por mês</em></div>
+                <span>Plano anual no cartão, até {CARD_MAX_INSTALLMENTS}x de</span>
+                <div className="paywall-offer__amount"><small>R$</small><strong>{installmentAmount}</strong><em>por mês</em></div>
               </div>
               <div className="paywall-offer__billing">
-                <span className="paywall-offer__calendar" aria-hidden="true">12</span>
-                <p><strong>Cobrança anual</strong><small>{formatBRL(ANNUAL_PRICE)} uma vez por ano</small></p>
+                <span className="paywall-offer__calendar" aria-hidden="true">Pix</span>
+                <p><strong>ou {formatBRL(PIX_PRICE)} no Pix</strong><small>À vista, sem renovação automática</small></p>
               </div>
-              <span className="paywall-offer__later">Depois, {formatBRL(FULL_ANNUAL_PRICE)} por ano.</span>
-              <p className="annual-commitment">Um pagamento libera 12 meses de receitas personalizadas para toda a sua matilha.</p>
+              <p className="annual-commitment">Cartão: total de {formatBRL(CARD_TOTAL)} por 12 meses, com renovação automática. Os dois liberam 12 meses de receitas para toda a sua matilha.</p>
             </section>
 
             <form className="transparent-checkout" onSubmit={submitPayment}>
               <fieldset className="payment-methods">
                 <legend>Forma de pagamento</legend>
-                <button type="button" className={method === 'pix' ? 'is-selected' : ''} onClick={() => setMethod('pix')}><span className="payment-methods__icon" aria-hidden="true"><img src={pixIcon} alt="" /></span><b>Pix</b><small>Liberação após o pagamento</small></button>
-                <button type="button" className={method === 'credit_card' ? 'is-selected' : ''} onClick={() => setMethod('credit_card')}><span className="payment-methods__icon" aria-hidden="true"><img src={cartaoIcon} alt="" /></span><b>Cartão de crédito</b><small>Renovação anual automática</small></button>
+                <button type="button" className={method === 'pix' ? 'is-selected' : ''} onClick={() => setMethod('pix')}><span className="payment-methods__icon" aria-hidden="true"><img src={pixIcon} alt="" /></span><b>Pix</b><small>{formatBRL(PIX_PRICE)} à vista, sem renovação automática</small></button>
+                <button type="button" className={method === 'credit_card' ? 'is-selected' : ''} onClick={() => setMethod('credit_card')}><span className="payment-methods__icon" aria-hidden="true"><img src={cartaoIcon} alt="" /></span><b>Cartão de crédito</b><small>Até {CARD_MAX_INSTALLMENTS}x de {formatBRL(CARD_INSTALLMENT_VALUE)}, renovação automática</small></button>
               </fieldset>
 
               <div className="checkout-form-section">
@@ -237,6 +239,13 @@ export function AssinaturaScreen() {
               {method === 'credit_card' ? (
                 <div className="checkout-form-section">
                   <h2>Dados do cartão</h2>
+                  <label>Parcelas
+                    <select value={installments} onChange={(e) => setInstallments(Number(e.target.value))}>
+                      {Array.from({ length: CARD_MAX_INSTALLMENTS }, (_, i) => CARD_MAX_INSTALLMENTS - i).map((n) => (
+                        <option key={n} value={n}>{n === 1 ? `1x de ${formatBRL(CARD_TOTAL)}` : `${n}x de ${formatBRL(cardInstallmentValue(n))}`}</option>
+                      ))}
+                    </select>
+                  </label>
                   <label>Nome impresso no cartão<input autoComplete="cc-name" value={cardHolder} onChange={(e) => setCardHolder(e.target.value.toUpperCase())} required /></label>
                   <label>Número do cartão<input inputMode="numeric" autoComplete="cc-number" value={cardNumber} onChange={(e) => setCardNumber(formatCard(e.target.value))} placeholder="0000 0000 0000 0000" required /></label>
                   <div className="checkout-form-grid">
@@ -251,10 +260,10 @@ export function AssinaturaScreen() {
               ) : null}
 
               <button type="submit" className="pz-button pz-button--primary wide paywall-cta" disabled={processing}>
-                {processing ? 'Processando…' : method === 'pix' ? `Gerar Pix de ${formatBRL(ANNUAL_PRICE)}` : `Pagar ${formatBRL(ANNUAL_PRICE)} no cartão`}
+                {processing ? 'Processando…' : method === 'pix' ? `Gerar Pix de ${formatBRL(PIX_PRICE)}` : installments === 1 ? `Pagar ${formatBRL(CARD_TOTAL)} no cartão` : `Pagar ${installments}x de ${formatBRL(cardInstallmentValue(installments))}`}
               </button>
-              <p className="paywall-disclosure">{method === 'pix' ? 'O Pix libera 12 meses de acesso. Ao final do período, você escolhe se quer renovar.' : 'Cobrança anual recorrente. Você pode cancelar a renovação a qualquer momento e usar o período já pago até o fim.'}</p>
-              <p className="checkout-security"><span aria-hidden="true">⌾</span> Pagamento seguro. Os dados do cartão não são armazenados pelo Papazilla.</p>
+              <p className="paywall-disclosure">{method === 'pix' ? 'O Pix libera 12 meses de acesso e não renova automaticamente. Ao final do período, você escolhe se quer renovar.' : `Plano anual de ${formatBRL(CARD_TOTAL)} no cartão, renovado automaticamente a cada 12 meses no mesmo cartão e no mesmo número de parcelas. Você pode cancelar a renovação quando quiser e usar o período pago até o fim.`}</p>
+              <p className="checkout-security"><span aria-hidden="true">⌾</span> Pagamento seguro. Os dados do cartão ficam com o processador de pagamentos, não com o Papazilla.</p>
             </form>
 
             <div className="paywall-links">

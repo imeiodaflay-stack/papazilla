@@ -11,7 +11,7 @@ import infoIcon from '../assets/icons/info.png';
 import excluirIcon from '../assets/icons/excluir.png';
 import { listPets } from '../lib/petsStore.js';
 import { describePet, joinPt } from '../lib/petLabel.js';
-import { ANNUAL_PRICE, formatBRL, getSubscription, hasActiveAccess } from '../lib/subscription.js';
+import { getSubscription, hasActiveAccess, subscriptionPriceLabel } from '../lib/subscription.js';
 import { setAuthenticated } from '../lib/session.js';
 import { getUserProfile, setUserAvatar } from '../lib/userProfile.js';
 import { fileToDataUrl, PhotoUploadError, uploadPhoto } from '../lib/photoUpload.js';
@@ -84,7 +84,7 @@ export function ContaScreen() {
     : 'Cadastre seus pets e explore os conteúdos. Assine para criar receitas personalizadas.';
   const valueLabel = isActive ? 'Pagamento' : 'Receitas';
   const planValue = isActive
-    ? `${formatBRL(ANNUAL_PRICE)}/ano via ${subscription?.paymentMethod === 'pix' ? 'Pix' : 'cartão'}`
+    ? subscriptionPriceLabel(subscription)
     : 'Benefício premium';
 
   function goManagePlan() {

@@ -13,24 +13,15 @@
  * confirmado pelo servidor (webhook → `/api/webhooks-asaas`), nunca
  * inventado no navegador.
  *
- * Decisão de produto (Flay, 2026-09): oferta única, Papazilla Anual R$99,99,
- * cobrança recorrente automática no cartão, ou pagamento anual por Pix com
- * renovação manual. Sem parcelamento no MVP.
+ * Decisão de produto (Flay, 2026-10-05): Papazilla Anual em até 12x de
+ * R$ 9,90 no cartão (renovação automática) ou R$ 99,90 no Pix (sem
+ * renovação automática). Preços em `pricing.ts`. Sem promoção de lançamento.
  */
 import { isSupabaseConfigured } from './env.js';
 import { supabase } from './supabase.js';
+import { CARD_TOTAL, PIX_PRICE, cardInstallmentValue } from './pricing.js';
 
-export const ANNUAL_PRICE = 99.99;
-
-/**
- * Preço cheio depois do lançamento (Flay, 2026-09-28). Comunicado como
- * "Preço de lançamento: R$ 99,99 por ano. Depois, R$ 149,99.", nunca como
- * "de/por", porque esse preço ainda não foi praticado (ver landing).
- */
-export const FULL_ANNUAL_PRICE = 149.99;
-
-/** Fim da promoção de lançamento (Flay, 2026-09-28). Em 01/11 trocar ANNUAL_PRICE aqui e em api/payment-create.ts. */
-export const LAUNCH_PRICE_UNTIL = '31/10';
+export { CARD_INSTALLMENT_VALUE, CARD_MAX_INSTALLMENTS, CARD_TOTAL, PIX_PRICE, cardInstallmentValue } from './pricing.js';
 
 export type SubscriptionStatus = 'none' | 'pending' | 'active' | 'past_due' | 'canceled';
 
@@ -39,6 +30,8 @@ export interface Subscription {
   plan: 'annual';
   currentPeriodEnd: string | null;
   paymentMethod: 'credit_card' | 'pix' | null;
+  installmentCount: number | null;
+  autoRenew: boolean;
 }
 
 interface SubscriptionRow {
@@ -46,6 +39,8 @@ interface SubscriptionRow {
   plan: string;
   current_period_end: string | null;
   payment_method: 'credit_card' | 'pix' | null;
+  installment_count: number | null;
+  auto_renew: boolean | null;
 }
 
 let cachedSubscription: Subscription | null = null;
@@ -57,6 +52,8 @@ function rowToSubscription(row: SubscriptionRow): Subscription {
     plan: 'annual',
     currentPeriodEnd: row.current_period_end,
     paymentMethod: row.payment_method,
+    installmentCount: row.installment_count,
+    autoRenew: Boolean(row.auto_renew),
   };
 }
 
@@ -69,7 +66,7 @@ export async function loadSubscriptionForOwner(userId: string | null): Promise<v
   }
   const { data, error } = await supabase
     .from('subscriptions')
-    .select('status, plan, current_period_end, payment_method')
+    .select('status, plan, current_period_end, payment_method, installment_count, auto_renew')
     .eq('user_id', userId)
     .maybeSingle();
   if (error) {
@@ -109,6 +106,14 @@ export function formatBRL(value: number): string {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
+/** "12x de R$ 9,90 no cartão" ou "R$ 99,90 no Pix", para telas de conta. */
+export function subscriptionPriceLabel(subscription: Subscription | null): string {
+  if (subscription?.paymentMethod === 'pix') return `${formatBRL(PIX_PRICE)} no Pix`;
+  const count = subscription?.installmentCount ?? null;
+  if (!count) return `${formatBRL(CARD_TOTAL)}/ano no cartão`;
+  return count === 1 ? `${formatBRL(CARD_TOTAL)} no cartão` : `${count}x de ${formatBRL(cardInstallmentValue(count))} no cartão`;
+}
+
 async function authedFetch(path: string, body?: unknown): Promise<Response> {
   if (!supabase) throw new Error('Supabase não configurado.');
   const { data } = await supabase.auth.getSession();
@@ -124,6 +129,8 @@ async function authedFetch(path: string, body?: unknown): Promise<Response> {
 /** Envia os dados do checkout próprio à Function segura, sem persistir cartão no navegador ou banco. */
 export interface TransparentPaymentInput {
   method: 'credit_card' | 'pix';
+  /** Só no cartão: 1 a 12 parcelas. */
+  installmentCount?: number;
   payer: {
     name: string;
     email: string;

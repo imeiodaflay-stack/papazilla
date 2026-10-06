@@ -14,7 +14,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { data: sub, error: subError } = await admin.from('subscriptions')
       .select('asaas_subscription_id,asaas_checkout_id,asaas_payment_id,payment_method,status').eq('user_id', user.id).maybeSingle();
     if (subError) throw subError;
-    if (sub?.status === 'active' && sub.payment_method !== 'pix' && !sub.asaas_subscription_id) {
+    // Cartão parcelado (2026-10-05) não tem assinatura no Asaas: a renovação é
+    // nossa e some junto com a linha (o token é apagado em cascata).
+    if (sub?.status === 'active' && sub.payment_method !== 'pix' && !sub.asaas_subscription_id && !sub.asaas_payment_id) {
       throw new HttpError(409, 'A assinatura precisa ser conferida antes da exclusão. Entre em contato com o suporte.');
     }
 
