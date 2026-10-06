@@ -2596,6 +2596,7 @@
 }
 .add-pet-inline {
   margin-top: 0.35rem;
+  min-height: 44px;
   color: var(--pz-accent-ink);
 }
 
@@ -2644,6 +2645,7 @@
 .pet-hero-card__identity .pz-badge {
   background: rgb(255 248 243 / 90%);
   backdrop-filter: blur(6px);
+  color: var(--pz-chocolate);
 }
 .pet-hero-card--empty {
   background:
@@ -2694,10 +2696,10 @@
 .pet-more {
   position: absolute;
   z-index: 3;
-  top: 0.85rem;
-  right: 0.85rem;
-  width: 38px;
-  height: 38px;
+  top: 0.6rem;
+  right: 0.6rem;
+  width: 44px;
+  height: 44px;
   border: 0;
   border-radius: 50%;
   background: rgb(255 255 255 / 55%);
@@ -2744,7 +2746,7 @@
 }
 .pet-section__heading > div {
   display: grid;
-  gap: 0.18rem;
+  gap: 0.28rem;
 }
 .pet-section__heading h2,
 .anamnesis-card h2 {
@@ -2793,15 +2795,15 @@
   overflow-wrap: anywhere;
 }
 .pet-profile-facts .pet-profile-fact--peach {
-  background: #fff0e8;
+  background: var(--pz-surface-soft);
   box-shadow: none;
 }
 .pet-profile-facts .pet-profile-fact--green {
-  background: #f0f4d8;
+  background: var(--pz-success-bg);
   box-shadow: none;
 }
 .pet-profile-facts .pet-profile-fact--blue {
-  background: #e8f4fa;
+  background: var(--pz-info-bg);
   box-shadow: none;
 }
 
@@ -5273,8 +5275,8 @@
 }
 .curiosity-filters button {
   flex: 0 0 auto;
-  min-height: 36px;
-  padding: 0.45rem 0.7rem;
+  min-height: 40px;
+  padding: 0.45rem 0.9rem;
   background: #fff;
   border: 1px solid var(--pz-border);
   border-radius: 999px;
