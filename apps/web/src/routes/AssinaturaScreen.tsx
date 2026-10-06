@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import cartaoIcon from '../assets/icons/cartao.webp';
 import pixIcon from '../assets/icons/pix.webp';
-import zillaFrente from '../assets/zilla-frente-transparent.webp';
+import zillaChef from '../assets/zilla-chef.webp';
 import { getActivePet } from '../lib/petsStore.js';
 import { describePet } from '../lib/petLabel.js';
 import {
@@ -198,7 +198,7 @@ export function AssinaturaScreen() {
         ) : (
           <>
             <div className="paywall-hero">
-              <span className="paywall-hero__art"><img src={zillaFrente} alt="Zilla pronto para cozinhar" /></span>
+              <span className="paywall-hero__art"><img src={zillaChef} alt="Zilla, o chefao do Papazilla" /></span>
               <div>
                 <h1>A receita do seu Monstrinho começa aqui</h1>
                 <p>Da escolha dos ingredientes à porção no potinho, o Papazilla calcula tudo para vocês.</p>

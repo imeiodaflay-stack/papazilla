@@ -3062,47 +3062,48 @@
 }
 
 .paywall-hero {
-  display: grid;
-  grid-template-rows: auto auto;
-  place-items: center;
-  text-align: center;
+  position: relative;
   overflow: hidden;
-  padding: 2rem 1.5rem 1.5rem;
   border-radius: 28px;
   background: var(--pz-coral);
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 .paywall-hero__art {
-  position: relative;
-  width: 148px;
-  height: 160px;
-  margin-bottom: 0.5rem;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 }
 .paywall-hero__art img {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 148px;
-  height: 160px;
+  right: -8px;
+  bottom: 0;
+  width: 220px;
+  height: 220px;
   object-fit: contain;
-  mix-blend-mode: multiply;
-  transform: translate(-50%, -50%);
+  object-position: bottom right;
+  filter: drop-shadow(0 4px 24px rgba(74,45,34,0.22));
+}
+.paywall-hero > div {
+  position: relative;
+  z-index: 1;
+  padding: 1.5rem 1.35rem 1.5rem;
+  max-width: calc(100% - 130px);
 }
 .paywall-hero h1 {
-  margin: 0 0 0.5rem;
-  font: 700 1.5rem / 1.1 var(--pz-font-display);
+  margin: 0 0 0.4rem;
+  font: 700 1.4rem / 1.15 var(--pz-font-display);
   letter-spacing: -0.02em;
   color: var(--pz-creme);
   text-wrap: balance;
 }
-.paywall-hero > div {
-  display: grid;
-  gap: 0;
-}
 .paywall-hero > div > p:last-child {
   margin: 0;
-  color: rgba(255, 248, 243, 0.82);
-  font-size: 0.875rem;
-  line-height: 1.4;
+  color: rgba(255, 248, 243, 0.86);
+  font-size: 0.8125rem;
+  line-height: 1.45;
 }
 
 .paywall-benefits {
