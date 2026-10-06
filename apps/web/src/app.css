@@ -313,6 +313,26 @@
   font: 800 0.875rem / 1.2 var(--pz-font-support);
   transform: rotate(-3deg);
 }
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 14px;
+  width: 14px;
+  height: 8px;
+  background: #fff;
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+.speech-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: -9px;
+  left: 13px;
+  width: 15px;
+  height: 9px;
+  background: var(--pz-border);
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
 .empty-state h1 {
   margin: 0.3rem 0 0.7rem;
   font-size: clamp(1.8rem, 7vw, 2.2rem);

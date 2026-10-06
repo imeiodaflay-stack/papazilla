@@ -35,7 +35,7 @@ export function ZillaScreen() {
             className="pz-button pz-button--primary wide"
             onClick={() => navigate('/anamnese')}
           >
-            Cadastrar um aumigo <span aria-hidden="true">＋</span>
+            Cadastrar um aumigo <span aria-hidden="true">+</span>
           </button>
         </div>
       </main>
