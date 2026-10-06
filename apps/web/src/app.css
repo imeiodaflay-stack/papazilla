@@ -2178,7 +2178,7 @@
 .home-personalized-card__zilla {
   grid-row: 1;
   grid-column: 1;
-  align-self: flex-end;
+  align-self: center;
   justify-self: center;
   width: 148px;
   max-width: 150%;
