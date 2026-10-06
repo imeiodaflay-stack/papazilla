@@ -35,6 +35,13 @@ export function GaleriaScreen() {
             <span><img src={galeriaIcon} alt="" /></span>
             <h2>Sua galeria está começando</h2>
             <p>As fotos dos preparos dos seus Monstrinhos vão aparecer aqui.</p>
+            <button
+              type="button"
+              className="collection-empty__cta"
+              onClick={() => navigate('/papa')}
+            >
+              Fazer minha primeira fornalha
+            </button>
           </section>
         ) : (
           <section className="gallery-feed" aria-labelledby="gallery-feed-title">

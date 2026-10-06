@@ -65,6 +65,13 @@ export function ReceitasScreen() {
               <span><img src={salvasIcon} alt="" /></span>
               <h2 id="saved-empty-title">Nenhuma receita salva ainda</h2>
               <p>Monte uma receita no Papá para ela aparecer aqui.</p>
+              <button
+                type="button"
+                className="collection-empty__cta"
+                onClick={() => navigate('/papa')}
+              >
+                Criar minha primeira receita
+              </button>
             </section>
           ) : (
             <div className="saved-content">
