@@ -15,6 +15,15 @@ function apiKey(): string {
   return key;
 }
 
+/** Erro de resposta do Asaas, com o status HTTP (4xx = recusa definitiva, ex.: cartão negado). */
+export class AsaasHttpError extends Error {
+  status: number;
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+  }
+}
+
 export async function asaasFetch<T = any>(path: string, init: RequestInit = {}): Promise<T> {
   const res = await fetch(`${ASAAS_BASE_URL}${path}`, {
     ...init,
@@ -28,7 +37,7 @@ export async function asaasFetch<T = any>(path: string, init: RequestInit = {}):
   const body: any = await res.json().catch(() => null);
   if (!res.ok) {
     const message = body?.errors?.[0]?.description || `O processamento do pagamento falhou (${res.status}).`;
-    throw new Error(message);
+    throw new AsaasHttpError(res.status, message);
   }
   return body as T;
 }

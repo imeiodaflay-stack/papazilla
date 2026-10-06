@@ -206,28 +206,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }),
       });
 
-      const { error: updateError } = await admin
-        .from('subscriptions')
-        .update({ asaas_payment_id: payment.id, asaas_installment_id: payment.installment ?? null, auto_renew: true })
-        .eq('user_id', user.id);
-      if (updateError) throw updateError;
-
       const token = payment.creditCard?.creditCardToken ?? payment.creditCardToken;
+      let tokenSaved = false;
       if (token) {
         const { error: tokenError } = await admin.from('subscription_card_tokens').upsert({
           user_id: user.id,
           asaas_credit_card_token: token,
           card_brand: payment.creditCard?.creditCardBrand ?? null,
           card_last4: payment.creditCard?.creditCardNumber?.slice(-4) ?? null,
+          customer_ip: requestIp(req) || null,
           updated_at: new Date().toISOString(),
         }, { onConflict: 'user_id' });
         if (tokenError) console.error('[payment-create] token não salvo', tokenError.message);
+        else tokenSaved = true;
+      } else {
+        console.error('[payment-create] Asaas não devolveu token do cartão; renovação automática desligada.');
       }
 
+      // Sem token não há como renovar sozinho: a renovação fica desligada e a
+      // tela de conta mostra isso, em vez de prometer uma cobrança que não vai rolar.
+      const { error: updateError } = await admin
+        .from('subscriptions')
+        .update({ asaas_payment_id: payment.id, asaas_installment_id: payment.installment ?? null, auto_renew: tokenSaved })
+        .eq('user_id', user.id);
+      if (updateError) throw updateError;
+
       // A resposta do Asaas (servidor a servidor) já diz se o cartão foi
-      // aprovado; o webhook confirma de novo, sem estender duas vezes.
-      if (payment.status === 'CONFIRMED' || payment.status === 'RECEIVED') {
-        await activatePeriod(admin, user.id, payment.installment ?? payment.id);
+      // aprovado. Só libera aqui se a chave for a mesma que o webhook vai usar
+      // (id do parcelamento, ou do pagamento em 1x); senão, espera o webhook.
+      const approved = payment.status === 'CONFIRMED' || payment.status === 'RECEIVED';
+      const activationKey = installmentCount > 1 ? payment.installment : payment.id;
+      if (approved && activationKey) {
+        await activatePeriod(admin, user.id, activationKey);
       }
       return res.status(200).json({ status: 'processing' });
     }

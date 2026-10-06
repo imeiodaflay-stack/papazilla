@@ -134,6 +134,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
         break;
       }
+      case 'PAYMENT_CREDIT_CARD_CAPTURE_REFUSED':
+      case 'PAYMENT_REPROVED_BY_RISK_ANALYSIS': {
+        // Cartão recusado depois da criação (análise de risco ou captura).
+        // Desliga a renovação; uma compra nova que ainda estava pendente volta
+        // para "sem assinatura". Um período já pago não é tocado.
+        const payment = payload.payment;
+        const filters: [string, string | null | undefined][] = [
+          ['asaas_payment_id', payment?.id],
+          ['asaas_installment_id', payment?.installment],
+        ];
+        for (const [column, value] of filters) {
+          if (!value) continue;
+          const { error } = await admin.from('subscriptions').update({ auto_renew: false }).eq(column, value);
+          if (error) throw error;
+          const { error: pendingError } = await admin.from('subscriptions').update({ status: 'none' }).eq(column, value).eq('status', 'pending');
+          if (pendingError) throw pendingError;
+        }
+        break;
+      }
       case 'PAYMENT_OVERDUE': {
         const subscriptionId = payload.payment?.subscription;
         if (!subscriptionId) break;
