@@ -2169,7 +2169,7 @@
 .home-personalized-card {
   display: grid;
   grid-template-columns: 0.82fr 1.18fr;
-  grid-template-rows: 1fr auto;
+  grid-template-rows: minmax(148px, 1fr) auto;
   overflow: hidden;
   border-radius: 28px;
   background: var(--pz-surface-soft);
