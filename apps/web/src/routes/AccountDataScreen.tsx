@@ -5,6 +5,7 @@ import infoIcon from '../assets/icons/info.png';
 import { deleteAccount, downloadAccountData } from '../lib/accountData.js';
 import { setAuthenticated } from '../lib/session.js';
 import { goBackOr } from '../lib/navigation.js';
+import { getSubscription, hasActiveAccess } from '../lib/subscription.js';
 
 /**
  * Dados da conta — sem tela equivalente no protótipo (lá era um toast "as
@@ -16,6 +17,9 @@ import { goBackOr } from '../lib/navigation.js';
 export function AccountDataScreen() {
   const navigate = useNavigate();
   const [confirming, setConfirming] = useState(false);
+  const subscription = getSubscription();
+  const installmentsLeft = hasActiveAccess(subscription) && subscription?.paymentMethod === 'credit_card' &&
+    (subscription.installmentCount ?? 1) > 1;
   const [busy, setBusy] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<number>();
@@ -99,6 +103,19 @@ export function AccountDataScreen() {
               <p>
                 <strong>Tem certeza?</strong>
                 <span>Essa ação não pode ser desfeita. Considere baixar seus dados antes de continuar.</span>
+              </p>
+            </div>
+          ) : null}
+
+          {confirming && installmentsLeft ? (
+            <div className="clinical-warning">
+              <img src={infoIcon} alt="" />
+              <p>
+                <strong>Seu plano no cartão foi parcelado</strong>
+                <span>
+                  A exclusão cancela a próxima renovação, mas as parcelas que faltam do plano atual
+                  ({subscription?.installmentCount}x) continuam na fatura do cartão. O acesso ao Papazilla termina na hora.
+                </span>
               </p>
             </div>
           ) : null}
