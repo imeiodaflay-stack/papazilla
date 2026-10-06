@@ -1,16 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { setSeenOnboarding } from '../lib/session.js';
-import zilla from '../assets/zilla-frente.webp';
-import patinha from '../assets/icons/patinha.png';
-import zillaIcon from '../assets/icons/zilla.png';
-import adicionar from '../assets/icons/adicionar.png';
-import potinho from '../assets/icons/potinho.png';
-import sucesso from '../assets/icons/sucesso.png';
-import salvo from '../assets/icons/salvo.png';
+import imgHello from '../assets/onboarding-hello.webp';
+import imgPets from '../assets/onboarding-pets.webp';
+import imgRecipe from '../assets/onboarding-recipe.webp';
+import imgPortion from '../assets/onboarding-portion.webp';
 
 /**
- * Onboarding em 4 telas, fiel a `papazilla-prototype` (tela "Onboarding").
+ * Onboarding em 4 telas.
  * Track horizontal com scroll-snap + gesto, dots, contador "N de 4", "Pular" e
  * botão que vira "Conhecer a matilha →" na última tela. Ao concluir, marca
  * `papazilla.seenOnboarding` e vai para o estado sem pets (/zilla).
@@ -29,8 +26,6 @@ export function OnboardingScreen() {
     const next = Math.max(0, Math.min(LAST, index));
     setActive(next);
     const track = trackRef.current;
-    // Escrita direta e instantânea: `scrollTo({behavior:'smooth'})` é cancelado
-    // pelo scroll-snap mandatory neste Chrome. O gesto (swipe) continua nativo.
     if (track) track.scrollLeft = next * track.clientWidth;
   }
 
@@ -66,13 +61,7 @@ export function OnboardingScreen() {
       <div className="onboarding__track" ref={trackRef} onScroll={onScroll}>
         <article className="onboarding-slide">
           <div className="hero-stage hero-stage--hello">
-            <span className="doodle doodle--spark" aria-hidden="true">
-              ✦
-            </span>
-            <span className="doodle doodle--heart" aria-hidden="true">
-              ♥
-            </span>
-            <img src={zilla} alt="Zilla, o cachorro do Papazilla" />
+            <img src={imgHello} alt="Zilla, o mascote do Papazilla, acenando com avental de chef" />
           </div>
           <div className="onboarding-slide__copy">
             <p className="eyebrow">Prazer, eu sou o Zilla</p>
@@ -85,17 +74,7 @@ export function OnboardingScreen() {
 
         <article className="onboarding-slide">
           <div className="hero-stage hero-stage--pets">
-            <div className="mini-pet mini-pet--one">
-              <img src={patinha} alt="" />
-              <span>Tico</span>
-            </div>
-            <div className="mini-pet mini-pet--two">
-              <img src={zillaIcon} alt="" />
-              <span>Lola</span>
-            </div>
-            <div className="add-pet-bubble">
-              <img src={adicionar} alt="" />
-            </div>
+            <img src={imgPets} alt="Dois cachorros sorridentes em cards, com botão de adicionar pet" />
           </div>
           <div className="onboarding-slide__copy">
             <p className="eyebrow">Primeiro, as apresentações</p>
@@ -108,19 +87,7 @@ export function OnboardingScreen() {
 
         <article className="onboarding-slide">
           <div className="hero-stage hero-stage--recipe">
-            <div className="ingredient ingredient--a" aria-hidden="true">
-              🥕
-            </div>
-            <div className="ingredient ingredient--b" aria-hidden="true">
-              🥦
-            </div>
-            <div className="ingredient ingredient--c" aria-hidden="true">
-              🍗
-            </div>
-            <div className="pot-card">
-              <img src={potinho} alt="Tigela de comida" />
-              <span>Receita balanceada</span>
-            </div>
+            <img src={imgRecipe} alt="Panela de barro com ingredientes frescos ao redor" />
           </div>
           <div className="onboarding-slide__copy">
             <p className="eyebrow">Você escolhe os ingredientes</p>
@@ -131,17 +98,7 @@ export function OnboardingScreen() {
 
         <article className="onboarding-slide">
           <div className="hero-stage hero-stage--portion">
-            <div className="portion-card">
-              <img src={sucesso} alt="" />
-              <strong>Porção da Mel</strong>
-              <span>320 g por dia</span>
-            </div>
-            <div className="saved-chip">
-              <img src={salvo} alt="" /> Salva para depois
-            </div>
-            <div className="rating-bubble" aria-hidden="true">
-              ♥ ♥ ♥ ♥ ♥
-            </div>
+            <img src={imgPortion} alt="Tigela com refeição balanceada e indicadores de aprovação" />
           </div>
           <div className="onboarding-slide__copy">
             <p className="eyebrow">Tudo na medida</p>
