@@ -2168,25 +2168,27 @@
 }
 .home-personalized-card {
   display: grid;
-  grid-template-columns: 0.88fr 1.12fr;
-  align-items: center;
-  column-gap: 0.35rem;
+  grid-template-columns: 0.82fr 1.18fr;
+  align-items: end;
+  column-gap: 0.5rem;
   overflow: hidden;
-  padding: 1.15rem;
+  padding: 1.25rem 1.25rem 0;
   border-radius: 28px;
   background: var(--pz-surface-soft);
   box-shadow: 0 10px 24px rgba(74, 45, 34, 0.1);
 }
 .home-personalized-card__zilla {
-  align-self: center;
+  align-self: flex-end;
   justify-self: center;
-  width: 142px;
-  max-width: 145%;
-  margin-left: -1.4rem;
+  width: 148px;
+  max-width: 150%;
+  margin-left: -1rem;
+  margin-bottom: 0;
   object-fit: contain;
 }
 .home-personalized-card__copy {
   min-width: 0;
+  padding-bottom: 1.25rem;
 }
 .home-personalized-card__copy small,
 .home-originals__heading small {
@@ -2195,18 +2197,20 @@
   letter-spacing: 0.07em;
 }
 .home-personalized-card h2 {
-  margin: 0.25rem 0 0.45rem;
+  margin: 0.25rem 0 0.4rem;
   color: var(--pz-chocolate);
   font: 800 1.35rem / 1.1 var(--pz-font-support);
 }
 .home-personalized-card p {
   color: var(--pz-ink);
-  font-size: 0.8125rem;
-  line-height: 1.42;
+  font-size: 0.875rem;
+  line-height: 1.45;
 }
 .home-personalized-card .pz-button {
   grid-column: 1 / -1;
-  margin-top: 1rem;
+  margin-top: 0.9rem;
+  border-radius: 0 0 28px 28px;
+  padding-bottom: 1.1rem;
 }
 .home-originals {
   display: grid;
