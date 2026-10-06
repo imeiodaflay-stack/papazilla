@@ -2169,26 +2169,27 @@
 .home-personalized-card {
   display: grid;
   grid-template-columns: 0.82fr 1.18fr;
-  align-items: end;
-  column-gap: 0.5rem;
+  grid-template-rows: 1fr auto;
   overflow: hidden;
-  padding: 1.25rem 1.25rem 0;
   border-radius: 28px;
   background: var(--pz-surface-soft);
   box-shadow: 0 10px 24px rgba(74, 45, 34, 0.1);
 }
 .home-personalized-card__zilla {
+  grid-row: 1;
+  grid-column: 1;
   align-self: flex-end;
   justify-self: center;
   width: 148px;
   max-width: 150%;
-  margin-left: -1rem;
-  margin-bottom: 0;
+  margin-left: -0.75rem;
   object-fit: contain;
 }
 .home-personalized-card__copy {
+  grid-row: 1;
+  grid-column: 2;
   min-width: 0;
-  padding-bottom: 1.25rem;
+  padding: 1.25rem 1.25rem 1rem 0.25rem;
 }
 .home-personalized-card__copy small,
 .home-originals__heading small {
@@ -2208,9 +2209,11 @@
 }
 .home-personalized-card .pz-button {
   grid-column: 1 / -1;
-  margin-top: 0.9rem;
+  grid-row: 2;
+  margin-top: 0;
   border-radius: 0 0 28px 28px;
-  padding-bottom: 1.1rem;
+  padding-top: 1rem;
+  padding-bottom: 1.15rem;
 }
 .home-originals {
   display: grid;
