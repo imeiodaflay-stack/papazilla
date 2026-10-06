@@ -35,13 +35,17 @@ export function GerenciarAssinaturaScreen() {
   const isCanceled = subscription.status === 'canceled';
   const isPix = subscription.paymentMethod === 'pix';
   const renews = !isPix && !isCanceled && subscription.autoRenew;
+  const daysLeft = subscription.currentPeriodEnd
+    ? Math.ceil((new Date(subscription.currentPeriodEnd).getTime() - Date.now()) / 86400000)
+    : 0;
+  const canRenew = !renews && daysLeft <= 30;
   const renewalCopy = isPix
     ? 'Ao final do período, você escolhe se quer renovar com um novo Pix.'
     : isCanceled
     ? 'A renovação foi cancelada. Seu acesso continua até a data acima, sem novas cobranças depois disso.'
     : renews
-    ? 'Na data acima, um novo plano anual é cobrado automaticamente no mesmo cartão, no mesmo número de parcelas.'
-    : 'A renovação automática está desligada. Ao final do período, você escolhe se quer renovar.';
+    ? 'A próxima cobrança anual acontece automaticamente no cartão, na data acima.'
+    : 'Não há renovação automática. Ao final do período, você escolhe se quer renovar.';
 
   async function handleCancel() {
     setCanceling(true);
@@ -116,15 +120,24 @@ export function GerenciarAssinaturaScreen() {
           </div>
         </section>
 
+        {canRenew ? (
+          <button
+            type="button"
+            className="pz-button pz-button--primary wide"
+            onClick={() => navigate('/assinatura', { state: { returnTo: 'conta' } })}
+          >
+            Renovar por mais 12 meses
+          </button>
+        ) : null}
         {renews ? (
           <button type="button" className="subscription-cancel" onClick={handleCancel} disabled={canceling}>
             {canceling ? 'Cancelando…' : 'Cancelar renovação'}
           </button>
         ) : null}
         <p className="subscription-help">
-          {isPix
-            ? 'Não há cobrança automática no Pix. Perto do vencimento, você poderá gerar um novo pagamento para continuar.'
-            : 'O cancelamento evita a próxima renovação. As parcelas do plano atual continuam na fatura e o acesso vai até o fim do período.'}
+          {renews
+            ? 'O cancelamento evita a próxima renovação. Seu acesso continua até o fim do período já pago.'
+            : 'Nenhum plano renova sozinho. Nos últimos 30 dias do período, aparece aqui o botão para renovar; os 12 meses novos começam quando os atuais terminam.'}
         </p>
       </div>
 

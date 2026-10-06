@@ -42,7 +42,7 @@ const TERMOS_SECTIONS: { heading: string; body: string }[] = [
   },
   {
     heading: '6. Assinatura',
-    body: 'Alguns recursos, como criar receitas, podem exigir uma assinatura paga. Preços, forma de pagamento e política de cancelamento são exibidos dentro do próprio app antes de qualquer cobrança. No cartão de crédito, o plano anual é renovado automaticamente a cada 12 meses no mesmo cartão e no mesmo número de parcelas, usando uma referência segura do cartão guardada pelo processador de pagamentos (o Papazilla não armazena os dados do cartão). Você pode cancelar a renovação a qualquer momento em Minha conta → Assinatura; as parcelas do período já contratado continuam na fatura e o acesso segue até o fim do período. No Pix, não há renovação automática.',
+    body: 'Alguns recursos, como criar receitas, podem exigir uma assinatura paga. Preços, forma de pagamento e política de cancelamento são exibidos dentro do próprio app antes de qualquer cobrança. O plano anual pode ser pago no cartão de crédito, em parcelas, ou no Pix, à vista. Nenhuma forma de pagamento renova automaticamente: ao fim dos 12 meses, você escolhe se quer contratar de novo. No cartão parcelado, as parcelas do período contratado seguem na fatura mesmo que você deixe de usar o app ou exclua a conta.',
   },
   {
     heading: '7. Uso aceitável',

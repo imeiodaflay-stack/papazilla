@@ -14,8 +14,8 @@
  * inventado no navegador.
  *
  * Decisão de produto (Flay, 2026-10-05): Papazilla Anual em até 12x de
- * R$ 9,90 no cartão (renovação automática) ou R$ 99,90 no Pix (sem
- * renovação automática). Preços em `pricing.ts`. Sem promoção de lançamento.
+ * R$ 9,90 no cartão ou R$ 99,90 no Pix. Nenhum dos dois renova
+ * automaticamente. Preços em `pricing.ts`. Sem promoção de lançamento.
  */
 import { isSupabaseConfigured } from './env.js';
 import { supabase } from './supabase.js';

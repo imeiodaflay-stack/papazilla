@@ -3,9 +3,9 @@
  * Vercel Functions (`api/payment-create.ts`, `api/subscription-renew.ts`),
  * então não importa nada do navegador.
  *
- * - Cartão: até 12x de R$ 9,90 (total R$ 118,80), renovação automática.
- * - Pix: R$ 99,90 à vista, sem renovação automática.
- * Sem promoção de lançamento.
+ * - Cartão: até 12x de R$ 9,90 (total R$ 118,80).
+ * - Pix: R$ 99,90 à vista.
+ * Nenhum dos dois renova automaticamente. Sem promoção de lançamento.
  */
 export const PIX_PRICE = 99.9;
 export const CARD_MAX_INSTALLMENTS = 12;

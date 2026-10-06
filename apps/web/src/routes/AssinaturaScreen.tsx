@@ -104,12 +104,17 @@ export function AssinaturaScreen() {
     toastTimer.current = window.setTimeout(() => setToastMsg(null), 3600);
   }
 
+  // Na renovação o acesso já está ativo: o Pix só conta como pago quando o
+  // fim do período muda.
+  const periodEndAtStart = useRef<string | null>(getSubscription()?.currentPeriodEnd ?? null);
+
   useEffect(() => {
     if (!pix) return;
     let cancelled = false;
     const timer = window.setInterval(() => {
       void loadSubscriptionForOwner(getUserId()).then(() => {
-        if (!cancelled && hasActiveAccess(getSubscription())) {
+        const current = getSubscription();
+        if (!cancelled && hasActiveAccess(current) && current?.currentPeriodEnd !== periodEndAtStart.current) {
           navigate(`/assinatura/confirmando?returnTo=${encodeURIComponent(returnTo ?? 'papa')}`, { replace: true });
         }
       });
@@ -214,16 +219,16 @@ export function AssinaturaScreen() {
               </div>
               <div className="paywall-offer__billing">
                 <span className="paywall-offer__calendar" aria-hidden="true">Pix</span>
-                <p><strong>ou {formatBRL(PIX_PRICE)} no Pix</strong><small>À vista, sem renovação automática</small></p>
+                <p><strong>ou {formatBRL(PIX_PRICE)} no Pix</strong><small>À vista, pagamento único</small></p>
               </div>
-              <p className="annual-commitment">Cartão: total de {formatBRL(CARD_TOTAL)} por 12 meses, com renovação automática. Os dois liberam 12 meses de receitas para toda a sua matilha.</p>
+              <p className="annual-commitment">Cartão: total de {formatBRL(CARD_TOTAL)} por 12 meses. Os dois liberam 12 meses de receitas para toda a sua matilha e não renovam automaticamente.</p>
             </section>
 
             <form className="transparent-checkout" onSubmit={submitPayment}>
               <fieldset className="payment-methods">
                 <legend>Forma de pagamento</legend>
-                <button type="button" className={method === 'pix' ? 'is-selected' : ''} onClick={() => setMethod('pix')}><span className="payment-methods__icon" aria-hidden="true"><img src={pixIcon} alt="" /></span><b>Pix</b><small>{formatBRL(PIX_PRICE)} à vista, sem renovação automática</small></button>
-                <button type="button" className={method === 'credit_card' ? 'is-selected' : ''} onClick={() => setMethod('credit_card')}><span className="payment-methods__icon" aria-hidden="true"><img src={cartaoIcon} alt="" /></span><b>Cartão de crédito</b><small>Até {CARD_MAX_INSTALLMENTS}x de {formatBRL(CARD_INSTALLMENT_VALUE)}, renovação automática</small></button>
+                <button type="button" className={method === 'pix' ? 'is-selected' : ''} onClick={() => setMethod('pix')}><span className="payment-methods__icon" aria-hidden="true"><img src={pixIcon} alt="" /></span><b>Pix</b><small>{formatBRL(PIX_PRICE)} à vista</small></button>
+                <button type="button" className={method === 'credit_card' ? 'is-selected' : ''} onClick={() => setMethod('credit_card')}><span className="payment-methods__icon" aria-hidden="true"><img src={cartaoIcon} alt="" /></span><b>Cartão de crédito</b><small>Até {CARD_MAX_INSTALLMENTS}x de {formatBRL(CARD_INSTALLMENT_VALUE)}</small></button>
               </fieldset>
 
               <div className="checkout-form-section">
@@ -262,8 +267,8 @@ export function AssinaturaScreen() {
               <button type="submit" className="pz-button pz-button--primary wide paywall-cta" disabled={processing}>
                 {processing ? 'Processando…' : method === 'pix' ? `Gerar Pix de ${formatBRL(PIX_PRICE)}` : installments === 1 ? `Pagar ${formatBRL(CARD_TOTAL)} no cartão` : `Pagar ${installments}x de ${formatBRL(cardInstallmentValue(installments))}`}
               </button>
-              <p className="paywall-disclosure">{method === 'pix' ? 'O Pix libera 12 meses de acesso e não renova automaticamente. Ao final do período, você escolhe se quer renovar.' : `Plano anual de ${formatBRL(CARD_TOTAL)} no cartão, renovado automaticamente a cada 12 meses no mesmo cartão e no mesmo número de parcelas. Você pode cancelar a renovação quando quiser e usar o período pago até o fim.`}</p>
-              <p className="checkout-security"><span aria-hidden="true">⌾</span> Pagamento seguro. Os dados do cartão ficam com o processador de pagamentos, não com o Papazilla.</p>
+              <p className="paywall-disclosure">{method === 'pix' ? 'O Pix libera 12 meses de acesso e não renova automaticamente. Ao final do período, você escolhe se quer renovar.' : `Plano anual de ${formatBRL(CARD_TOTAL)} no cartão. Libera 12 meses de acesso e não renova automaticamente: ao final do período, você escolhe se quer renovar.`}</p>
+              <p className="checkout-security"><span aria-hidden="true">⌾</span> Pagamento seguro. Os dados do cartão não são armazenados pelo Papazilla.</p>
             </form>
 
             <div className="paywall-links">

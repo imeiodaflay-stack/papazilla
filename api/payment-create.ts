@@ -4,6 +4,8 @@ import { HttpError, requireUser, supabaseAdmin } from './_lib/supabaseAdmin.js';
 import { activatePeriod } from './_lib/subscriptionPeriod.js';
 import { CARD_TOTAL, PIX_PRICE, normalizeInstallments } from '../apps/web/src/lib/pricing.js';
 
+const RENEWAL_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+
 type PaymentMethod = 'credit_card' | 'pix';
 
 interface PayerInput {
@@ -35,12 +37,6 @@ interface AsaasCardPayment {
   id: string;
   status?: string;
   installment?: string | null;
-  creditCardToken?: string;
-  creditCard?: {
-    creditCardToken?: string;
-    creditCardBrand?: string;
-    creditCardNumber?: string;
-  };
 }
 
 interface PixQrCode {
@@ -112,10 +108,9 @@ async function ensureCustomer(
  * persistidos, registrados em log ou devolvidos ao navegador.
  *
  * Cartão (Flay, 2026-10-05): plano anual de R$ 118,80 em até 12x, cobrado
- * como parcelamento no cartão (POST /payments com installmentCount). O
- * Asaas devolve um token do cartão, guardado em `subscription_card_tokens`,
- * que `/api/subscription-renew` usa para renovar a cada 12 meses.
- * Pix: R$ 99,90 à vista, libera 12 meses e não renova automaticamente.
+ * como parcelamento no cartão (POST /payments com installmentCount).
+ * Pix: R$ 99,90 à vista. Nenhum dos dois renova automaticamente: os dois
+ * liberam 12 meses e, no fim, a pessoa escolhe se compra de novo.
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método não permitido.' });
@@ -134,20 +129,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .eq('user_id', user.id)
       .maybeSingle();
     if (existingError) throw existingError;
-    if (existing && ['active', 'canceled'].includes(existing.status) && existing.current_period_end &&
-        new Date(existing.current_period_end).getTime() > Date.now()) {
-      throw new HttpError(409, 'Sua assinatura já está ativa.');
+    // Sem renovação automática: a renovação é uma compra nova, liberada nos
+    // últimos 30 dias do período. Os 12 meses novos começam no fim do atual
+    // (`activatePeriod`), e o acesso de hoje não é tocado enquanto o pagamento
+    // novo está pendente.
+    const currentEnd = existing?.current_period_end ? new Date(existing.current_period_end).getTime() : 0;
+    const isRenewal = Boolean(existing && ['active', 'canceled'].includes(existing.status) && currentEnd > Date.now());
+    if (isRenewal && currentEnd > Date.now() + RENEWAL_WINDOW_MS) {
+      throw new HttpError(409, 'Sua assinatura já está ativa. A renovação fica disponível nos últimos 30 dias do período.');
     }
 
     const customerId = await ensureCustomer(user, payer, existing?.asaas_customer_id ?? null);
     const pendingBase = {
       user_id: user.id,
-      status: 'pending',
       plan: 'annual',
       payment_method: method,
       asaas_customer_id: customerId,
       asaas_checkout_id: null,
-      current_period_end: null,
+      ...(isRenewal ? {} : { status: 'pending', current_period_end: null }),
     };
 
     if (method === 'credit_card') {
@@ -206,28 +205,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }),
       });
 
-      const token = payment.creditCard?.creditCardToken ?? payment.creditCardToken;
-      let tokenSaved = false;
-      if (token) {
-        const { error: tokenError } = await admin.from('subscription_card_tokens').upsert({
-          user_id: user.id,
-          asaas_credit_card_token: token,
-          card_brand: payment.creditCard?.creditCardBrand ?? null,
-          card_last4: payment.creditCard?.creditCardNumber?.slice(-4) ?? null,
-          customer_ip: requestIp(req) || null,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: 'user_id' });
-        if (tokenError) console.error('[payment-create] token não salvo', tokenError.message);
-        else tokenSaved = true;
-      } else {
-        console.error('[payment-create] Asaas não devolveu token do cartão; renovação automática desligada.');
-      }
-
-      // Sem token não há como renovar sozinho: a renovação fica desligada e a
-      // tela de conta mostra isso, em vez de prometer uma cobrança que não vai rolar.
+      // Sem renovação automática (Flay, 2026-10-05): nenhum dado do cartão,
+      // nem token, é guardado. Ao fim dos 12 meses a pessoa compra de novo.
       const { error: updateError } = await admin
         .from('subscriptions')
-        .update({ asaas_payment_id: payment.id, asaas_installment_id: payment.installment ?? null, auto_renew: tokenSaved })
+        .update({ asaas_payment_id: payment.id, asaas_installment_id: payment.installment ?? null, auto_renew: false })
         .eq('user_id', user.id);
       if (updateError) throw updateError;
 

@@ -113,8 +113,8 @@ export function AccountDataScreen() {
               <p>
                 <strong>Seu plano no cartão foi parcelado</strong>
                 <span>
-                  A exclusão cancela a próxima renovação, mas as parcelas que faltam do plano atual
-                  ({subscription?.installmentCount}x) continuam na fatura do cartão. O acesso ao Papazilla termina na hora.
+                  As parcelas que faltam do plano atual ({subscription?.installmentCount}x) continuam na fatura
+                  do cartão. O acesso ao Papazilla termina na hora.
                 </span>
               </p>
             </div>
