@@ -32,7 +32,7 @@ const GOAL_SHORT: Record<string, string> = {
 };
 
 export function shortGoal(goal: string | undefined): string {
-  if (!goal) return '—';
+  if (!goal) return 'Não informado';
   return GOAL_SHORT[goal] ?? goal;
 }
 

@@ -95,7 +95,7 @@ export interface DailyPlan {
   percentOfWeight: number;
   /** Total de alimento PRONTO por dia, em gramas (arredondado a múltiplo de 5). */
   totalGramsPerDay: number;
-  /** Número de refeições sugerido ("2", "3", "3–4"). */
+  /** Número de refeições sugerido ("2", "3", "3 a 4"). */
   mealsPerDay: string;
   /** Gramas PRONTAS por dia de cada grupo, antes da divisão por ingredientes. */
   groupsGramsPerDay: Record<FoodGroup, number>;

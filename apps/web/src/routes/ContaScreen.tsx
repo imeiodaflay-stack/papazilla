@@ -236,7 +236,7 @@ export function ContaScreen() {
           <button
             type="button"
             className="user-settings-row"
-            onClick={() => toast('Papazilla usa sempre o visual oficial — sem tema alternativo por enquanto.')}
+            onClick={() => toast('Papazilla usa sempre o visual oficial. Não há tema alternativo por enquanto.')}
           >
             <span className="user-settings-row__icon">
               <img src={ajustesIcon} alt="" />

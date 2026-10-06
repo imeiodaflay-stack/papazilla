@@ -304,16 +304,16 @@ const DECIMAL_KEYS = ['age', 'weight', 'idealWeight', 'previousWeight', 'current
  * (o Papazilla não decide dieta terapêutica, ver `escopo-mvp.md`).
  */
 const CONDITION_GUIDANCE: Record<string, string> = {
-  'Doença renal': 'Tende a pedir menos proteína e mais cautela com vísceras — o veterinário pode ajustar isso com você.',
+  'Doença renal': 'Tende a pedir menos proteína e mais cautela com vísceras. O veterinário pode ajustar isso com você.',
   'Cálculos ou cristais urinários':
-    'Dependendo do tipo de cálculo, alguns vegetais e proteínas devem ser evitados — vale confirmar o tipo com o veterinário antes de montar a receita.',
-  Pancreatite: 'Vale ter cautela extra com vísceras muito gordurosas — confirme com o veterinário o que é seguro para esse cão.',
-  'Doença hepática': 'Vale ter cautela extra com vísceras muito gordurosas — confirme com o veterinário o que é seguro para esse cão.',
-  Diabetes: 'Pede atenção especial aos carboidratos da receita — o veterinário pode orientar a quantidade certa.',
+    'Dependendo do tipo de cálculo, alguns vegetais e proteínas devem ser evitados. Confirme o tipo com o veterinário antes de montar a receita.',
+  Pancreatite: 'Vale ter cautela extra com vísceras muito gordurosas. Confirme com o veterinário o que é seguro para esse cão.',
+  'Doença hepática': 'Vale ter cautela extra com vísceras muito gordurosas. Confirme com o veterinário o que é seguro para esse cão.',
+  Diabetes: 'Pede atenção especial aos carboidratos da receita. O veterinário pode orientar a quantidade certa.',
 };
 
 const PAPAZILLA_ROLE_NOTE =
-  'O Papazilla existe pra simplificar o dia a dia de quem prepara alimentação natural pro cão — as recomendações são baseadas em literatura veterinária e revisadas por profissionais, mas a receita final precisa ser verificada e acompanhada pelo veterinário do seu cão, principalmente se essa for a primeira vez que ele transiciona pra alimentação natural.';
+  'O Papazilla existe pra simplificar o dia a dia de quem prepara alimentação natural pro cão. As recomendações são baseadas em literatura veterinária e revisadas por profissionais, mas a receita final precisa ser verificada e acompanhada pelo veterinário do seu cão, principalmente se essa for a primeira vez que ele transiciona pra alimentação natural.';
 
 function filled(value: string | undefined): boolean {
   return Boolean((value ?? '').trim());
@@ -682,10 +682,10 @@ const STEPS: Step[] = [
                 ctx={ctx}
                 compact
                 options={[
-                  'Pequeno (adulto 5–10kg)',
-                  'Médio (adulto 10–25kg)',
-                  'Grande (adulto 25–35kg)',
-                  'Gigante (adulto 35kg+)',
+                  'Pequeno (adulto de 5 a 10 kg)',
+                  'Médio (adulto de 10 a 25 kg)',
+                  'Grande (adulto de 25 a 35 kg)',
+                  'Gigante (adulto com mais de 35 kg)',
                 ]}
               />
             </Question>
@@ -734,7 +734,7 @@ const STEPS: Step[] = [
     eyebrow: '3 · Condição corporal',
     title: 'Como está o corpo dele?',
     intro:
-      'Olhe por cima, passe as mãos pelas laterais do peito e depois observe a barriga de lado. É essa avaliação — não uma impressão geral — que ajusta a quantidade da receita pra mais ou pra menos.',
+      'Olhe por cima, passe as mãos pelas laterais do peito e depois observe a barriga de lado. Essa avaliação, em vez de uma impressão geral, ajusta a quantidade da receita pra mais ou pra menos.',
     body: (ctx) => (
       <>
         <Question first title="Olhando seu cão de cima, qual opção mais parece com ele?">
@@ -841,7 +841,7 @@ const STEPS: Step[] = [
                   <button type="button" className="clinical-warning__link" onClick={() => ctx.goToStep(1)}>
                     Passo 2
                   </button>{' '}
-                  e marque "Emagrecer" — assim a receita já sai calculada pra isso.
+                  e marque "Emagrecer". Assim, a receita já sai calculada pra isso.
                 </span>
               </p>
             </div>
@@ -920,7 +920,7 @@ const STEPS: Step[] = [
               <p>
                 <strong>Vale conversar com o veterinário antes de seguir.</strong>
                 <span>
-                  Fome fora do comum junto com perda de peso pode ser sinal de algo além da alimentação —
+                  Fome fora do comum junto com perda de peso pode ser sinal de algo além da alimentação.
                   não é algo pra resolver só aumentando a porção. O perfil será salvo normalmente, mas
                   recomendamos essa conversa antes de trocar a dieta.
                 </span>
@@ -1086,12 +1086,12 @@ const STEPS: Step[] = [
     body: (ctx) => (
       <>
         {ctx.multi.health?.has('Pancreatite') ? (
-          <Question first title="Se houver histórico de pancreatite — a pancreatite aconteceu:">
+          <Question first title="Se houver histórico de pancreatite, a pancreatite aconteceu:">
             <SingleCards name="pancreatitisHistory" ctx={ctx} compact options={['Uma vez', 'Mais de uma vez', 'Não sei']} />
           </Question>
         ) : null}
         {ctx.multi.health?.has('Cálculos ou cristais urinários') ? (
-          <Question first title="Se houver histórico de cálculo ou cristal urinário — você sabe qual era o tipo?">
+          <Question first title="Se houver histórico de cálculo ou cristal urinário, você sabe qual era o tipo?">
             <SingleCards
               name="urinaryType"
               ctx={ctx}
@@ -1101,7 +1101,7 @@ const STEPS: Step[] = [
           </Question>
         ) : null}
         {ctx.multi.health?.has('Doença renal') ? (
-          <Question first title="Se houver doença renal — seu veterinário já informou o estágio da doença?">
+          <Question first title="Se houver doença renal, seu veterinário já informou o estágio da doença?">
             <Pills name="renalStage" options={['Sim', 'Não', 'Não sei']} ctx={ctx} />
           </Question>
         ) : null}
@@ -1146,7 +1146,7 @@ const STEPS: Step[] = [
           <p>
             <strong>Suplementação não é opcional na alimentação natural.</strong>
             Diferente de uma ração industrializada, a AN cozida em casa não vem com vitaminas e minerais
-            já balanceados — por isso toda receita do Papazilla inclui um suplemento vitamínico-mineral
+            já balanceados. Por isso, toda receita do Papazilla inclui um suplemento vitamínico-mineral
             calculado (você escolhe o produto no próximo passo, o da receita). Pular essa parte é o
             principal jeito de uma dieta caseira ficar desbalanceada com o tempo.
           </p>
@@ -1189,7 +1189,7 @@ const STEPS: Step[] = [
           <img src={infoIcon} alt="" />
           <p>
             Mesmo com o cão saudável, o check-up veterinário (incluindo peso e exame físico) é recomendado
-            pelo menos 1x ao ano — e a cada consulta vale revisar a receita da alimentação natural com o
+            pelo menos 1x ao ano. A cada consulta, vale revisar a receita da alimentação natural com o
             veterinário, ajustando o que for preciso.
           </p>
         </div>
@@ -1303,7 +1303,7 @@ const STEPS: Step[] = [
               <p>
                 <strong>1 refeição por dia é pouco para um filhote.</strong>
                 <span>
-                  Filhotes têm metabolismo acelerado e reserva de glicose menor — passar longos períodos em jejum
+                  Filhotes têm metabolismo acelerado e reserva de glicose menor. Passar longos períodos em jejum
                   aumenta o risco de hipoglicemia. Prefira pelo menos 2 a 3 refeições, ou deixe o Papazilla recomendar
                   a partir da faixa etária dele.
                 </span>

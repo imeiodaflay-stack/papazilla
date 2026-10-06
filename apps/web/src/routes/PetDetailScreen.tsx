@@ -88,7 +88,7 @@ export function PetDetailScreen({ petIdOverride, isSinglePetRoot = false }: PetD
 
   return (
     <div className="app-view">
-      <header className="app-header pets-header pets-header--detail">
+      <header className={`app-header pets-header pets-header--detail${isSinglePetRoot ? ' pets-header--single' : ''}`}>
         {isSinglePetRoot ? (
           <span className="profile-list-back-placeholder" aria-hidden="true" />
         ) : (
@@ -218,27 +218,27 @@ export function PetDetailScreen({ petIdOverride, isSinglePetRoot = false }: PetD
               <article>
                 <img src={idadeIcon} alt="" className="pet-profile-fact__brand-icon" />
                 <small>Idade</small>
-                <strong>{pet.age || '—'}</strong>
+                <strong>{pet.age || 'Não informada'}</strong>
               </article>
               <article>
                 <img src={pesoIcon} alt="" className="pet-profile-fact__brand-icon" />
                 <small>Peso</small>
-                <strong>{pet.weight ? `${pet.weight} kg` : '—'}</strong>
+                <strong>{pet.weight ? `${pet.weight} kg` : 'Não informado'}</strong>
               </article>
               <article className="pet-profile-fact--green">
                 <img src={sucessoIcon} alt="" />
                 <small>Objetivo atual</small>
-                <strong>{pet.goal || '—'}</strong>
+                <strong>{pet.goal || 'Não informado'}</strong>
               </article>
               <article>
                 <img src={atividadeIcon} alt="" className="pet-profile-fact__brand-icon" />
                 <small>Atividade</small>
-                <strong>{pet.activityTime || '—'}</strong>
+                <strong>{pet.activityTime || 'Não informada'}</strong>
               </article>
               <article className="pet-profile-fact--blue">
                 <img src={potinhoIcon} alt="" />
                 <small>Gosta de comer?</small>
-                <strong>{pet.appetite || '—'}</strong>
+                <strong>{pet.appetite || 'Não informado'}</strong>
               </article>
             </div>
           </section>

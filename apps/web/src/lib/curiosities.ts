@@ -106,7 +106,7 @@ export const CURIOSITIES: CuriosityItem[] = [
       lead: 'Faz parte do gênero Allium: cebola, alho, cebolinha, alho-poró e chalota. Todos têm o mesmo problema para cães, em qualquer forma que apareçam na cozinha.',
       fact: {
         value: '1 dente de alho',
-        text: 'já é citado como dose de referência para causar toxicidade em um cão de porte pequeno (cerca de 9 kg) — a ASPCA orienta manter toda a família Allium longe do potinho.',
+        text: 'já é citado como dose de referência para causar toxicidade em um cão de porte pequeno (cerca de 9 kg). A ASPCA orienta manter toda a família Allium longe do potinho.',
       },
       sections: [
         {
@@ -115,14 +115,14 @@ export const CURIOSITIES: CuriosityItem[] = [
         },
         {
           heading: 'Todas as formas contam',
-          body: 'Cru, cozido, assado, em pó ou desidratado — todas as formas mantêm o risco. As versões em pó são mais concentradas: uma colher de chá de alho em pó equivale a cerca de 8 dentes frescos.',
+          body: 'Cru, cozido, assado, em pó ou desidratado. Todas as formas mantêm o risco. As versões em pó são mais concentradas: uma colher de chá de alho em pó equivale a cerca de 8 dentes frescos.',
         },
         {
           heading: 'Fique de olho nos sinais',
           body: 'Fraqueza, gengivas pálidas, urina escura, vômito e falta de ar podem aparecer horas ou dias depois da ingestão. Se seu cão comeu qualquer quantidade, vale ligar para o veterinário.',
         },
       ],
-      scope: 'Este resumo cobre o risco geral da família Allium. A quantidade que causa problema varia com o porte e a sensibilidade de cada cão — na dúvida, ou diante de qualquer ingestão, procure orientação veterinária.',
+      scope: 'Este resumo cobre o risco geral da família Allium. A quantidade que causa problema varia com o porte e a sensibilidade de cada cão. Na dúvida, ou diante de qualquer ingestão, procure orientação veterinária.',
       source: {
         label: 'Fonte consultada',
         name: 'ASPCA Animal Poison Control',
@@ -157,7 +157,7 @@ export const CURIOSITIES: CuriosityItem[] = [
         },
         {
           heading: 'Por que o peso sozinho não conta tudo',
-          body: 'Um cão pode manter o mesmo peso na balança enquanto perde massa muscular por idade ou doença — por isso a WSAVA recomenda avaliar também o escore de condição muscular, separado do escore de gordura.',
+          body: 'Um cão pode manter o mesmo peso na balança enquanto perde massa muscular por idade ou doença. Por isso, a WSAVA recomenda avaliar também o escore de condição muscular, separado do escore de gordura.',
         },
       ],
       scope: 'Este resumo explica a lógica do escore corporal; ele não substitui a avaliação prática feita por um médico-veterinário, que consegue comparar a pontuação com o histórico e o porte do seu cão.',
@@ -179,7 +179,7 @@ export const CURIOSITIES: CuriosityItem[] = [
     readTime: '2 min de leitura',
     article: {
       headerEyebrow: 'Higiene no potinho',
-      lead: 'Separar os ingredientes certos é só metade do trabalho — o jeito de guardar e lavar a fornalha também protege a saúde da matilha, e da sua também.',
+      lead: 'Separar os ingredientes certos é só metade do trabalho. O jeito de guardar e lavar a fornalha também protege a saúde da matilha, e da sua também.',
       fact: {
         value: '20 segundos',
         text: 'é o tempo mínimo de lavagem das mãos recomendado pela FDA antes e depois de lidar com a comida ou os petiscos do seu cão.',
@@ -187,7 +187,7 @@ export const CURIOSITIES: CuriosityItem[] = [
       sections: [
         {
           heading: 'Lave depois de cada uso',
-          body: 'A FDA recomenda lavar tigelas, colheres e utensílios de medição com água quente e sabão após cada uso — não só quando parecem sujos.',
+          body: 'A FDA recomenda lavar tigelas, colheres e utensílios de medição com água quente e sabão após cada uso, não só quando parecem sujos.',
         },
         {
           heading: 'Não use a tigela como medidor',
@@ -201,7 +201,7 @@ export const CURIOSITIES: CuriosityItem[] = [
       scope: 'Estas são orientações gerais de higiene doméstica. Se alguém da casa for imunocomprometido, vale reforçar os cuidados com orientação de um profissional de saúde.',
       source: {
         label: 'Fonte consultada',
-        name: 'FDA — Tips for Safe Handling of Pet Food and Treats',
+        name: 'FDA: Tips for Safe Handling of Pet Food and Treats',
         updated: 'Atualizada em 14 set. 2026 no Papazilla',
         url: 'https://www.fda.gov/animal-veterinary/animal-health-literacy/tips-safe-handling-pet-food-and-treats',
       },
@@ -217,7 +217,7 @@ export const CURIOSITIES: CuriosityItem[] = [
     readTime: '5 min de leitura',
     article: {
       headerEyebrow: 'Formulação importa',
-      lead: 'Cozinhar em casa dá controle sobre os ingredientes — mas só vira uma dieta completa quando as proporções são calculadas com atenção, e seguidas do jeito que foram pensadas.',
+      lead: 'Cozinhar em casa dá controle sobre os ingredientes. A dieta só fica completa quando as proporções são calculadas com atenção e seguidas do jeito que foram pensadas.',
       fact: {
         value: '60%',
         text: 'dos tutores entrevistados em um estudo da USP admitiram ter alterado por conta própria a fórmula de dieta caseira prescrita para o cão, sem orientação prévia.',
@@ -229,14 +229,14 @@ export const CURIOSITIES: CuriosityItem[] = [
         },
         {
           heading: 'Onde mora o risco',
-          body: 'A literatura veterinária associa dietas caseiras desbalanceadas a deficiências de vitamina D, vitamina E, zinco, cálcio e ácidos graxos ômega-3 — mais críticas em filhotes em fase de crescimento.',
+          body: 'A literatura veterinária associa dietas caseiras desbalanceadas a deficiências de vitamina D, vitamina E, zinco, cálcio e ácidos graxos ômega-3. Essas deficiências são mais críticas em filhotes em fase de crescimento.',
         },
         {
           heading: 'O que ajuda',
           body: 'Seguir a formulação como calculada, sem trocar ou remover ingredientes por conta própria, e reavaliar peso e exames periodicamente com o médico-veterinário que acompanha o cão.',
         },
       ],
-      scope: 'Este resumo descreve um achado de pesquisa, não uma regra fixa. A necessidade nutricional muda com idade, porte e saúde do cão — por isso o Papazilla não recomenda ajustar receitas por conta própria.',
+      scope: 'Este resumo descreve um achado de pesquisa, não uma regra fixa. A necessidade nutricional muda com idade, porte e saúde do cão. Por isso, o Papazilla não recomenda ajustar receitas por conta própria.',
       source: {
         label: 'Fonte consultada',
         name: 'Halfen et al., Pesquisa Veterinária Brasileira (USP), 2017',
@@ -255,10 +255,10 @@ export const CURIOSITIES: CuriosityItem[] = [
     readTime: '3 min de leitura',
     article: {
       headerEyebrow: 'Regra dos 10%',
-      lead: 'Um petisco aqui, uma beliscada ali — separados, parecem pouco. Somados ao longo do dia, podem desequilibrar a alimentação pensada com tanto cuidado.',
+      lead: 'Um petisco aqui, uma beliscada ali. Separados, parecem pouco. Somados ao longo do dia, podem desequilibrar a alimentação pensada com tanto cuidado.',
       fact: {
         value: '10%',
-        text: 'é o limite recomendado pela AAHA (American Animal Hospital Association) para o total de calorias diárias vindas de petiscos e extras — o resto deve vir da alimentação completa e balanceada.',
+        text: 'é o limite recomendado pela AAHA (American Animal Hospital Association) para o total de calorias diárias vindas de petiscos e extras. O restante deve vir da alimentação completa e balanceada.',
       },
       sections: [
         {
@@ -267,17 +267,17 @@ export const CURIOSITIES: CuriosityItem[] = [
         },
         {
           heading: 'O que entra na conta',
-          body: 'Não é só o petisco embalado: pedacinhos de comida da família, prêmios de treino, ossos e petiscos dentais também contam — vale somar tudo, não só o que sai do pacote "de petisco".',
+          body: 'Não é só o petisco embalado: pedacinhos de comida da família, prêmios de treino, ossos e petiscos dentais também contam. Vale somar tudo, não só o que sai do pacote "de petisco".',
         },
         {
           heading: 'Como aplicar no dia a dia',
-          body: 'Reserve os 10% para os extras e, se um dia teve mais petisco que o normal, ajuste a porção da refeição principal para compensar — em vez de simplesmente somar por cima.',
+          body: 'Reserve os 10% para os extras e, se um dia teve mais petisco que o normal, ajuste a porção da refeição principal para compensar, em vez de simplesmente somar por cima.',
         },
       ],
-      scope: 'Este resumo apresenta uma diretriz geral da AAHA. Cães com restrições de saúde específicas podem precisar de limites diferentes — vale conversar com o médico-veterinário.',
+      scope: 'Este resumo apresenta uma diretriz geral da AAHA. Cães com restrições de saúde específicas podem precisar de limites diferentes. Vale conversar com o médico-veterinário.',
       source: {
         label: 'Fonte consultada',
-        name: 'AAHA — Nutrition and Weight Management Guidelines for Dogs and Cats',
+        name: 'AAHA: Nutrition and Weight Management Guidelines for Dogs and Cats',
         updated: 'Atualizada em 14 set. 2026 no Papazilla',
         url: 'https://www.aaha.org/resources/2021-aaha-nutrition-and-weight-management-guidelines/home/',
       },
@@ -289,11 +289,11 @@ export const CURIOSITIES: CuriosityItem[] = [
     art: 'cool',
     sourceLabel: 'PREPARO · CACHORRO VERDE',
     title: 'Vapor, água ou pressão: qual preserva mais nutrientes?',
-    summary: 'O método de cozimento muda quanto de vitamina sobra no prato — vapor preserva mais, pressão perde mais.',
+    summary: 'O método de cozimento muda quanto de vitamina sobra no prato. O vapor preserva mais, enquanto a pressão perde mais.',
     readTime: '3 min de leitura',
     article: {
       headerEyebrow: 'Método de cozimento',
-      lead: 'Separar os ingredientes certos é só metade da receita — o jeito de cozinhar também muda quanto nutriente chega até o potinho.',
+      lead: 'Separar os ingredientes certos é só metade da receita. O jeito de cozinhar também muda quanto nutriente chega até o potinho.',
       fact: {
         value: 'Vapor',
         text: 'é o método que a fonte usada na metodologia do Papazilla aponta como o que mais preserva vitaminas e antioxidantes, na comparação com água e panela de pressão.',
@@ -305,17 +305,17 @@ export const CURIOSITIES: CuriosityItem[] = [
         },
         {
           heading: 'Cozinhando em água? Guarde o caldo',
-          body: 'Cozinhar em pouca água, numa panela pequena, já reduz a perda. Depois, reintegre o caldo na porção ou sirva um pouco à parte — é ali que boa parte das vitaminas que saíram do alimento foi parar.',
+          body: 'Cozinhar em pouca água, numa panela pequena, já reduz a perda. Depois, reintegre o caldo na porção ou sirva um pouco à parte. É ali que boa parte das vitaminas que saíram do alimento foi parar.',
         },
         {
           heading: 'E a panela de pressão?',
           body: 'A pressão e a temperatura mais altas causam uma perda um pouco maior de vitaminas sensíveis ao calor. Se for usar, controle o tempo mínimo necessário e reaproveite o caldo do mesmo jeito.',
         },
       ],
-      scope: 'Este resumo descreve diferenças gerais entre métodos de cozimento doméstico. Nenhum dos três está proibido — o Papazilla já pergunta o método preferido na Anamnese e sugere guardar o caldo no modo de preparo da receita.',
+      scope: 'Este resumo descreve diferenças gerais entre métodos de cozimento doméstico. Nenhum dos três está proibido. O Papazilla já pergunta o método preferido na Anamnese e sugere guardar o caldo no modo de preparo da receita.',
       source: {
         label: 'Fonte consultada',
-        name: 'Cachorro Verde — Dra. Sylvia Angélico, CRMV-SP 29943',
+        name: 'Cachorro Verde: Dra. Sylvia Angélico, CRMV-SP 29943',
         updated: 'Atualizada em 25 set. 2026 no Papazilla',
         url: 'https://cachorroverde.com.br/metodos-cozimento/',
       },
@@ -327,33 +327,33 @@ export const CURIOSITIES: CuriosityItem[] = [
     art: 'portion',
     sourceLabel: 'NUTRIÇÃO · VCA ANIMAL HOSPITALS',
     title: 'Quantas refeições por dia, na prática?',
-    summary: 'Filhotes com menos de 4 meses precisam de pelo menos 3 refeições — menos que isso aumenta o risco de hipoglicemia.',
+    summary: 'Filhotes com menos de 4 meses precisam de pelo menos 3 refeições. Menos que isso aumenta o risco de hipoglicemia.',
     readTime: '3 min de leitura',
     article: {
       headerEyebrow: 'Frequência de refeições',
-      lead: 'Não existe um número mágico único — a frequência ideal muda com a idade do cão, e é mais crítica quanto menor e mais novo ele é.',
+      lead: 'Não existe um número mágico único. A frequência ideal muda com a idade do cão e é mais crítica quanto menor e mais novo ele é.',
       fact: {
         value: '3 refeições',
-        text: 'por dia é o mínimo recomendado para filhotes com menos de 4 meses, segundo a VCA Animal Hospitals — o estômago pequeno não comporta porções grandes de uma vez.',
+        text: 'por dia é o mínimo recomendado para filhotes com menos de 4 meses, segundo a VCA Animal Hospitals. O estômago pequeno não comporta porções grandes de uma vez.',
       },
       sections: [
         {
           heading: 'Por que filhotes pequenos precisam de mais',
-          body: 'Com o estômago ainda pequeno, um filhote não consegue guardar energia suficiente numa única refeição grande. Passar muito tempo sem comer pode levar à hipoglicemia — queda perigosa do açúcar no sangue.',
+          body: 'Com o estômago ainda pequeno, um filhote não consegue guardar energia suficiente numa única refeição grande. Passar muito tempo sem comer pode levar à hipoglicemia, uma queda perigosa do açúcar no sangue.',
         },
         {
           heading: 'Uma referência por idade',
-          body: 'A VCA recomenda pelo menos 3 refeições pequenas por dia até os 4 meses, e pelo menos 2 por dia a partir daí — tanto para cães mais velhos quanto para adultos, desde que a quantidade total do dia esteja certa.',
+          body: 'A VCA recomenda pelo menos 3 refeições pequenas por dia até os 4 meses e pelo menos 2 por dia a partir daí, tanto para cães mais velhos quanto para adultos, desde que a quantidade total do dia esteja certa.',
         },
         {
           heading: 'Raça toy ou miniatura? Redobre a atenção',
-          body: 'Filhotes de raças toy (chihuahua, poodle toy, yorkshire) têm reserva de energia menor ainda e podem precisar de refeições mais frequentes — a VCA cita hipoglicemia como risco real nesse grupo nos primeiros meses de vida.',
+          body: 'Filhotes de raças toy (chihuahua, poodle toy, yorkshire) têm reserva de energia menor ainda e podem precisar de refeições mais frequentes. A VCA cita hipoglicemia como risco real nesse grupo nos primeiros meses de vida.',
         },
       ],
-      scope: 'Esta é uma referência geral por idade, não uma prescrição — o veterinário do seu cão pode recomendar algo diferente pela raça, saúde ou rotina dele. No Papazilla, se você marcar 1 refeição por dia pra um filhote na Anamnese, a gente avisa sobre esse risco.',
+      scope: 'Esta é uma referência geral por idade, não uma prescrição. O veterinário do seu cão pode recomendar algo diferente pela raça, saúde ou rotina dele. No Papazilla, se você marcar 1 refeição por dia pra um filhote na Anamnese, a gente avisa sobre esse risco.',
       source: {
         label: 'Fonte consultada',
-        name: 'VCA Animal Hospitals — Nutritional Considerations for Toy and Small Dogs',
+        name: 'VCA Animal Hospitals: Nutritional Considerations for Toy and Small Dogs',
         updated: 'Atualizada em 25 set. 2026 no Papazilla',
         url: 'https://vcahospitals.com/know-your-pet/nutritional-considerations-for-toy-and-small-dogs',
       },

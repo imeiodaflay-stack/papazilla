@@ -38,7 +38,7 @@ export const PUPPY_RANGES: Record<PuppyAgeBand, Record<DogSize, readonly [number
 
 /** Refeições por dia sugeridas por faixa etária do filhote. */
 export const PUPPY_MEALS: Record<PuppyAgeBand, string> = {
-  '2-4': '3–4',
+  '2-4': '3 a 4',
   '4-6': '3',
   '6-8': '2',
   '8-10': '2',
@@ -110,7 +110,7 @@ export const SUPPLEMENT_RAMP =
 
 export const SALT_GUIDANCE =
   'Pode entrar na receita, mas em quantidade bem pequena: excesso de sódio faz mal para o cão. ' +
-  'A dose certa varia de cão para cão (peso, idade, doenças renais ou cardíacas) — procure orientação ' +
+  'A dose certa varia de cão para cão conforme peso, idade e condições renais ou cardíacas. Procure orientação ' +
   'de um médico-veterinário antes de definir quanto usar.';
 
 /** Óleo vegetal, por faixa de peso ATUAL (kg). */

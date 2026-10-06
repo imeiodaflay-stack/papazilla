@@ -103,15 +103,15 @@ export function AnamnesisDetailScreen() {
             <div>
               <p>
                 <small>Objetivo</small>
-                <strong>{pet.goal || '—'}</strong>
+                <strong>{pet.goal || 'Não informado'}</strong>
               </p>
               <p>
                 <small>Condição corporal</small>
-                <strong>{pet.bodyTop || '—'}</strong>
+                <strong>{pet.bodyTop || 'Não informado'}</strong>
               </p>
               <p>
                 <small>Mudança de peso</small>
-                <strong>{pet.weightChange || '—'}</strong>
+                <strong>{pet.weightChange || 'Não informada'}</strong>
               </p>
             </div>
           </details>
@@ -127,15 +127,15 @@ export function AnamnesisDetailScreen() {
             <div>
               <p>
                 <small>Atividade</small>
-                <strong>{pet.activityTime ? `${pet.activityTime} por dia` : '—'}</strong>
+                <strong>{pet.activityTime ? `${pet.activityTime} por dia` : 'Não informada'}</strong>
               </p>
               <p>
                 <small>Apetite</small>
-                <strong>{pet.appetite || '—'}</strong>
+                <strong>{pet.appetite || 'Não informado'}</strong>
               </p>
               <p>
                 <small>Refeições</small>
-                <strong>{pet.currentMeals ? `${pet.currentMeals} por dia` : '—'}</strong>
+                <strong>{pet.currentMeals ? `${pet.currentMeals} por dia` : 'Não informado'}</strong>
               </p>
             </div>
           </details>
@@ -155,7 +155,7 @@ export function AnamnesisDetailScreen() {
               </p>
               <p>
                 <small>Fezes</small>
-                <strong>{pet.stool || '—'}</strong>
+                <strong>{pet.stool || 'Não informado'}</strong>
               </p>
               <p>
                 <small>Medicamentos contínuos</small>
@@ -177,11 +177,11 @@ export function AnamnesisDetailScreen() {
             <div>
               <p>
                 <small>Proteínas</small>
-                <strong>{pet.proteins.length > 0 ? joinPt(pet.proteins) : '—'}</strong>
+                <strong>{pet.proteins.length > 0 ? joinPt(pet.proteins) : 'Não informado'}</strong>
               </p>
               <p>
                 <small>Favoritos</small>
-                <strong>{pet.vegetableFavorites.length > 0 ? joinPt(pet.vegetableFavorites) : '—'}</strong>
+                <strong>{pet.vegetableFavorites.length > 0 ? joinPt(pet.vegetableFavorites) : 'Não informado'}</strong>
               </p>
               <p>
                 <small>Evitar</small>

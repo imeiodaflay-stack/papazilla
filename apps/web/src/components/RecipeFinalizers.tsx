@@ -36,7 +36,7 @@ export function RecipeFinalizers({ petPlans }: { petPlans: { pet: StoredPet; pla
           <img src={infoIcon} alt="" />
           <p>
             <strong>Não aqueça o suplemento.</strong>Recomendamos adicionar Food Dog e Nutroplus só à porção já fria ou
-            morna, na hora de servir — nunca direto na panela.
+            morna, na hora de servir. Nunca coloque direto na panela.
           </p>
         </div>
         <div className="pet-finalizers">

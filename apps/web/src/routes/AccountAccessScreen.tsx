@@ -71,7 +71,7 @@ export function AccountAccessScreen() {
             <img src={infoIcon} alt="" />
             <p>
               <strong>Login social ainda não existe</strong>Conectar com Google (e depois Apple) é um dos próximos passos
-              da autenticação — por enquanto o acesso é só pelo e-mail informado na tela de entrada.
+              da autenticação. Por enquanto, o acesso é só pelo e-mail informado na tela de entrada.
             </p>
           </div>
         )}

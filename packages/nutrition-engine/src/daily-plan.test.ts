@@ -140,8 +140,8 @@ describe('calculateDailyPlan — ajustes', () => {
   });
 });
 
-describe('calculateDailyPlan — filhote', () => {
-  it('2–4 meses porte médio => 10% e 3–4 refeições', () => {
+describe('calculateDailyPlan: filhote', () => {
+  it('2 a 4 meses porte médio => 10% e 3 a 4 refeições', () => {
     const plan = calculateDailyPlan({
       ...base,
       currentWeightKg: 3,
@@ -152,7 +152,7 @@ describe('calculateDailyPlan — filhote', () => {
     });
     expect(plan.percentOfWeight).toBe(10);
     expect(plan.totalGramsPerDay).toBe(300);
-    expect(plan.mealsPerDay).toBe('3–4');
+    expect(plan.mealsPerDay).toBe('3 a 4');
   });
 
   it('usa a dose de suplemento de filhote', () => {

@@ -94,7 +94,7 @@ export function hasActiveAccess(subscription: Subscription | null): boolean {
 }
 
 export function formatRenewalDate(subscription: Subscription): string {
-  if (!subscription.currentPeriodEnd) return '—';
+  if (!subscription.currentPeriodEnd) return 'Não disponível';
   return new Date(subscription.currentPeriodEnd).toLocaleDateString('pt-BR', {
     day: 'numeric',
     month: 'long',

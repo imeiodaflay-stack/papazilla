@@ -62,10 +62,10 @@ export function formatGrams(value: number): string {
 export function formatRowAmount(row: RecipeRow, format: string): string {
   const cookedTxt = row.cookedGrams !== undefined ? formatGrams(row.cookedGrams) : '';
   const rawTxt = row.rawGrams !== undefined ? formatGrams(row.rawGrams) : '';
-  if (format === 'Quantidade dos alimentos crus') return rawTxt ? `≈ ${rawTxt} cru` : '—';
-  if (format === 'Quantidade dos alimentos prontos') return cookedTxt ? `≈ ${cookedTxt} pronto` : '—';
+  if (format === 'Quantidade dos alimentos crus') return rawTxt ? `≈ ${rawTxt} cru` : 'Não se aplica';
+  if (format === 'Quantidade dos alimentos prontos') return cookedTxt ? `≈ ${cookedTxt} pronto` : 'Não se aplica';
   if (rawTxt && cookedTxt) return `≈ ${rawTxt} cru · ${cookedTxt} pronto`;
-  return rawTxt ? `≈ ${rawTxt}` : cookedTxt ? `≈ ${cookedTxt}` : '—';
+  return rawTxt ? `≈ ${rawTxt}` : cookedTxt ? `≈ ${cookedTxt}` : 'Não se aplica';
 }
 
 export function prepPortionsText(petPlans: { pet: StoredPet; plan: DailyPlan }[], days: number): string {

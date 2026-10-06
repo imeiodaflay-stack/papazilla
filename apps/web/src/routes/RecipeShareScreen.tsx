@@ -32,10 +32,10 @@ export function RecipeShareScreen() {
   const created = new Date(saved.createdAt).toLocaleDateString('pt-BR');
   const rows = recipe.groups.flatMap((group) => group.rows.map((row) => ({ group: group.title, ...row })));
   const plainText = [
-    `Papazilla — ${title}`, `Criada em ${created} · Motor ${recipe.engineVersion}`,
+    `Papazilla: ${title}`, `Criada em ${created} · Motor ${recipe.engineVersion}`,
     `Rendimento: ${saved.days} dias · ${formatGrams(recipe.totalCookedGrams)} prontos no total`,
     ...petPlans.flatMap(({ pet, plan }) => [
-      `\n${pet.name} — ${pet.age || 'idade não informada'}, ${pet.weight || 'peso não informado'} kg`,
+      `\n${pet.name}: ${pet.age || 'idade não informada'}, ${pet.weight || 'peso não informado'} kg`,
       `Objetivo: ${pet.goal || 'não informado'}${pet.idealWeight ? ` · peso ideal ${pet.idealWeight} kg` : ''}`,
       `Condições: ${pet.healthConditions?.join(', ') || 'nenhuma informada'}`,
       `Medicamentos: ${pet.medicationName || (pet.medication === 'Sim' ? 'uso informado, sem nome' : 'nenhum informado')}`,
@@ -45,7 +45,7 @@ export function RecipeShareScreen() {
       `Sal: ${plan.saltGuidance}`,
     ]),
     '\nIngredientes para todo o lote:',
-    ...rows.map((row) => `${row.group}: ${row.label} — ${row.rawGrams !== undefined ? `≈ ${formatGrams(row.rawGrams)} cru · ` : ''}${row.cookedGrams !== undefined ? `${formatGrams(row.cookedGrams)} pronto` : row.note ?? ''}`),
+    ...rows.map((row) => `${row.group}: ${row.label}. ${row.rawGrams !== undefined ? `≈ ${formatGrams(row.rawGrams)} cru · ` : ''}${row.cookedGrams !== undefined ? `${formatGrams(row.cookedGrams)} pronto` : row.note ?? ''}`),
     '\nPreparo: higienize mãos e bancada; corte em pedaços uniformes; cozinhe os grupos separadamente sem cebola, alho ou temperos prontos; confirme 74 °C no centro de carnes e vísceras; deixe amornar, misture e separe porções individuais; adicione suplementos e óleos apenas na hora de servir; refrigere em até 2 horas e congele o restante.',
     ...recipe.disclaimers,
     ...(clinical ? ['Esta receita não contempla ajustes clínicos individualizados. Leve este material ao médico-veterinário que acompanha o cão para revisão.'] : []),
@@ -54,7 +54,7 @@ export function RecipeShareScreen() {
 
   async function share() {
     try {
-      if (navigator.share) await navigator.share({ title: `Papazilla — ${title}`, text: plainText });
+      if (navigator.share) await navigator.share({ title: `Papazilla: ${title}`, text: plainText });
       else {
         await navigator.clipboard.writeText(plainText);
         setMessage('Resumo copiado. Você já pode enviá-lo ao veterinário.');
@@ -92,7 +92,7 @@ export function RecipeShareScreen() {
         <h2>Receita e quantidades</h2>
         <p>{saved.days} dias · {formatGrams(recipe.totalCookedGrams)} prontos no total · {formatGrams(recipe.cookedGramsPerDay)} por dia</p>
         <table><thead><tr><th>Grupo e ingrediente</th><th>Peso cru estimado</th><th>Peso pronto</th></tr></thead><tbody>
-          {rows.map((row) => <tr key={`${row.group}-${row.id}`}><td>{row.group} · {row.label}</td><td>{row.rawGrams === undefined ? row.note ?? '—' : `≈ ${formatGrams(row.rawGrams)}`}</td><td>{row.cookedGrams === undefined ? '—' : formatGrams(row.cookedGrams)}</td></tr>)}
+          {rows.map((row) => <tr key={`${row.group}-${row.id}`}><td>{row.group} · {row.label}</td><td>{row.rawGrams === undefined ? row.note ?? 'Não se aplica' : `≈ ${formatGrams(row.rawGrams)}`}</td><td>{row.cookedGrams === undefined ? 'Não se aplica' : formatGrams(row.cookedGrams)}</td></tr>)}
         </tbody></table>
         <RecipePreparationSteps petPlans={petPlans} days={saved.days} />
         <h2>Orientação de revisão</h2>

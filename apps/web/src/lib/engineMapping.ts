@@ -51,6 +51,11 @@ export function mapPuppyAgeBand(pet: Pick<StoredPet, 'puppyAgeBand'>): PuppyAgeB
 }
 
 const ADULT_SIZE_MAP: Record<string, DogSize> = {
+  'Pequeno (adulto de 5 a 10 kg)': 'small',
+  'Médio (adulto de 10 a 25 kg)': 'medium',
+  'Grande (adulto de 25 a 35 kg)': 'large',
+  'Gigante (adulto com mais de 35 kg)': 'giant',
+  // Compatibilidade com respostas salvas antes da revisão de copy.
   'Pequeno (adulto 5–10kg)': 'small',
   'Médio (adulto 10–25kg)': 'medium',
   'Grande (adulto 25–35kg)': 'large',

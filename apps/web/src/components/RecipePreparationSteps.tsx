@@ -46,7 +46,7 @@ export function RecipePreparationSteps({
             <div>
               <strong>Faça cortes uniformes</strong>
               <p>
-                Corte carnes em cubos de 2–3 cm; vísceras em pedaços de 1,5–2 cm; tubérculos e vegetais em cubos de 1,5–2
+                Corte carnes em cubos de 2 a 3 cm; vísceras em pedaços de 1,5 a 2 cm; tubérculos e vegetais em cubos de 1,5 a 2
                 cm. Tamanhos parecidos cozinham por igual.
               </p>
             </div>
@@ -90,7 +90,7 @@ export function RecipePreparationSteps({
             <span>7</span>
             <div>
               <strong>Guarde com segurança</strong>
-              <p>Refrigere em até 2 horas e use as porções refrigeradas em 3–4 dias. Congele o restante e descongele dentro da geladeira.</p>
+              <p>Refrigere em até 2 horas e use as porções refrigeradas em 3 a 4 dias. Congele o restante e descongele dentro da geladeira.</p>
             </div>
           </li>
         </ol>

@@ -13,9 +13,14 @@ import { ENGINE_VERSION } from './version.js';
 export const RECIPE_DAYS_MIN = 1;
 export const RECIPE_DAYS_MAX = 30;
 
+export const MUSCULAR_ORGANS_GUIDANCE =
+  'Moela, coração, pulmão, bucho e língua trazem variedade de sabores e nutrientes para o potinho. ' +
+  'Como referência geral, mantenha as vísceras musculares em até 1/3 da porção de carnes. ' +
+  'Introduza aos poucos e observe a tolerância do seu cão, especialmente as fezes e a ocorrência de vômitos.';
+
 const HERBS_SUBTITLE =
   'Passo opcional: a receita continua completa sem nenhuma erva. Não entram no total de gramas ' +
-  'nem são multiplicadas pelos dias — é uma dose por dia de comida, para temperar a porção na hora de servir.';
+  'nem são multiplicadas pelos dias. É uma dose por dia de comida, para temperar a porção na hora de servir.';
 
 function clampDays(days: number): number {
   const d = Math.round(days || 1);
@@ -44,10 +49,7 @@ function buildNotes(proteins: CatalogItem[], vegetables: CatalogItem[]): RecipeN
   if (proteins.some((it) => it.muscularOrgan)) {
     notes.push({
       code: 'MUSCULAR_ORGANS',
-      text:
-        'Vísceras musculares na receita (moela, coração, pulmão, bucho). Enriquecem a dieta e a ' +
-        'maioria dos cães adora. Referência: até 1/3 da porção diária de carne nelas, 3x por semana ' +
-        'ou até diariamente se o cão tolerar bem. Aumente aos poucos e observe fezes e vômitos.',
+      text: MUSCULAR_ORGANS_GUIDANCE,
     });
   }
   if (proteins.some((it) => it.highFat)) {

@@ -22,7 +22,7 @@ export function PapaScreen() {
       <p className="eyebrow">Toda receita começa por um Monstrinho</p>
       <h1 className="pz-h1">Ainda não sei para quem cozinhar</h1>
       <p>
-        Peso, fase de vida e rotina entram direto no cálculo — cadastre seu primeiro aumigo para eu montar a
+        Peso, fase de vida e rotina entram direto no cálculo. Cadastre seu primeiro aumigo para eu montar a
         receita certa para ele.
       </p>
       <button type="button" className="pz-button pz-button--primary wide" onClick={() => navigate('/anamnese')}>

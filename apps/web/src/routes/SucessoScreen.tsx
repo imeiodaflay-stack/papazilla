@@ -169,13 +169,13 @@ export function SucessoScreen() {
 
         <div className="success-summary">
           <span>
-            <strong>{state.weight ? `${state.weight} kg` : '—'}</strong>Peso
+            <strong>{state.weight ? `${state.weight} kg` : 'Não informado'}</strong>Peso
           </span>
           <span>
-            <strong>{state.goal || '—'}</strong>Objetivo
+            <strong>{state.goal || 'Não informado'}</strong>Objetivo
           </span>
           <span>
-            <strong>{state.activityTime || '—'}</strong>Atividade
+            <strong>{state.activityTime || 'Não informada'}</strong>Atividade
           </span>
         </div>
       </div>

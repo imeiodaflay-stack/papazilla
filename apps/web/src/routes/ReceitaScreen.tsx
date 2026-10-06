@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import type { FormulationId, SupplementId } from '@papazilla/nutrition-engine';
-import { CARBS, FORMULATIONS, ORGANS, PROTEINS, VEGETABLES, findItem } from '@papazilla/nutrition-engine';
+import { CARBS, FORMULATIONS, MUSCULAR_ORGANS_GUIDANCE, ORGANS, PROTEINS, VEGETABLES, findItem } from '@papazilla/nutrition-engine';
 import potinhoIcon from '../assets/icons/potinho.png';
 import infoIcon from '../assets/icons/info.png';
 import { getActivePet, getActivePetId, listPets } from '../lib/petsStore.js';
@@ -298,7 +298,7 @@ export function ReceitaScreen() {
     'Pode escolher mais de um; a gente divide em partes iguais.',
     'Pode pular esta etapa. Se não usar vísceras hoje, o valor delas é somado à proteína escolhida.',
     'Escolha o vitamínico-mineral que entrará nesta receita. A dose final muda conforme o produto.',
-    'Quanto você vai preparar de uma vez? Se cozinha porções para a semana toda, por exemplo, escolha 7 dias — a gente multiplica as quantidades pra você.',
+    'Quanto você vai preparar de uma vez? Se cozinha porções para a semana toda, por exemplo, escolha 7 dias. A gente multiplica as quantidades pra você.',
     'Receita pronta para a matilha.',
   ];
 
@@ -379,7 +379,7 @@ export function ReceitaScreen() {
                 <p>
                   <strong>Musculatura pede mais proteína</strong>
                   {joinPt(petsWithMuscleLoss.map((p) => p.name))} {petsWithMuscleLoss.length > 1 ? 'mostraram' : 'mostrou'} perda de músculo moderada ou bem
-                  evidente na Anamnese. "Mais proteína" ajuda a preservar massa muscular — você decide se quer usar.
+                  evidente na Anamnese. "Mais proteína" ajuda a preservar massa muscular. Você decide se quer usar.
                 </p>
               </div>
             ) : null}
@@ -439,11 +439,15 @@ export function ReceitaScreen() {
               <div className="shared-recipe-note" key={pet.id}>
                 <img src={infoIcon} alt="" />
                 <p>
-                  <strong>Lembrete da Anamnese</strong>Você contou que {pet.name} {text}. A escolha é sua — é só pra não
+                  <strong>Lembrete da Anamnese</strong>Você contou que {pet.name} {text}. A escolha é sua. É só pra não
                   esquecer.
                 </p>
               </div>
             ))}
+            <div className="shared-recipe-note">
+              <img src={infoIcon} alt="" />
+              <p><strong>Vísceras musculares: até 1/3 das carnes</strong>{MUSCULAR_ORGANS_GUIDANCE}</p>
+            </div>
             <IngredientPicker items={PROTEINS} selected={proteins} onToggle={(id) => toggleInSet(setProteins, id)} />
           </>
         ) : null}
@@ -454,7 +458,7 @@ export function ReceitaScreen() {
               <div className="shared-recipe-note" key={pet.id}>
                 <img src={infoIcon} alt="" />
                 <p>
-                  <strong>Lembrete da Anamnese</strong>Você contou que {pet.name} prefere {text}. A escolha é sua — é só
+                  <strong>Lembrete da Anamnese</strong>Você contou que {pet.name} prefere {text}. A escolha é sua. É só
                   pra não esquecer.
                 </p>
               </div>

@@ -290,7 +290,7 @@ export function RecipeDetailScreen() {
           </span>
           <span>
             <small>Avaliação</small>
-            <strong>{avgRating !== null ? `♥ ${avgRating.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}` : '—'}</strong>
+            <strong>{avgRating !== null ? `♥ ${avgRating.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}` : 'Sem avaliação'}</strong>
           </span>
         </div>
 

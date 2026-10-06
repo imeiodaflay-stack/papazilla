@@ -1,6 +1,6 @@
 export { ENGINE_VERSION } from './version.js';
 export { calculateDailyPlan } from './daily-plan.js';
-export { buildRecipe, RECIPE_DAYS_MIN, RECIPE_DAYS_MAX } from './recipe.js';
+export { buildRecipe, MUSCULAR_ORGANS_GUIDANCE, RECIPE_DAYS_MIN, RECIPE_DAYS_MAX } from './recipe.js';
 export {
   CATALOG,
   PROTEINS,

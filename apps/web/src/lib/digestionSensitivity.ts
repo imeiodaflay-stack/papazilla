@@ -22,5 +22,5 @@ const STRENGTHENED_CODES = new Set<RecipeNote['code']>(['MUSCULAR_ORGANS', 'LOOS
 export function digestionContextFor(note: RecipeNote, sensitivePetNames: string[]): string | null {
   if (sensitivePetNames.length === 0 || !STRENGTHENED_CODES.has(note.code)) return null;
   const names = sensitivePetNames.join(', ');
-  return `Você contou na Anamnese que a digestão de ${names} já dá sinais de sensibilidade — vale introduzir esse item aos poucos, em pouca quantidade, e observar as fezes nos dias seguintes.`;
+  return `Você contou na Anamnese que a digestão de ${names} já dá sinais de sensibilidade. Introduza esse item aos poucos, em pouca quantidade, e observe as fezes nos dias seguintes.`;
 }

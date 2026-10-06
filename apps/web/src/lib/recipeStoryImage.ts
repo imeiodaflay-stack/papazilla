@@ -298,7 +298,7 @@ export async function generateRecipeStoryImage({ recipe, petPlans, formulation, 
     ctx.fillText(label, MARGIN + 44, rowY - 16);
 
     const weight = format === 'Quantidade dos alimentos crus' ? row.rawGrams : row.cookedGrams;
-    const amountTxt = weight !== undefined ? `≈ ${formatGrams(weight)}` : row.note ?? '—';
+    const amountTxt = weight !== undefined ? `≈ ${formatGrams(weight)}` : row.note ?? 'Não se aplica';
     ctx.fillStyle = INK;
     ctx.font = '800 30px Nunito, "Avenir Next", sans-serif';
     ctx.textAlign = 'right';

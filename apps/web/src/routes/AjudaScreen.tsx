@@ -23,7 +23,7 @@ const FAQ = [
   },
   {
     q: 'Posso cadastrar mais de um cão?',
-    a: 'Sim. Cada Monstrinho tem seu próprio perfil, respostas e recomendações — todos ficam juntos na área Pets, e você troca entre eles quando quiser.',
+    a: 'Sim. Cada Monstrinho tem seu próprio perfil, respostas e recomendações. Todos ficam juntos na área Pets, e você troca entre eles quando quiser.',
   },
   {
     q: 'Preciso pagar para usar o Papazilla?',

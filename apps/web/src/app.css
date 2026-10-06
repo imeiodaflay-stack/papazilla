@@ -2596,6 +2596,12 @@
   grid-template-columns: 42px 1fr 42px;
   gap: 0.65rem;
 }
+.pets-header--single {
+  grid-template-columns: 1fr 42px;
+}
+.pets-header--single .profile-list-back-placeholder {
+  display: none;
+}
 .profile-list-back {
   display: grid;
   place-items: center;
@@ -2752,7 +2758,7 @@
   color: var(--pz-chocolate);
 }
 .more-menu {
-  margin-top: -0.5rem;
+  margin: 0.75rem 0 1rem;
   padding: 0.4rem;
   display: grid;
   background: #fff;
@@ -4452,7 +4458,8 @@
   align-items: flex-start;
   gap: 0.6rem;
   margin-top: 0.75rem;
-  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding: 0.8rem;
   background: var(--pz-info-bg);
   border-radius: 15px;
   color: var(--pz-info-ink);
@@ -4468,8 +4475,8 @@
 }
 .shared-recipe-note p {
   margin: 0;
-  font-size: 0.875rem;
-  line-height: 1.4;
+  font-size: 0.9375rem;
+  line-height: 1.42;
 }
 .shared-recipe-note strong {
   display: block;
@@ -5117,11 +5124,11 @@
   border-radius: 9px;
   object-fit: contain;
 }
-.recipe-preparation > summary b {
+.recipe-preparation > summary > b {
   color: var(--pz-ink-label);
   transition: transform 0.2s ease;
 }
-.recipe-preparation[open] > summary b {
+.recipe-preparation[open] > summary > b {
   transform: rotate(180deg);
 }
 .recipe-preparation__body {

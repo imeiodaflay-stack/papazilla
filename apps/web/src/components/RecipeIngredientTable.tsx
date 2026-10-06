@@ -31,8 +31,8 @@ export function RecipeIngredientTable({ groups, format }: { groups: RecipeGroup[
       {rows.map((row) => (
         <div key={row.id} className={`ingredient-table__row ingredient-table__row--${row.groupKey}${columns === 1 ? ' ingredient-table__row--single' : ''}`}>
           <span>{row.label}</span>
-          {showRaw ? <strong>{row.rawGrams !== undefined ? `≈ ${formatGrams(row.rawGrams)}` : '—'}</strong> : null}
-          {showCooked ? <strong>{row.cookedGrams !== undefined ? `≈ ${formatGrams(row.cookedGrams)}` : '—'}</strong> : null}
+          {showRaw ? <strong>{row.rawGrams !== undefined ? `≈ ${formatGrams(row.rawGrams)}` : 'Não se aplica'}</strong> : null}
+          {showCooked ? <strong>{row.cookedGrams !== undefined ? `≈ ${formatGrams(row.cookedGrams)}` : 'Não se aplica'}</strong> : null}
         </div>
       ))}
     </div>

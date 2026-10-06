@@ -148,6 +148,10 @@ describe('buildRecipe — alertas contextuais', () => {
     expect(codes).toEqual(
       ['LOOSENS_INTESTINE', 'MUSCULAR_ORGANS', 'SPINACH_OXALATE', 'TONGUE_HIGH_FAT'].sort(),
     );
+
+    const muscularOrgans = recipe.notes.find((note) => note.code === 'MUSCULAR_ORGANS');
+    expect(muscularOrgans?.text).toContain('até 1/3 da porção de carnes');
+    expect(muscularOrgans?.text).not.toContain('a maioria dos cães adora');
   });
 });
 

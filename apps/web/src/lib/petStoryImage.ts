@@ -24,13 +24,13 @@ function appetiteLabel(appetite: string, isFemale: boolean): string {
     case 'Gosta bastante de comer': return isFemale ? 'Boa de garfo' : 'Bom de garfo';
     case 'Parece estar sempre com fome':
     case 'Procura ou pede comida o tempo todo': return 'De monstro';
-    default: return '—';
+    default: return 'Não informado';
   }
 }
 
 function ageLabel(age: string): string {
   const n = Number(String(age).replace(',', '.'));
-  if (!Number.isFinite(n) || n <= 0) return '—';
+  if (!Number.isFinite(n) || n <= 0) return 'Não informado';
   if (n < 1) {
     const months = Math.max(1, Math.round(n * 12));
     return `${months} ${months === 1 ? 'mês' : 'meses'}`;
@@ -44,8 +44,8 @@ export function petStoryFacts(pet: PetStoryData): [string, string][] {
   const stage = pet.senior === 'Sim' ? 'Sênior' : pet.lifeStage || 'Adulto';
   return [
     ['Raça', pet.breed?.trim() || 'Sem raça definida'], ['Idade', ageLabel(pet.age)], ['Fase', stage],
-    ['Peso', pet.weight?.trim() ? `${pet.weight.trim()} kg` : '—'],
-    ['Objetivo', GOAL_LABEL[pet.goal] ?? (pet.goal || '—')], ['Fome', appetiteLabel(pet.appetite, isFemale)],
+    ['Peso', pet.weight?.trim() ? `${pet.weight.trim()} kg` : 'Não informado'],
+    ['Objetivo', GOAL_LABEL[pet.goal] ?? (pet.goal || 'Não informado')], ['Fome', appetiteLabel(pet.appetite, isFemale)],
   ];
 }
 

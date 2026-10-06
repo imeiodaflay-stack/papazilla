@@ -174,7 +174,7 @@ export function RecipeResultCard({
                   <p>
                     {liked.length > 0 ? (
                       <>
-                        Você contou que {pet.name} adora {joinPt(liked)} — essa receita tem!{' '}
+                        Você contou que {pet.name} adora {joinPt(liked)}. Essa receita tem!{' '}
                       </>
                     ) : null}
                     {avoided.length > 0 ? (
@@ -195,18 +195,18 @@ export function RecipeResultCard({
                 <div key={pet.id}>
                   <span>{pet.name}</span>
                   <strong>
-                    até {formatGrams(plan.treatsGramsPerDay.min)}–{formatGrams(plan.treatsGramsPerDay.max)}/dia
+                    até {formatGrams(plan.treatsGramsPerDay.min)} a {formatGrams(plan.treatsGramsPerDay.max)}/dia
                   </strong>
                 </div>
               ))
             ) : (
               <div>
                 <span>Petiscos e mimos por fora da receita</span>
-                <strong>até {formatGrams(treatsMin)}–{formatGrams(treatsMax)}/dia</strong>
+                <strong>até {formatGrams(treatsMin)} a {formatGrams(treatsMax)}/dia</strong>
               </div>
             )}
             <p className="pz-note">
-              10% a 15% do total diário{petPlans.length > 1 ? ', por pet' : ''} — inclui petiscos, comida da família e
+              10% a 15% do total diário{petPlans.length > 1 ? ', por pet' : ''}. Inclui petiscos, comida da família e
               qualquer coisa fora do potinho.
             </p>
             {petsWithFrequentExtras.length > 0 ? (
@@ -215,7 +215,7 @@ export function RecipeResultCard({
                 <p>
                   Você contou na Anamnese que {joinPt(petsWithFrequentExtras.map((p) => p.name))}{' '}
                   {petsWithFrequentExtras.length > 1 ? 'recebem' : 'recebe'} petiscos ou comida da família com
-                  frequência — vale medir ou contar o quanto isso já soma antes de completar com essa receita, pra
+                  frequência. Vale medir ou contar o quanto isso já soma antes de completar com essa receita, pra
                   não passar do limite.
                 </p>
               </div>

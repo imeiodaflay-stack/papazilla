@@ -22,7 +22,7 @@ import { goBackOr } from '../lib/navigation.js';
 const TERMOS_SECTIONS: { heading: string; body: string }[] = [
   {
     heading: '1. Sobre o Papazilla',
-    body: 'O Papazilla é um aplicativo que ajuda tutores de cães a montar receitas de alimentação natural cozida (AN) para seus Monstrinhos, calculando quantidades de ingredientes e suplementos a partir do perfil de cada cão — peso, fase de vida, rotina e preferências informadas por você.',
+    body: 'O Papazilla é um aplicativo que ajuda tutores de cães a montar receitas de alimentação natural cozida (AN) para seus Monstrinhos, calculando quantidades de ingredientes e suplementos a partir do perfil de cada cão, incluindo peso, fase de vida, rotina e preferências informadas por você.',
   },
   {
     heading: '2. Quem pode usar',
@@ -34,11 +34,11 @@ const TERMOS_SECTIONS: { heading: string; body: string }[] = [
   },
   {
     heading: '4. As receitas e o cálculo nutricional',
-    body: 'O Papazilla calcula quantidades a partir das informações que você fornece sobre o cão — a precisão da receita depende da precisão dessas informações. Condições de saúde informadas na anamnese não viram regras terapêuticas automáticas: elas geram avisos e, quando aplicável, uma recomendação de revisão veterinária — nunca uma promessa de que a receita trata, previne ou substitui tratamento de qualquer condição. O Papazilla não substitui orientação de um médico-veterinário; antes de mudanças relevantes na alimentação do seu cão, principalmente se ele tiver alguma condição diagnosticada, consulte um profissional. Cada receita salva registra a versão do motor de cálculo usada, para que atualizações futuras nas regras não alterem silenciosamente receitas já geradas.',
+    body: 'O Papazilla calcula quantidades a partir das informações que você fornece sobre o cão. A precisão da receita depende da precisão dessas informações. Condições de saúde informadas na anamnese não viram regras terapêuticas automáticas: elas geram avisos e, quando aplicável, uma recomendação de revisão veterinária, sem prometer que a receita trata, previne ou substitui o tratamento de qualquer condição. O Papazilla não substitui orientação de um médico-veterinário; antes de mudanças relevantes na alimentação do seu cão, principalmente se ele tiver alguma condição diagnosticada, consulte um profissional. Cada receita salva registra a versão do motor de cálculo usada, para que atualizações futuras nas regras não alterem silenciosamente receitas já geradas.',
   },
   {
     heading: '5. Conteúdo enviado por você',
-    body: 'Fotos e informações que você envia — fotos do pet, fotos da fornalha, respostas da anamnese — continuam sendo suas. Você garante ter o direito de enviá-las e que elas não violam direitos de terceiros.',
+    body: 'As fotos do pet e da fornalha, assim como as respostas da anamnese e outras informações que você envia, continuam sendo suas. Você garante ter o direito de enviá-las e que elas não violam direitos de terceiros.',
   },
   {
     heading: '6. Assinatura',
@@ -54,7 +54,7 @@ const TERMOS_SECTIONS: { heading: string; body: string }[] = [
   },
   {
     heading: '9. Limitação de responsabilidade',
-    body: 'O Papazilla é fornecido "como está". Não garantimos que o serviço estará livre de erros ou interrupções. Na máxima extensão permitida por lei, não nos responsabilizamos por danos indiretos decorrentes do uso do app — isso não afeta os direitos que a legislação brasileira de defesa do consumidor te garante.',
+    body: 'O Papazilla é fornecido "como está". Não garantimos que o serviço estará livre de erros ou interrupções. Na máxima extensão permitida por lei, não nos responsabilizamos por danos indiretos decorrentes do uso do app. Isso não afeta os direitos que a legislação brasileira de defesa do consumidor te garante.',
   },
   {
     heading: '10. Legislação aplicável',
@@ -69,7 +69,7 @@ const PRIVACIDADE_SECTIONS: { heading: string; body: string }[] = [
   },
   {
     heading: '2. Quais dados coletamos',
-    body: 'Dados de conta (nome, e-mail e, quando fornecida pelo provedor de login, foto de perfil); dados de autenticação do fluxo de login com Google, Apple ou e-mail; dados do(s) cão(ães) cadastrado(s) — nome, raça, idade ou data de nascimento, peso, sexo, foto e as respostas da anamnese sobre rotina, apetite, preferências alimentares e condições de saúde que você informar; e as receitas calculadas, os ingredientes escolhidos e o histórico de fornalhas, com fotos quando você adicionar.',
+    body: 'Dados de conta (nome, e-mail e, quando fornecida pelo provedor de login, foto de perfil); dados de autenticação do fluxo de login com Google, Apple ou e-mail; dados dos cães cadastrados, como nome, raça, idade ou data de nascimento, peso, sexo, foto e as respostas da anamnese sobre rotina, apetite, preferências alimentares e condições de saúde que você informar; e as receitas calculadas, os ingredientes escolhidos e o histórico de fornalhas, com fotos quando você adicionar.',
   },
   {
     heading: '3. Por que coletamos',
@@ -81,7 +81,7 @@ const PRIVACIDADE_SECTIONS: { heading: string; body: string }[] = [
   },
   {
     heading: '5. Com quem compartilhamos',
-    body: 'Supabase (banco de dados, autenticação e armazenamento de arquivos) e Vercel (hospedagem do aplicativo) atuam como operadores dos seus dados, seguindo nossas instruções. Se você optar por entrar com Google ou Apple, recebemos do provedor apenas nome, e-mail e foto, quando disponíveis — como em qualquer login social. Não compartilhamos seus dados com mais ninguém, e o Papazilla não usa ferramentas de rastreamento publicitário.',
+    body: 'Supabase (banco de dados, autenticação e armazenamento de arquivos) e Vercel (hospedagem do aplicativo) atuam como operadores dos seus dados, seguindo nossas instruções. Se você optar por entrar com Google ou Apple, recebemos do provedor apenas nome, e-mail e foto, quando disponíveis, como em qualquer login social. Não compartilhamos seus dados com mais ninguém, e o Papazilla não usa ferramentas de rastreamento publicitário.',
   },
   {
     heading: '6. Seus direitos (LGPD)',
