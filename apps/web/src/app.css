@@ -1,5 +1,28 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 #root {
   min-height: 100dvh;
+}
+
+
+/* ============================================================
+   Desktop frame — acabamento visual fora da area util (>480px)
+   ============================================================ */
+@media (min-width: 520px) {
+  body {
+    background: #2e1d17;
+  }
+
+  .app-view,
+  .auth-screen {
+    box-shadow:
+      0 0 0 1px rgb(0 0 0 / 18%),
+      0 8px 40px rgb(0 0 0 / 28%),
+      0 2px 8px rgb(0 0 0 / 16%);
+    border-radius: 0 0 28px 28px;
+  }
 }
 
 /* ============================================================
