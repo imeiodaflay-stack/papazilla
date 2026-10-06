@@ -1957,8 +1957,9 @@
     radial-gradient(circle at 50% 10%, #fff 0, #fffaf6 55%, #f8eddf 100%);
 }
 .beneficios-header {
-  min-height: 88px;
+  min-height: max(88px, calc(56px + env(safe-area-inset-top)));
   margin: 0 1.25rem;
+  padding-top: env(safe-area-inset-top);
 }
 .beneficios-letter {
   position: relative;
@@ -2025,11 +2026,10 @@
   gap: 0.55rem;
 }
 .beneficios-benefit {
-  min-height: 8rem;
-  padding: 0.75rem 0.6rem;
+  padding: 0.85rem 0.6rem 0.85rem 0.5rem;
   display: grid;
   grid-template-columns: 3.45rem minmax(0, 1fr);
-  align-items: center;
+  align-items: start;
   gap: 0.4rem;
   border-radius: 1.25rem;
   box-shadow: 0 5px 16px -14px rgb(74 45 34 / 50%);
@@ -2047,19 +2047,22 @@
   width: 3.3rem;
   height: 3.3rem;
   object-fit: contain;
+  align-self: center;
+  margin-top: 0.1rem;
 }
 .beneficios-benefit h2 {
   margin: 0 0 0.3rem;
   color: var(--pz-chocolate);
   font: 600 1.05rem / 1.06 var(--pz-font-display);
+  text-wrap: balance;
 }
 .beneficios-benefit--green h2 {
   color: #50721e;
 }
 .beneficios-benefit p {
   margin: 0;
-  color: var(--pz-chocolate);
-  font: 500 0.75rem / 1.3 var(--pz-font-body);
+  color: color-mix(in srgb, var(--pz-chocolate) 80%, transparent);
+  font: 500 0.78rem / 1.35 var(--pz-font-body);
 }
 .beneficios-divider {
   height: 2.2rem;
@@ -2120,6 +2123,20 @@
   gap: 0.65rem;
   background: linear-gradient(135deg, #ff8969, #ff6947);
   box-shadow: 0 10px 22px -13px rgb(184 71 38 / 75%);
+  transition: filter 0.15s ease, box-shadow 0.15s ease;
+}
+.beneficios-actions .pz-button--primary:hover {
+  filter: brightness(1.06);
+  box-shadow: 0 14px 28px -12px rgb(184 71 38 / 80%);
+}
+.beneficios-actions .pz-button--primary:active {
+  filter: brightness(0.93);
+  box-shadow: 0 4px 12px -8px rgb(184 71 38 / 60%);
+  transform: translateY(1px);
+}
+.beneficios-actions .pz-button--primary:focus-visible {
+  outline: 3px solid var(--pz-coral);
+  outline-offset: 3px;
 }
 .beneficios-actions .pz-button--primary span {
   font-size: 2rem;
@@ -2136,6 +2153,15 @@
 .beneficios-actions .beneficios-secondary:hover {
   background: rgb(74 45 34 / 5%);
   color: var(--pz-chocolate);
+}
+.beneficios-actions .beneficios-secondary:active {
+  background: rgb(74 45 34 / 9%);
+  transform: scale(0.98);
+}
+.beneficios-actions .beneficios-secondary:focus-visible {
+  outline: 3px solid var(--pz-coral);
+  outline-offset: 3px;
+  border-radius: 0.5rem;
 }
 .beneficios-garden {
   position: relative;

@@ -142,7 +142,7 @@ export function BeneficiosScreen() {
             P.S. Se {petNamesWithArticles} {subscriberVerb}, essa carta é só pra lembrar: toda receita nova continua
             calculada assim, com esse mesmo carinho.
           </p>
-          <strong>Com carinho,<br /><b>Zilla</b> 🐾</strong>
+          <strong>Com carinho,<br /><b>Zilla</b> <span aria-hidden="true">🐾</span></strong>
         </div>
       </main>
 
