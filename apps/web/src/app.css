@@ -3030,12 +3030,13 @@
 }
 .paywall-hero__art img {
   position: absolute;
-  bottom: -10px;
-  left: -13px;
+  top: 50%;
+  left: 50%;
   width: 118px;
   height: 132px;
   object-fit: contain;
   mix-blend-mode: multiply;
+  transform: translate(-50%, -50%);
 }
 .paywall-hero h1 {
   margin: 0.28rem 0 0.4rem;
@@ -3082,12 +3083,12 @@
   margin: 0;
 }
 .paywall-benefits strong {
-  font: 800 0.875rem / 1.2 var(--pz-font-support);
+  font: 800 1rem / 1.2 var(--pz-font-support);
 }
 .paywall-benefits small {
   color: var(--pz-ink-label);
-  font-size: 0.875rem;
-  line-height: 1.25;
+  font-size: 0.9375rem;
+  line-height: 1.35;
 }
 
 .paywall-offer {
