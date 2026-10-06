@@ -17,11 +17,14 @@
 
   .app-view,
   .auth-screen {
+    min-height: calc(100dvh - 2rem);
+    margin-top: 1rem;
+    margin-bottom: 1rem;
     box-shadow:
       0 0 0 1px rgb(0 0 0 / 18%),
       0 8px 40px rgb(0 0 0 / 28%),
       0 2px 8px rgb(0 0 0 / 16%);
-    border-radius: 0 0 28px 28px;
+    border-radius: 28px;
   }
 }
 
