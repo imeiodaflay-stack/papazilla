@@ -137,6 +137,7 @@ export function ReceitaScreen() {
   const petsWithMuscleLoss = selectedPets.filter(hasSignificantMuscleLoss);
   const petProteinReminders = proteinReminders(selectedPets);
   const petVegetableReminders = vegetableReminders(selectedPets);
+  const hasSelectedMuscularOrgan = PROTEINS.some((item) => item.muscularOrgan && proteins.has(item.id));
   const petPlans = useMemo(
     () => selectedPets.map((pet) => ({ pet, plan: buildPetPlan(pet, choices) })),
     [selectedPets.map((p) => p.id).join(','), choices],
@@ -444,10 +445,12 @@ export function ReceitaScreen() {
                 </p>
               </div>
             ))}
-            <div className="shared-recipe-note">
-              <img src={infoIcon} alt="" />
-              <p><strong>Vísceras musculares: até 1/3 das carnes</strong>{MUSCULAR_ORGANS_GUIDANCE}</p>
-            </div>
+            {hasSelectedMuscularOrgan ? (
+              <div className="shared-recipe-note">
+                <img src={infoIcon} alt="" />
+                <p><strong>Vísceras musculares: até 1/3 das carnes</strong>{MUSCULAR_ORGANS_GUIDANCE}</p>
+              </div>
+            ) : null}
             <IngredientPicker items={PROTEINS} selected={proteins} onToggle={(id) => toggleInSet(setProteins, id)} />
           </>
         ) : null}

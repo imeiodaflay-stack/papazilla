@@ -5,7 +5,6 @@ import patinhaIcon from '../assets/icons/patinha.png';
 import perfilIcon from '../assets/icons/perfil.png';
 import sucessoIcon from '../assets/icons/sucesso.png';
 import notificacoesIcon from '../assets/icons/notificacoes.png';
-import ajustesIcon from '../assets/icons/ajustes.png';
 import mensagemIcon from '../assets/icons/mensagem.png';
 import infoIcon from '../assets/icons/info.png';
 import excluirIcon from '../assets/icons/excluir.png';
@@ -233,20 +232,6 @@ export function ContaScreen() {
               <i aria-hidden="true" />
             </button>
           </div>
-          <button
-            type="button"
-            className="user-settings-row"
-            onClick={() => toast('Papazilla usa sempre o visual oficial. Não há tema alternativo por enquanto.')}
-          >
-            <span className="user-settings-row__icon">
-              <img src={ajustesIcon} alt="" />
-            </span>
-            <span>
-              <strong>Aparência</strong>
-              <small>Visual oficial do Papazilla</small>
-            </span>
-            <b aria-hidden="true">›</b>
-          </button>
         </section>
 
         <section className="user-settings-group" aria-labelledby="support-title">
