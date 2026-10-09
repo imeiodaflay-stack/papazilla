@@ -141,15 +141,6 @@ export function OriginalRecipeResultScreen() {
             <img className="original-result-food" src={original.image} alt={`${original.title} pronto`} />
           </div>
 
-          {recipe ? (
-            <div className="recipe-share-image">
-              <button type="button" className="pz-button pz-button--outline wide" disabled={sharing} onClick={() => { void handleShare(); }}>
-                {sharing ? 'Gerando imagem…' : 'Compartilhar imagem para stories'}
-              </button>
-              <small>Uma lembrança da fornalha, pronta para postar ou salvar.</small>
-            </div>
-          ) : null}
-
           <div className="recipe-preset-result original-result-summary">
             <span className="original-result-summary__photo"><img src={original.image} alt="" /></span>
             <div><small>Original escolhida</small><strong>{original.title}</strong><span>{original.subtitle}</span></div>
@@ -237,6 +228,15 @@ export function OriginalRecipeResultScreen() {
               {treat ? <p className="recipe-preparation__intro">{treat.source}</p> : null}
             </div>
           </details>
+
+          {recipe ? (
+            <div className="recipe-share-image">
+              <button type="button" className="pz-button pz-button--outline wide" disabled={sharing} onClick={() => { void handleShare(); }}>
+                {sharing ? 'Gerando imagem…' : 'Compartilhar imagem para stories'}
+              </button>
+              <small>Uma lembrança da fornalha, pronta para postar ou salvar.</small>
+            </div>
+          ) : null}
         </article>
       </div>
 

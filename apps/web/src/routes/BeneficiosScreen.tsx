@@ -36,7 +36,6 @@ export function BeneficiosScreen() {
   const ownerPreposition = isPack ? 'de' : activeDescription.preposition;
   const pronoun = isPack ? 'deles' : activeDescription.isFemale ? 'dela' : 'dele';
   const subjectPronoun = isPack ? 'eles' : activeDescription.isFemale ? 'ela' : 'ele';
-  const subscriberVerb = isPack ? 'são assinantes' : 'já é assinante';
   const petPhoto = activePet?.photoPath || zillaFallback;
   const requestedReturnTo = searchParams.get('returnTo') ?? 'recipe';
   const originalSlug = requestedReturnTo.startsWith('original:') ? requestedReturnTo.slice('original:'.length) : '';
@@ -139,8 +138,8 @@ export function BeneficiosScreen() {
 
         <div className="beneficios-signoff">
           <p>
-            P.S. Se {petNamesWithArticles} {subscriberVerb}, essa carta é só pra lembrar: toda receita nova continua
-            calculada assim, com esse mesmo carinho.
+            P.S. O perfil {ownerPreposition} {petNames} ficou guardado. A próxima receita parte dessas informações
+            para calcular cada medida.
           </p>
           <strong>Com carinho,<br /><b>Zilla</b> <span aria-hidden="true">🐾</span></strong>
         </div>

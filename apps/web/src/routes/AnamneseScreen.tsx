@@ -630,7 +630,7 @@ function ConditionalPanel({ show, children }: { show: boolean; children: ReactNo
 
 const STEPS: Step[] = [
   {
-    eyebrow: '1 · Sobre o seu cão',
+    eyebrow: 'Sobre o seu cão',
     title: 'Quem é esse Monstrinho?',
     intro: 'Comece pelas informações que ajudam a gente a reconhecer e calcular o perfil dele.',
     body: (ctx) => (
@@ -696,7 +696,7 @@ const STEPS: Step[] = [
     ),
   },
   {
-    eyebrow: '2 · Objetivo',
+    eyebrow: 'Objetivo',
     title: 'Qual é o principal objetivo da alimentação?',
     intro: 'O que você gostaria de alcançar com a alimentação do seu cão?',
     body: (ctx) => (
@@ -731,7 +731,7 @@ const STEPS: Step[] = [
     ),
   },
   {
-    eyebrow: '3 · Condição corporal',
+    eyebrow: 'Condição corporal',
     title: 'Como está o corpo dele?',
     intro:
       'Olhe por cima, passe as mãos pelas laterais do peito e depois observe a barriga de lado. Essa avaliação, em vez de uma impressão geral, ajusta a quantidade da receita pra mais ou pra menos.',
@@ -777,7 +777,7 @@ const STEPS: Step[] = [
     ),
   },
   {
-    eyebrow: '4 · Musculatura',
+    eyebrow: 'Musculatura',
     title: 'Como está a musculatura?',
     intro: 'Você percebe alguma dessas mudanças no corpo do seu cão? Pode selecionar mais de uma.',
     body: (ctx) => {
@@ -807,7 +807,7 @@ const STEPS: Step[] = [
     },
   },
   {
-    eyebrow: '5 · Histórico de peso',
+    eyebrow: 'Histórico de peso',
     title: 'O peso mudou recentemente?',
     intro: 'Considere os últimos 3 a 6 meses.',
     body: (ctx) => {
@@ -836,10 +836,10 @@ const STEPS: Step[] = [
               <p>
                 <strong>O objetivo escolhido e o histórico de peso não combinam.</strong>
                 <span>
-                  Você marcou "Manter o peso atual" no Passo 2, mas contou aqui que o peso aumentou
-                  bastante nos últimos meses. Se o objetivo real é voltar ao peso de antes, volte ao{' '}
+                  Você marcou "Manter o peso atual" na etapa Objetivo, mas contou aqui que o peso aumentou
+                  bastante nos últimos meses. Se o objetivo real é voltar ao peso de antes, volte a{' '}
                   <button type="button" className="clinical-warning__link" onClick={() => ctx.goToStep(1)}>
-                    Passo 2
+                    Objetivo
                   </button>{' '}
                   e marque "Emagrecer". Assim, a receita já sai calculada pra isso.
                 </span>
@@ -857,7 +857,7 @@ const STEPS: Step[] = [
     },
   },
   {
-    eyebrow: '6 · Atividade',
+    eyebrow: 'Atividade',
     title: 'Como é a rotina de atividade?',
     intro: 'Considere a média de uma semana comum.',
     body: (ctx) => (
@@ -892,7 +892,7 @@ const STEPS: Step[] = [
     ),
   },
   {
-    eyebrow: '7 · Apetite',
+    eyebrow: 'Apetite',
     title: 'Como é a fome?',
     intro: 'Como é o apetite do seu cão?',
     body: (ctx) => {
@@ -932,7 +932,7 @@ const STEPS: Step[] = [
     },
   },
   {
-    eyebrow: '8 · Alimentação atual',
+    eyebrow: 'Alimentação atual',
     title: 'Como ele se alimenta hoje?',
     intro: 'Isso ajuda a planejar uma transição mais tranquila.',
     body: (ctx) => (
@@ -968,7 +968,7 @@ const STEPS: Step[] = [
     ),
   },
   {
-    eyebrow: '9 · Petiscos',
+    eyebrow: 'Petiscos',
     title: 'E os petiscos?',
     intro: 'Eles também fazem parte do que o seu cão consome no dia.',
     body: (ctx) => (
@@ -988,7 +988,7 @@ const STEPS: Step[] = [
     ),
   },
   {
-    eyebrow: '10 · Digestão',
+    eyebrow: 'Digestão',
     title: 'Como é a digestão?',
     intro: 'Conte como costuma ser a rotina intestinal dele.',
     body: (ctx) => (
@@ -1027,7 +1027,7 @@ const STEPS: Step[] = [
     ),
   },
   {
-    eyebrow: '11 · Saúde',
+    eyebrow: 'Saúde',
     title: 'Saúde',
     intro:
       'Seu cão já foi diagnosticado por um veterinário com alguma destas condições? Pode selecionar mais de uma.',
@@ -1080,7 +1080,7 @@ const STEPS: Step[] = [
     },
   },
   {
-    eyebrow: '12 · Saúde complementar',
+    eyebrow: 'Saúde complementar',
     title: 'Perguntas complementares de saúde',
     intro: 'Mostramos apenas o que corresponde às condições informadas.',
     body: (ctx) => (
@@ -1116,7 +1116,7 @@ const STEPS: Step[] = [
     ),
   },
   {
-    eyebrow: '13 · Medicamentos',
+    eyebrow: 'Medicamentos',
     title: 'Medicamentos e suplementos',
     intro: 'Registre somente o que ele usa atualmente.',
     body: (ctx) => (
@@ -1155,7 +1155,7 @@ const STEPS: Step[] = [
     ),
   },
   {
-    eyebrow: '14 · Veterinário',
+    eyebrow: 'Veterinário',
     title: 'Acompanhamento veterinário',
     intro:
       'Essas informações ajudam a identificar quando vale revisar a alimentação com o profissional.',
@@ -1197,7 +1197,7 @@ const STEPS: Step[] = [
     ),
   },
   {
-    eyebrow: '15 · Preferências',
+    eyebrow: 'Preferências',
     title: 'Preferências alimentares',
     intro: 'Conte o que costuma funcionar e o que deve ficar fora do potinho.',
     body: (ctx) => (
@@ -1225,7 +1225,7 @@ const STEPS: Step[] = [
     ),
   },
   {
-    eyebrow: '16 · Carboidratos',
+    eyebrow: 'Carboidratos',
     title: 'Carboidratos',
     intro: 'Quais carboidratos você gostaria de usar? Pode selecionar mais de uma.',
     body: (ctx) => (
@@ -1237,7 +1237,7 @@ const STEPS: Step[] = [
     ),
   },
   {
-    eyebrow: '17 · Vegetais',
+    eyebrow: 'Vegetais',
     title: 'Vegetais',
     intro: 'Preferências ajudam o Zilla a sugerir combinações mais fáceis para a rotina.',
     body: (ctx) => (
@@ -1259,7 +1259,7 @@ const STEPS: Step[] = [
     ),
   },
   {
-    eyebrow: '18 · Preparo',
+    eyebrow: 'Preparo',
     title: 'Preferências de preparo',
     intro: 'Essas respostas viram o padrão sugerido nas próximas receitas.',
     body: (ctx) => (
@@ -1284,7 +1284,7 @@ const STEPS: Step[] = [
     ),
   },
   {
-    eyebrow: '19 · Refeições',
+    eyebrow: 'Refeições',
     title: 'Quantas refeições por dia?',
     intro: 'Quantas refeições você prefere oferecer?',
     body: (ctx) => {
@@ -1315,7 +1315,7 @@ const STEPS: Step[] = [
     },
   },
   {
-    eyebrow: '20 · Observações',
+    eyebrow: 'Observações',
     title: 'Observações finais',
     intro: 'Última etapa. Depois disso, você poderá revisar e atualizar tudo pela área Pets.',
     body: (ctx) => {

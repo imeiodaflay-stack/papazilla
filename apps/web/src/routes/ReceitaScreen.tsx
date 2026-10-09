@@ -270,7 +270,7 @@ export function ReceitaScreen() {
         : 'Receita';
 
   const eyebrowByStep = [
-    'Passo 1 de 9 · A matilha à mesa',
+    'A matilha à mesa',
     'Composição do potinho',
     'Base da receita',
     'Energia',

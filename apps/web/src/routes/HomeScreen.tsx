@@ -30,9 +30,9 @@ function storeLikedOriginals(slugs: string[]): void {
 
 /**
  * Vitrine Papá. Os retratos da matilha são informativos: a escolha dos pets
- * acontece somente no fluxo da receita. Tanto a Personalizada quanto as
- * Originals passam primeiro pela carta de benefícios; é nela que o acesso é
- * conferido antes de seguir para a configuração ou para a assinatura.
+ * acontece somente no fluxo da receita. A carta de benefícios é apresentada
+ * depois do primeiro cadastro; daqui, assinantes seguem direto para a receita
+ * e quem ainda não assina recebe a oferta correspondente.
  */
 export function HomeScreen() {
   const navigate = useNavigate();
@@ -41,11 +41,14 @@ export function HomeScreen() {
   const [likedOriginals, setLikedOriginals] = useState<string[]>(readLikedOriginals);
 
   function createRecipe() {
-    navigate('/beneficios?returnTo=recipe');
+    navigate(hasSubscription ? '/receita' : '/assinatura?returnTo=recipe');
   }
 
   function openOriginal(slug: string) {
-    navigate(`/beneficios?returnTo=${encodeURIComponent(`original:${slug}`)}`);
+    const returnTo = `original:${slug}`;
+    navigate(hasSubscription
+      ? `/papa/original/${encodeURIComponent(slug)}`
+      : `/assinatura?returnTo=${encodeURIComponent(returnTo)}`);
   }
 
   function toggleLike(slug: string) {
