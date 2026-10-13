@@ -65,7 +65,7 @@ const TERMOS_SECTIONS: { heading: string; body: string }[] = [
 const PRIVACIDADE_SECTIONS: { heading: string; body: string }[] = [
   {
     heading: '1. Quem trata seus dados',
-    body: 'Os dados pessoais tratados pelo Papazilla são de responsabilidade de Flaybio Inc, inscrita no CNPJ [a definir]. Dúvidas ou solicitações sobre seus dados podem ser enviadas para imeiodaflay@gmail.com.',
+    body: 'Os dados pessoais tratados pelo Papazilla são de responsabilidade de Flaybio Inc, inscrita no CNPJ [a definir]. Dúvidas ou solicitações sobre seus dados podem ser enviadas para hello@papazilla.app.',
   },
   {
     heading: '2. Quais dados coletamos',
@@ -101,9 +101,18 @@ const PRIVACIDADE_SECTIONS: { heading: string; body: string }[] = [
   },
   {
     heading: '10. Contato',
-    body: 'Dúvidas, solicitações ou reclamações sobre seus dados podem ser enviadas para imeiodaflay@gmail.com.',
+    body: 'Dúvidas, solicitações ou reclamações sobre seus dados podem ser enviadas para hello@papazilla.app.',
   },
 ];
+
+const CONTACT_EMAIL = 'hello@papazilla.app';
+
+function renderLegalBody(body: string) {
+  const parts = body.split(CONTACT_EMAIL);
+  return parts.flatMap((part, index) => index === parts.length - 1
+    ? [part]
+    : [part, <a key={`contact-email-${index}`} href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>]);
+}
 
 export function TermosPrivacidadeScreen() {
   const navigate = useNavigate();
@@ -125,7 +134,7 @@ export function TermosPrivacidadeScreen() {
         <p className="eyebrow">Como cuidamos dos seus dados</p>
         <h1>Termos de Uso e Política de Privacidade</h1>
         <p className="curiosity-lead">
-          Última atualização: 5 de outubro de 2026. Ao usar o Papazilla, você concorda com os Termos de Uso e a
+          Última atualização: 13 de outubro de 2026. Ao usar o Papazilla, você concorda com os Termos de Uso e a
           Política de Privacidade abaixo.
         </p>
 
@@ -133,7 +142,7 @@ export function TermosPrivacidadeScreen() {
         {TERMOS_SECTIONS.map((section) => (
           <div key={section.heading}>
             <h2>{section.heading}</h2>
-            <p>{section.body}</p>
+            <p>{renderLegalBody(section.body)}</p>
           </div>
         ))}
 
@@ -141,7 +150,7 @@ export function TermosPrivacidadeScreen() {
         {PRIVACIDADE_SECTIONS.map((section) => (
           <div key={section.heading}>
             <h2>{section.heading}</h2>
-            <p>{section.body}</p>
+            <p>{renderLegalBody(section.body)}</p>
           </div>
         ))}
       </div>

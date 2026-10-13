@@ -9,6 +9,8 @@ O Papazilla mantém o mesmo conteúdo legal em dois contextos:
 
 Toda alteração em Termos de Uso ou Política de Privacidade deve ser aplicada na mesma mudança aos arquivos públicos e à tela interna do app. A data de “Última atualização” também deve permanecer igual nos dois contextos.
 
+E-mail de contato vigente: `hello@papazilla.app`. Atualizar qualquer mudança deste endereço em todos os documentos legais públicos e na tela autenticada do app.
+
 Antes de publicar uma mudança legal:
 
 1. Atualizar o texto no site público.
