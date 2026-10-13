@@ -18,4 +18,4 @@ Antes de publicar uma mudança legal:
 3. Conferir a data de atualização nas duas versões.
 4. Validar `/termos`, `/privacidade` e `/conta/termos`.
 
-Os textos atuais são uma minuta e ainda contêm o placeholder `CNPJ [a definir]`. A razão social, o CNPJ e mudanças materiais de tratamento de dados precisam ser confirmados antes de substituir essas informações.
+Razão social informada por Flay: `Flaybio Inc Serviços e Consultoria em Tecnologia da Informação LTDA`. CNPJ informado por Flay: `31.075.527/0001-09`. Esses dados estão registrados nos Termos de Uso e na Política de Privacidade, em ambas as versões. O conteúdo jurídico continua sendo uma minuta e alterações materiais no tratamento de dados devem ser refletidas nos dois contextos.

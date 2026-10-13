@@ -5,9 +5,8 @@ import { goBackOr } from '../lib/navigation.js';
  * Termos e privacidade — minuta redigida a partir do que o produto
  * efetivamente faz hoje (ver `arquitetura-tecnica.md` e o código de
  * `accountData.ts`, `session.ts`, `subscription.ts`): não inventa recursos,
- * provedores ou práticas que o app não tem. Dois pontos ficam deliberadamente
- * como placeholder — razão social e CNPJ — porque são dados reais da empresa
- * que só a Flay pode preencher; não é algo pra decidir ou inventar sozinho.
+ * provedores ou práticas que o app não tem. Os dados de identificação da
+ * empresa abaixo foram fornecidos por Flay e não foram inferidos.
  *
  * Isto é uma MINUTA: content jurídico gerado para revisão humana, não texto
  * aprovado. Antes de publicar isto como Política de Privacidade oficial (por
@@ -16,13 +15,14 @@ import { goBackOr } from '../lib/navigation.js';
  * especial porque o app lida com dados de saúde do pet e é voltado a
  * consumidores no Brasil (LGPD, CDC, Marco Civil da Internet).
  *
- * Razão social confirmada (Flaybio Inc); CNPJ ainda não existe — fica como
- * placeholder até a empresa ser formalizada.
+ * Razão social e CNPJ informados por Flay em 13/10/2026. O conteúdo jurídico
+ * continua como minuta e ainda requer revisão humana antes de ser tratado
+ * como aconselhamento ou validação jurídica.
  */
 const TERMOS_SECTIONS: { heading: string; body: string }[] = [
   {
     heading: '1. Sobre o Papazilla',
-    body: 'O Papazilla é um aplicativo que ajuda tutores de cães a montar receitas de alimentação natural cozida (AN) para seus Monstrinhos, calculando quantidades de ingredientes e suplementos a partir do perfil de cada cão, incluindo peso, fase de vida, rotina e preferências informadas por você.',
+    body: 'O Papazilla é um aplicativo operado por Flaybio Inc Serviços e Consultoria em Tecnologia da Informação LTDA, inscrita no CNPJ nº 31.075.527/0001-09. O serviço ajuda tutores de cães a montar receitas de alimentação natural cozida (AN) para seus Monstrinhos, calculando quantidades de ingredientes e suplementos a partir do perfil de cada cão, incluindo peso, fase de vida, rotina e preferências informadas por você.',
   },
   {
     heading: '2. Quem pode usar',
@@ -65,7 +65,7 @@ const TERMOS_SECTIONS: { heading: string; body: string }[] = [
 const PRIVACIDADE_SECTIONS: { heading: string; body: string }[] = [
   {
     heading: '1. Quem trata seus dados',
-    body: 'Os dados pessoais tratados pelo Papazilla são de responsabilidade de Flaybio Inc, inscrita no CNPJ [a definir]. Dúvidas ou solicitações sobre seus dados podem ser enviadas para hello@papazilla.app.',
+    body: 'Os dados pessoais tratados pelo Papazilla são de responsabilidade de Flaybio Inc Serviços e Consultoria em Tecnologia da Informação LTDA, inscrita no CNPJ nº 31.075.527/0001-09. Dúvidas ou solicitações sobre seus dados podem ser enviadas para hello@papazilla.app.',
   },
   {
     heading: '2. Quais dados coletamos',
