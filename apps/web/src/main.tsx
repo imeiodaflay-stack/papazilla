@@ -9,15 +9,24 @@ import { initAuth } from './lib/session.js';
 
 const root = document.getElementById('root');
 if (!root) throw new Error('#root não encontrado');
+const reactRoot = createRoot(root);
 
-// Espera a sessão (e a matilha carregada junto por ela, ver session.ts)
-// resolver antes do primeiro render. Sem isso, abrir/recarregar a página
-// direto numa rota como /zilla renderiza antes do Supabase responder e
-// mostra "sem pets" mesmo com Monstrinhos já cadastrados na conta.
-void initAuth().then(() => {
-  createRoot(root).render(
+function renderApp() {
+  reactRoot.render(
     <StrictMode>
       <RouterProvider router={router} />
     </StrictMode>,
   );
-});
+}
+
+// A entrada pública não depende da sessão nem dos dados da conta. A sessão
+// continua inicializando em segundo plano (session.ts), mas uma renovação
+// lenta ou indisponível não pode impedir que o formulário de login apareça.
+const pathname = window.location.pathname.replace(/\/+$/, '') || '/';
+if (pathname === '/signup' || pathname === '/entrar') {
+  renderApp();
+} else {
+  // Nas demais rotas, aguarda também a matilha para não mostrar uma conta
+  // vazia enquanto os dados reais ainda estão sendo carregados.
+  void initAuth().then(renderApp);
+}
