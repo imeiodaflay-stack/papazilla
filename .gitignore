@@ -36,3 +36,11 @@ coverage/
 
 # chaves privadas da Apple (Sign in with Apple)
 *.p8
+
+# chaves e certificados
+*.pem
+*.key
+*.p12
+
+# relatórios do Claude Security (podem citar código sensível)
+CLAUDE-SECURITY-*/
