@@ -14,7 +14,7 @@
  * inventado no navegador.
  *
  * Decisão de produto (Flay, 2026-10-05): Papazilla Anual em até 12x de
- * R$ 9,90 no cartão ou R$ 99,90 no Pix. Nenhum dos dois renova
+ * R$ 9,90 no cartão ou R$ 97,00 no Pix. Nenhum dos dois renova
  * automaticamente. Preços em `pricing.ts`. Sem promoção de lançamento.
  */
 import { isSupabaseConfigured } from './env.js';
@@ -106,7 +106,7 @@ export function formatBRL(value: number): string {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
-/** "12x de R$ 9,90 no cartão" ou "R$ 99,90 no Pix", para telas de conta. */
+/** "12x de R$ 9,90 no cartão" ou "R$ 97,00 no Pix", para telas de conta. */
 export function subscriptionPriceLabel(subscription: Subscription | null): string {
   if (subscription?.paymentMethod === 'pix') return `${formatBRL(PIX_PRICE)} no Pix`;
   const count = subscription?.installmentCount ?? null;

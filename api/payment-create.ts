@@ -109,7 +109,7 @@ async function ensureCustomer(
  *
  * Cartão (Flay, 2026-10-05): plano anual de R$ 118,80 em até 12x, cobrado
  * como parcelamento no cartão (POST /payments com installmentCount).
- * Pix: R$ 99,90 à vista. Nenhum dos dois renova automaticamente: os dois
+ * Pix: R$ 97,00 à vista. Nenhum dos dois renova automaticamente: os dois
  * liberam 12 meses e, no fim, a pessoa escolhe se compra de novo.
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {

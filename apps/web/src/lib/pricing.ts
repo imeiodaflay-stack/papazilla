@@ -1,13 +1,13 @@
 /**
- * Preços do Papazilla Anual (Flay, 2026-10-05). Usado pelo app e pelas
+ * Preços do Papazilla Anual (Flay, 2026-10-20). Usado pelo app e pelas
  * Vercel Functions (`api/payment-create.ts`, `api/subscription-renew.ts`),
  * então não importa nada do navegador.
  *
  * - Cartão: até 12x de R$ 9,90 (total R$ 118,80).
- * - Pix: R$ 99,90 à vista.
+ * - Pix: R$ 97,00 à vista.
  * Nenhum dos dois renova automaticamente. Sem promoção de lançamento.
  */
-export const PIX_PRICE = 99.9;
+export const PIX_PRICE = 97;
 export const CARD_MAX_INSTALLMENTS = 12;
 export const CARD_INSTALLMENT_VALUE = 9.9;
 export const CARD_TOTAL = Math.round(CARD_INSTALLMENT_VALUE * CARD_MAX_INSTALLMENTS * 100) / 100;
