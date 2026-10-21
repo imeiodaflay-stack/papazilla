@@ -36,6 +36,15 @@ export function setUserProfile(profile: UserProfile): void {
   }
 }
 
+/** Esquece o perfil guardado neste aparelho (ao sair da conta). */
+export function clearUserProfile(): void {
+  try {
+    localStorage.removeItem(PROFILE_KEY);
+  } catch {
+    /* storage indisponível — nada a apagar */
+  }
+}
+
 /** Só a foto — preserva nome/e-mail já salvos em vez de pedir o objeto inteiro de volta. */
 export function setUserAvatar(avatarUrl: string): void {
   const current = getUserProfile();

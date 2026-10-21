@@ -17,10 +17,11 @@
 import type { User } from '@supabase/supabase-js';
 import { isSupabaseConfigured } from './env.js';
 import { supabase } from './supabase.js';
-import { syncProfileFromAuthUser } from './userProfile.js';
+import { clearUserProfile, syncProfileFromAuthUser } from './userProfile.js';
 import { listPets, loadPetsForOwner } from './petsStore.js';
 import { loadSubscriptionForOwner } from './subscription.js';
 import { loadRecipesForOwner } from './recipeRepository.js';
+import { clearRecipeDraft } from './recipeDraft.js';
 
 const AUTH_KEY = 'papazilla.authenticated';
 const ONBOARDING_KEY = 'papazilla.seenOnboarding';
@@ -28,9 +29,16 @@ const ONBOARDING_KEY = 'papazilla.seenOnboarding';
 let cachedUser: User | null = null;
 let initPromise: Promise<void> | null = null;
 
+/** Sem sessão, nada da conta anterior fica à vista neste aparelho (perfil, rascunho de receita; pets em `petsStore.ts`). */
+function forgetAccount(): void {
+  clearUserProfile();
+  clearRecipeDraft();
+}
+
 async function applySession(user: User | null): Promise<void> {
   cachedUser = user;
   if (user) syncProfileFromAuthUser(user);
+  else forgetAccount();
   await Promise.all([loadPetsForOwner(user?.id ?? null), loadSubscriptionForOwner(user?.id ?? null), loadRecipesForOwner(user?.id ?? null)]);
 }
 
@@ -93,6 +101,7 @@ export function setAuthenticated(value: boolean): void {
   if (isSupabaseConfigured && supabase) {
     if (!value) {
       cachedUser = null;
+      forgetAccount();
       void loadPetsForOwner(null);
       void loadRecipesForOwner(null);
       void supabase.auth.signOut();

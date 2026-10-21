@@ -254,8 +254,20 @@ let ownerId: string | null = null;
 /** Chamada por `session.ts` a cada mudança de sessão. Sem Supabase/usuário, mantém o cache local de sempre. */
 export async function loadPetsForOwner(userId: string | null): Promise<void> {
   ownerId = userId;
-  if (!isSupabaseConfigured || !supabase || !userId) {
+  if (!isSupabaseConfigured || !supabase) {
     cachedPets = readLocalPets();
+    return;
+  }
+  if (!userId) {
+    // Com login real, sem sessão não há matilha: o cache local é da conta que
+    // saiu e não pode aparecer para a próxima pessoa deste aparelho.
+    cachedPets = [];
+    try {
+      localStorage.removeItem(PETS_KEY);
+      localStorage.removeItem(ACTIVE_PET_KEY);
+    } catch {
+      /* storage indisponível — nada a apagar */
+    }
     return;
   }
   const { data, error } = await supabase.from('pets').select('*').eq('owner_id', userId).order('created_at', { ascending: true });
