@@ -10,7 +10,8 @@ import { supabaseAdmin } from './_lib/supabaseAdmin.js';
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método não permitido.' });
   const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
-  if (!/^\S+@\S+\.\S+$/.test(email) || email.length > 254) return res.status(400).json({ providers: [] });
+  // O limite de tamanho vem antes do regex: o padrão só é seguro em entrada curta.
+  if (email.length > 254 || !/^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/.test(email)) return res.status(400).json({ providers: [] });
   try {
     const { data, error } = await supabaseAdmin().rpc('auth_providers_for_email', { p_email: email });
     if (error) throw error;
