@@ -12,6 +12,9 @@ export const supabase: SupabaseClient | null = isSupabaseConfigured
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
+        // PKCE: o login só conclui no navegador que o iniciou. No fluxo implícito
+        // (padrão), um link com tokens no fragmento trocaria a conta de quem o abre.
+        flowType: 'pkce',
       },
     })
   : null;
