@@ -15,6 +15,8 @@ import { RecipeFinalizers } from '../components/RecipeFinalizers.js';
 import { RecipeIngredientTable } from '../components/RecipeIngredientTable.js';
 import { RecipePreparationSteps } from '../components/RecipePreparationSteps.js';
 import galeriaIcon from '../assets/icons/galeria.svg';
+import { draftFromRecipe, recipeSnapshot } from '../lib/fornalhaFlow.js';
+import { startFornalha } from '../lib/fornalhaStore.js';
 
 /**
  * Detalhe de uma receita salva — fiel à tela "recipe-detail" de
@@ -318,9 +320,17 @@ export function RecipeDetailScreen() {
           <button
             type="button"
             className="pz-button pz-button--primary wide"
-            onClick={() => navigate(`/receitas/${storedRecipe.id}/preparo`)}
+            onClick={() => {
+              const snap = recipeSnapshot(storedRecipe);
+              if (!snap) { navigate('/papa/planejar'); return; }
+              startFornalha({ recipeId: storedRecipe.id, title: snap.title, recipe: snap.recipe, petPlans: snap.petPlans });
+              navigate('/papa', { state: { toast: 'Sua fornalha começou: agora é a lista.' } });
+            }}
           >
-            Preparar novamente
+            Usar na próxima fornalha
+          </button>
+          <button type="button" className="pz-button pz-button--outline wide" onClick={() => { draftFromRecipe(storedRecipe); navigate('/receita', { state: { editing: true } }); }}>
+            Alterar e cozinhar de novo
           </button>
         </section>
 

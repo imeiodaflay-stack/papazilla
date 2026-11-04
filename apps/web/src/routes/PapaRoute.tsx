@@ -1,5 +1,5 @@
 import { hasPet } from '../lib/session.js';
-import { HomeScreen } from './HomeScreen.js';
+import { PapaHubScreen } from './PapaHubScreen.js';
 import { PapaScreen } from './PapaScreen.js';
 
 /**
@@ -8,5 +8,5 @@ import { PapaScreen } from './PapaScreen.js';
  * mostra a amostra do motor (placeholder da Fase 0 até o wizard existir).
  */
 export function PapaRoute() {
-  return hasPet() ? <HomeScreen /> : <PapaScreen />;
+  return hasPet() ? <PapaHubScreen /> : <PapaScreen />;
 }

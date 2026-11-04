@@ -19,6 +19,8 @@ import { RecipeIngredientTable } from '../components/RecipeIngredientTable.js';
 import { RecipeFinalizers } from '../components/RecipeFinalizers.js';
 import { RecipePreparationSteps } from '../components/RecipePreparationSteps.js';
 import { useScrollAwareFooter } from '../hooks/useScrollAwareFooter.js';
+import type { SavedRecipe } from '../lib/recipeRepository.js';
+import { PencilIcon, RecipeNextActions } from '../components/FornalhaUi.js';
 
 export function OriginalRecipeResultScreen() {
   const { slug } = useParams();
@@ -46,6 +48,7 @@ export function OriginalRecipeResultScreen() {
   const { bodyRef, dividerVisible, onBodyScroll } = useScrollAwareFooter();
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [savedRecipe, setSavedRecipe] = useState<SavedRecipe | null>(null);
   const [sharing, setSharing] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const toastTimer = useRef<number>();
@@ -79,6 +82,26 @@ export function OriginalRecipeResultScreen() {
       toast('Não foi possível gerar a imagem agora. Tente de novo.');
     } finally {
       setSharing(false);
+    }
+  }
+
+  async function ensureSaved(): Promise<SavedRecipe | null> {
+    if (savedRecipe) return savedRecipe;
+    if (!recipe || !original?.formula) return null;
+    setSaving(true);
+    try {
+      const created = await saveRecipe({
+        petIds: selectedPets.map((pet) => pet.id), formulation: planChoices.formulation, supplement: planChoices.supplement,
+        selection: { ...original.formula.selection, herbs: [] }, days, format: 'Os dois', result: recipe, petPlans: plans,
+      });
+      setSavedRecipe(created);
+      setSaved(true);
+      return created;
+    } catch (error) {
+      toast(error instanceof RecipeSaveError && error.status === 403 ? 'Sua assinatura precisa estar ativa para salvar a receita.' : error instanceof Error ? error.message : 'Não foi possível salvar a receita.');
+      return null;
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -127,6 +150,11 @@ export function OriginalRecipeResultScreen() {
           <p className="eyebrow">Porção na medida</p>
           <h1>{title}</h1>
           <p>{intro}</p>
+          {!isTreat ? (
+            <button type="button" className="pz-button pz-button--outline" style={{ marginTop: '0.75rem', minHeight: 40, padding: '0 0.9rem', fontSize: '0.875rem' }} onClick={() => navigate(`/papa/original/${original.slug}`)}>
+              <PencilIcon size={14} /> Alterar receita
+            </button>
+          ) : null}
         </div>
 
         <article className="recipe-result-card original-result-card">
@@ -240,6 +268,9 @@ export function OriginalRecipeResultScreen() {
         </article>
       </div>
 
+      {!isTreat && recipe ? (
+        <RecipeNextActions ensureSaved={ensureSaved} recipe={recipe} petPlans={plans} title={original.title} busy={saving} onSaveOnly={() => { void handleSave(); }} />
+      ) : (
       <footer className={`flow-footer scroll-aware-footer${dividerVisible ? ' is-divider-visible' : ''}`}>
         <button type="button" className="pz-button pz-button--outline" onClick={() => navigate(`/papa/original/${original.slug}`)}>Voltar</button>
         {isTreat ? (
@@ -250,6 +281,7 @@ export function OriginalRecipeResultScreen() {
           </button>
         )}
       </footer>
+      )}
       {toastMessage ? <div className="pz-toast is-visible" role="status">{toastMessage}</div> : null}
     </div>
   );

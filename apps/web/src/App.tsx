@@ -33,6 +33,9 @@ import { OriginalRecipeConfigScreen } from './routes/OriginalRecipeConfigScreen.
 import { OriginalRecipeResultScreen } from './routes/OriginalRecipeResultScreen.js';
 import { GaleriaScreen } from './routes/GaleriaScreen.js';
 import { RouteScrollReset } from './components/RouteScrollReset.js';
+import { PlanejarScreen } from './routes/PlanejarScreen.js';
+import { ModoCozinhaScreen } from './routes/ModoCozinhaScreen.js';
+import { EstoqueScreen } from './routes/EstoqueScreen.js';
 
 /**
  * Rotas do MVP. Fluxo confirmado (arquitetura-tecnica.md):
@@ -85,8 +88,13 @@ export const router = createBrowserRouter([
   { path: '/receitas/:recipeId/historico', element: <RecipeHistoryScreen /> },
   {
     element: <AppShell />,
-    children: [{ path: '/papa', element: <PapaRoute /> }],
+    children: [
+      { path: '/papa', element: <PapaRoute /> },
+      { path: '/papa/planejar', element: <PlanejarScreen /> },
+    ],
   },
+  { path: '/papa/cozinha', element: <ModoCozinhaScreen /> },
+  { path: '/papa/estoque', element: <EstoqueScreen /> },
   { path: '*', element: <Navigate to="/" replace /> },
     ],
   },

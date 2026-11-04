@@ -28,6 +28,8 @@ import { IngredientPicker } from '../components/IngredientPicker.js';
 import { RecipeResultCard } from '../components/RecipeResultCard.js';
 import { RecipePetSelector } from '../components/RecipePetSelector.js';
 import { useScrollAwareFooter } from '../hooks/useScrollAwareFooter.js';
+import type { SavedRecipe } from '../lib/recipeRepository.js';
+import { EditingBanner, PencilIcon, RecipeNextActions } from '../components/FornalhaUi.js';
 
 /**
  * Wizard da receita — fiel à tela "recipe" de `papazilla-prototype` (9 etapas:
@@ -66,6 +68,9 @@ export function ReceitaScreen() {
   const subscription = getSubscription();
   const pets = listPets();
   const draft = peekRecipeDraft();
+  const entryState = location.state as { editing?: boolean; petIds?: string[] } | null;
+  const [editing, setEditing] = useState(() => Boolean(entryState?.editing));
+  const [savedRecipe, setSavedRecipe] = useState<SavedRecipe | null>(null);
 
   const [step, setStep] = useState(0);
   const [selectedPetIds, setSelectedPetIds] = useState<Set<string>>(() => {
@@ -75,6 +80,8 @@ export function ReceitaScreen() {
       if (activeId) ids.add(activeId);
       return ids;
     }
+    const fromPapa = entryState?.petIds?.filter((id) => pets.some((p) => p.id === id));
+    if (fromPapa && fromPapa.length > 0) return new Set(fromPapa);
     const active = getActivePet();
     return new Set(active ? [active.id] : pets[0] ? [pets[0].id] : []);
   });
@@ -249,6 +256,32 @@ export function ReceitaScreen() {
     goToStep(step + 1);
   }
 
+  async function ensureSaved(): Promise<SavedRecipe | null> {
+    if (savedRecipe) return savedRecipe;
+    if (!recipe) return null;
+    setSaving(true);
+    try {
+      const created = await saveRecipe({
+        petIds: [...selectedPetIds], formulation, supplement,
+        selection: { proteins: [...proteins], organs: [...organs], carbs: [...carbs], vegetables: [...vegetables], herbs: [] },
+        days, format, result: recipe, petPlans,
+      });
+      setSavedRecipe(created);
+      setSaved(true);
+      return created;
+    } catch (error) {
+      if (error instanceof RecipeSaveError && error.status === 403) {
+        toast('Sua assinatura precisa estar ativa para salvar a receita.');
+        window.setTimeout(() => navigate('/assinatura', { state: { returnTo: 'recipe' } }), 900);
+        return null;
+      }
+      toast(error instanceof Error ? error.message : 'Não foi possível salvar a receita.');
+      return null;
+    } finally {
+      setSaving(false);
+    }
+  }
+
   function onBack() {
     if (step > 0) goToStep(step - 1);
     else navigate('/papa');
@@ -337,10 +370,16 @@ export function ReceitaScreen() {
       </div>
 
       <div className="flow-body" ref={bodyRef} onScroll={onBodyScroll}>
+        {editing && !isResultStep ? <EditingBanner /> : null}
         <div className={`flow-intro${step === 1 && petsWithMuscleLoss.length > 0 ? ' flow-intro--with-note' : ''}`}>
           <p className="eyebrow">{eyebrowByStep[step]}</p>
           <h1>{isResultStep ? resultTitle : titleByStep[step]}</h1>
           <p>{recipeIntro}</p>
+          {isResultStep ? (
+            <button type="button" className="pz-button pz-button--outline" style={{ marginTop: '0.75rem', minHeight: 40, padding: '0 0.9rem', fontSize: '0.875rem' }} onClick={() => { setEditing(true); setSavedRecipe(null); setSaved(false); goToStep(0); }}>
+              <PencilIcon size={14} /> Alterar receita
+            </button>
+          ) : null}
         </div>
 
         {step === 0 ? (
@@ -572,7 +611,22 @@ export function ReceitaScreen() {
         ) : null}
       </div>
 
+      {isResultStep && recipe ? (
+        <RecipeNextActions
+          ensureSaved={ensureSaved}
+          recipe={recipe}
+          petPlans={petPlans}
+          title={recipeTitle({ proteins: [...proteins], carbs: [...carbs] })}
+          busy={saving}
+          onSaveOnly={() => { void ensureSaved().then((r) => { if (r) { toast('Receita salva para futuras fornalhas!'); window.setTimeout(() => navigate('/receitas'), 900); } }); }}
+        />
+      ) : (
       <footer className={`flow-footer scroll-aware-footer${dividerVisible ? ' is-divider-visible' : ''}`}>
+        {editing ? (
+          <button type="button" className="pz-button pz-button--text" style={{ gridColumn: '1 / -1', justifySelf: 'center', minHeight: 36 }} disabled={nextDisabled} onClick={() => goToStep(STEPS_COUNT - 1)}>
+            Pular para a receita atualizada
+          </button>
+        ) : null}
         <button type="button" className="pz-button pz-button--outline" onClick={onBack}>
           {step === 0 ? 'Cancelar' : 'Voltar'}
         </button>
@@ -580,6 +634,7 @@ export function ReceitaScreen() {
           {isResultStep ? saving ? 'Salvando…' : 'Salvar receita' : step === STEPS_COUNT - 2 ? 'Ver receita →' : 'Continuar →'}
         </button>
       </footer>
+      )}
 
       {toastMsg ? (
         <div className="pz-toast is-visible" role="status">
