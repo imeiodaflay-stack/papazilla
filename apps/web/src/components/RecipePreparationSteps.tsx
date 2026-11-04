@@ -13,12 +13,14 @@ import { prepPortionsText } from '../lib/recipeDisplay.js';
 export function RecipePreparationSteps({
   petPlans,
   days,
+  defaultOpen,
 }: {
   petPlans: { pet: StoredPet; plan: DailyPlan }[];
   days: number;
+  defaultOpen?: boolean;
 }) {
   return (
-    <details className="recipe-preparation">
+    <details className="recipe-preparation" open={defaultOpen}>
       <summary>
         <span>
           <img src={receitaIcon} alt="" />

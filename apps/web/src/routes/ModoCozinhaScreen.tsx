@@ -1,32 +1,24 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import zillaChef from '../assets/zilla-chef.webp';
 import { joinPt } from '../lib/petLabel.js';
+import { getRecipe } from '../lib/recipeRepository.js';
+import { recipeSnapshot } from '../lib/fornalhaFlow.js';
 import {
   daysFromGrams, formatDay, formatDuration, formatDurationShort, formatKg, getInProgress, getSupplementTiming,
   listFornalhas, setSupplementTiming, todayIso, updateFornalha, type Fornalha, type SupplementTiming,
 } from '../lib/fornalhaStore.js';
 import { AlterarReceitaSheet, CloseIcon, PencilIcon } from '../components/FornalhaUi.js';
-
-interface CookStep {
-  key: string;
-  title: string;
-  text: string;
-  minutes?: number;
-}
-
-const GROUP_STEPS: Record<string, { title: string; text: string; minutes: number }> = {
-  proteins: { title: 'Carnes', text: 'Corte em cubos de 2 a 3 cm e cozinhe em água ou no vapor, sem temperos, até não ficar rosado por dentro.', minutes: 20 },
-  organs: { title: 'Vísceras', text: 'Corte em pedaços de 1,5 a 2 cm e cozinhe separado das carnes, sem temperos.', minutes: 12 },
-  carbs: { title: 'Carboidratos', text: 'Cozinhe até ficar macio. Grãos em água; tubérculos em cubos de 1,5 a 2 cm.', minutes: 25 },
-  vegetables: { title: 'Vegetais', text: 'Corte em cubos pequenos e cozinhe em água ou no vapor até ficar macio. Guarde o caldo.', minutes: 15 },
-};
+import { RecipeIngredientTable } from '../components/RecipeIngredientTable.js';
+import { RecipeFinalizers } from '../components/RecipeFinalizers.js';
+import { RecipePreparationSteps } from '../components/RecipePreparationSteps.js';
 
 const LOSS_KINDS = ['Queimou', 'Sobrou cru', 'Virou petisco', 'Outro'];
 
 /**
- * Modo Cozinha (tela cheia): abertura → etapas por grupo com cronômetro →
- * finalizar → guardar comida (segue para Montar estoque).
+ * Modo Cozinha (tela cheia, dentro do container mobile): abertura → preparo
+ * numa tela só, com o cronômetro total e o mesmo modo de preparo da receita
+ * pronta → guardar comida (segue para Montar estoque).
  */
 export function ModoCozinhaScreen() {
   const navigate = useNavigate();
@@ -50,30 +42,25 @@ export function ModoCozinhaScreen() {
     return () => { void lock?.release().catch(() => undefined); };
   }, [fornalha?.stage]);
 
-  const steps: CookStep[] = useMemo(() => {
-    if (!fornalha) return [];
-    const groups = [...new Set(fornalha.items.filter((i) => !i.pantry).map((i) => i.group))];
-    return [
-      ...groups.filter((g) => GROUP_STEPS[g]).map((g) => ({ key: g, ...GROUP_STEPS[g]! })),
-      { key: 'finalizar', title: 'Finalizar', text: '' },
-    ];
-  }, [fornalha?.id]);
-
   if (!fornalha) return <Navigate to="/papa" replace />;
 
   const save = (patch: Partial<Fornalha>) => setFornalha(updateFornalha(fornalha.id, patch));
   const previousSeconds = listFornalhas().find((f) => f.id !== fornalha.id && f.cookSeconds)?.cookSeconds;
+  const editSheet = editing
+    ? <AlterarReceitaSheet recipeId={fornalha.recipeId} petIds={fornalha.pets.map((p) => p.id)} onClose={() => setEditing(false)} />
+    : null;
 
   if (fornalha.stage === 'shopping' || !fornalha.cookStartedAt) {
     return (
-      <Opening
-        fornalha={fornalha}
-        onClose={() => navigate('/papa')}
-        onEdit={() => setEditing(true)}
-        onStart={(cookDate) => save({ stage: 'cooking', cookStartedAt: new Date().toISOString(), cookDate, cookStep: 0 })}
-        editing={editing}
-        onCloseEdit={() => setEditing(false)}
-      />
+      <>
+        <Opening
+          fornalha={fornalha}
+          onClose={() => navigate('/papa')}
+          onEdit={() => setEditing(true)}
+          onStart={(cookDate) => save({ stage: 'cooking', cookStartedAt: new Date().toISOString(), cookDate })}
+        />
+        {editSheet}
+      </>
     );
   }
 
@@ -91,9 +78,9 @@ export function ModoCozinhaScreen() {
     );
   }
 
-  const index = Math.min(fornalha.cookStep ?? 0, steps.length - 1);
-  const step = steps[index]!;
-  const isLast = index === steps.length - 1;
+  const stored = getRecipe(fornalha.recipeId);
+  const snap = stored ? recipeSnapshot(stored) : null;
+  const timing = getSupplementTiming() ?? 'serving';
 
   return (
     <div className="fz-kitchen">
@@ -110,43 +97,45 @@ export function ModoCozinhaScreen() {
       </header>
 
       <main className="fz-kitchen__body">
-        <div className="fz-stack" style={{ gap: '0.5rem' }}>
-          <div className="fz-row" style={{ color: 'var(--pz-ink-muted)', fontWeight: 700 }}>
-            <span>Etapa {index + 1} de {steps.length}</span>
-            <span>{isLast ? 'Última etapa' : `Depois: ${steps[index + 1]!.title.toLowerCase()}`}</span>
-          </div>
-          <div className="fz-steps" aria-hidden="true" style={{ ['--fz-steps' as string]: steps.length }}>
-            {steps.map((s, i) => <span key={s.key} className={i < index ? 'is-done' : i === index ? 'is-current' : ''} />)}
-          </div>
-        </div>
+        <p className="fz-kicker">{fornalha.title} · {joinPt(fornalha.pets.map((p) => p.name))} · {fornalha.days} dias</p>
 
-        {isLast ? <FinalStep fornalha={fornalha} /> : <GroupStep key={step.key} fornalha={fornalha} step={step} now={now} />}
+        {snap ? (
+          <div className="recipe-result-card">
+            <RecipeIngredientTable groups={snap.recipe.groups} format="Os dois" />
+            <RecipeFinalizers petPlans={snap.petPlans} defaultOpen />
+            <RecipePreparationSteps petPlans={snap.petPlans} days={snap.recipe.days} defaultOpen />
+          </div>
+        ) : (
+          <section className="fz-card fz-stack" aria-label="O que pesar">
+            <table className="fz-table">
+              <thead><tr><th scope="col">Ingrediente</th><th scope="col">Cru</th><th scope="col">Pronto</th></tr></thead>
+              <tbody>
+                {fornalha.items.filter((i) => !i.pantry).map((row) => (
+                  <tr key={row.id}>
+                    <th scope="row">{row.label}</th>
+                    <td>{row.rawGrams !== undefined ? formatKg(row.rawGrams) : ''}</td>
+                    <td>{row.cookedGrams !== undefined ? formatKg(row.cookedGrams) : ''}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+        )}
 
-        {!isLast && fornalha.saltGuidance ? (
-          <p className="fz-note fz-note--warn"><span><strong>Sal</strong>{fornalha.saltGuidance}</span></p>
+        {timing === 'cooking' ? (
+          <p className="fz-note fz-note--warn"><span><strong>Você escolheu: suplemento no preparo</strong>Espere a comida amornar e misture. Depois disso, não volte ao fogo. Com suplemento, nunca descongele no micro-ondas.</span></p>
         ) : null}
       </main>
 
       <footer className="fz-kitchen__foot">
-        <div className="fz-btn-row" style={{ gridTemplateColumns: '1fr 2fr' }}>
-          <button type="button" className="pz-button pz-button--outline" disabled={index === 0} onClick={() => save({ cookStep: index - 1 })}>Voltar</button>
-          {isLast ? (
-            <button type="button" className="pz-button pz-button--primary" onClick={() => { save({ cookSeconds: elapsed }); setFinishing(true); }}>Concluir preparo →</button>
-          ) : (
-            <button type="button" className="pz-button pz-button--primary" onClick={() => save({ cookStep: index + 1 })}>Próxima etapa →</button>
-          )}
-        </div>
+        <button type="button" className="pz-button pz-button--primary wide" onClick={() => { save({ cookSeconds: elapsed }); setFinishing(true); }}>Concluir preparo →</button>
       </footer>
-      {editing ? <AlterarReceitaSheet recipeId={fornalha.recipeId} petIds={fornalha.pets.map((p) => p.id)} onClose={() => setEditing(false)} /> : null}
+      {editSheet}
     </div>
   );
 }
 
-function Opening({
-  fornalha, onClose, onEdit, onStart, editing, onCloseEdit,
-}: {
-  fornalha: Fornalha; onClose: () => void; onEdit: () => void; onStart: (date: string) => void; editing: boolean; onCloseEdit: () => void;
-}) {
+function Opening({ fornalha, onClose, onEdit, onStart }: { fornalha: Fornalha; onClose: () => void; onEdit: () => void; onStart: (date: string) => void }) {
   const [date, setDate] = useState(todayIso());
   const [timing, setTiming] = useState<SupplementTiming>(() => getSupplementTiming() ?? 'serving');
   const today = todayIso();
@@ -203,61 +192,7 @@ function Opening({
       <footer className="fz-kitchen__foot">
         <button type="button" className="pz-button pz-button--primary wide" onClick={() => onStart(date)}>Começar e ligar o cronômetro</button>
       </footer>
-      {editing ? <AlterarReceitaSheet recipeId={fornalha.recipeId} petIds={fornalha.pets.map((p) => p.id)} onClose={onCloseEdit} /> : null}
     </div>
-  );
-}
-
-function GroupStep({ fornalha, step, now }: { fornalha: Fornalha; step: CookStep; now: number }) {
-  const [endsAt, setEndsAt] = useState<number | null>(null);
-  const rows = fornalha.items.filter((i) => i.group === step.key);
-  const remaining = endsAt ? Math.max(0, Math.round((endsAt - now) / 1000)) : (step.minutes ?? 0) * 60;
-  const finished = endsAt !== null && remaining === 0;
-
-  useEffect(() => {
-    if (finished) {
-      try { navigator.vibrate?.([300, 150, 300]); } catch { /* sem vibração */ }
-    }
-  }, [finished]);
-
-  return (
-    <section className="fz-card fz-stack" style={{ gap: '0.75rem' }} aria-labelledby="fz-etapa">
-      <h1 id="fz-etapa" className="fz-h2">{step.title}</h1>
-      <p style={{ margin: 0, fontSize: '1.0625rem', lineHeight: 1.5 }}>{step.text}</p>
-      <table className="fz-table">
-        <thead><tr><th scope="col">Ingrediente</th><th scope="col">Cru</th><th scope="col">Cozido</th></tr></thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.id}>
-              <th scope="row">{row.label}</th>
-              <td>{row.rawGrams !== undefined ? formatKg(row.rawGrams) : ''}</td>
-              <td>{row.cookedGrams !== undefined ? formatKg(row.cookedGrams) : ''}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {step.minutes ? (
-        <button type="button" className={`fz-timer${endsAt ? ' is-running' : ''}`} aria-live="polite" onClick={() => setEndsAt(endsAt ? null : Date.now() + (step.minutes ?? 0) * 60_000)}>
-          <span>{finished ? 'Tempo da etapa terminou' : `Cronômetro da etapa · ${formatDuration(remaining).slice(2)}`}</span>
-          <b>{endsAt ? (finished ? 'Ok' : 'Parar') : 'Iniciar'}</b>
-        </button>
-      ) : null}
-    </section>
-  );
-}
-
-function FinalStep({ fornalha }: { fornalha: Fornalha }) {
-  const timing = getSupplementTiming() ?? 'serving';
-  return (
-    <section className="fz-card fz-stack" style={{ gap: '0.75rem' }} aria-labelledby="fz-final">
-      <h1 id="fz-final" className="fz-h2">Escorra, espere amornar e misture</h1>
-      <p style={{ margin: 0, fontSize: '1.0625rem', lineHeight: 1.5 }}>Desfie ou pique depois de cozido e misture tudo até ficar bem distribuído. Não ofereça a comida quente.</p>
-      {timing === 'cooking' ? (
-        <p className="fz-note fz-note--warn"><span><strong>{fornalha.supplementName} e óleos, agora</strong>Espere a comida amornar e misture. Depois disso, não volte ao fogo. Com suplemento, nunca descongele no micro-ondas.</span></p>
-      ) : (
-        <p className="fz-note"><span><strong>{fornalha.supplementName} na hora de servir</strong>Não vai na panela. Adicione à porção já fria ou morna, na hora de servir.</span></p>
-      )}
-    </section>
   );
 }
 
@@ -287,7 +222,7 @@ function Finish({
     <div className="fz-kitchen">
       <header className="fz-kitchen__head">
         <div className="fz-kitchen__bar">
-          <button type="button" className="fz-kitchen__ghost" onClick={onBack}>← Etapas</button>
+          <button type="button" className="fz-kitchen__ghost" onClick={onBack}>← Preparo</button>
           <strong>Guardar comida</strong>
           <span style={{ width: 44 }} />
         </div>
@@ -304,7 +239,11 @@ function Finish({
       <main className="fz-kitchen__body">
         <input ref={fileRef} type="file" accept="image/*" hidden onChange={(event) => { void onPhoto(event); }} />
         <button type="button" className="fz-photo" onClick={() => fileRef.current?.click()}>
-          {photo ? <img src={photo} alt="Foto da panela" /> : <span aria-hidden="true" style={{ display: 'grid', placeItems: 'center', width: 52, height: 52, borderRadius: 16, background: 'var(--pz-surface-soft)', color: 'var(--pz-accent-ink)' }}><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z" /><circle cx="12" cy="13" r="3.5" /></svg></span>}
+          {photo ? <img src={photo} alt="Foto da panela" /> : (
+            <span aria-hidden="true" style={{ display: 'grid', placeItems: 'center', width: 52, height: 52, borderRadius: 16, background: 'var(--pz-surface-soft)', color: 'var(--pz-accent-ink)' }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z" /><circle cx="12" cy="13" r="3.5" /></svg>
+            </span>
+          )}
           <span className="fz-stack" style={{ gap: '0.15rem' }}>
             <strong style={{ font: '700 1rem/1.2 var(--pz-font-support)' }}>{photo ? 'Trocar foto da panela' : 'Foto da panela'}</strong>
             <small className="fz-muted">Fica guardada neste aparelho</small>

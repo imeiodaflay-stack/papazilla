@@ -154,7 +154,8 @@ export function buildItems(recipe: Recipe): FornalhaItem[] {
       });
     }
   }
-  items.push({ id: 'despensa', label: 'Suplemento e óleos', group: 'pantry', groupTitle: 'Despensa', checked: false, pantry: true });
+  // Suplemento e óleos ficam fora da lista e do custo: duram várias
+  // fornalhas e deixariam a conta por dia distorcida (Flay, 2026-11-04).
   return items;
 }
 

@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import {
-  FRIDGE_DAYS, addDays, daysFromGrams, formatDay, formatKg, getInProgress, stockFornalha, todayIso,
+  FRIDGE_DAYS, addDays, daysFromGrams, formatKg, getInProgress, stockFornalha, todayIso,
   type PotMode,
 } from '../lib/fornalhaStore.js';
 import { formatGrams } from '../lib/recipeDisplay.js';
-import { Sheet } from '../components/FornalhaUi.js';
 import '../fornalha.css';
 
 /** Montar o estoque: potes por cão, geladeira x freezer, etiquetas. */
@@ -13,7 +12,6 @@ export function EstoqueScreen() {
   const navigate = useNavigate();
   const fornalha = getInProgress();
   const [mode, setMode] = useState<PotMode>(fornalha?.potMode ?? 'day');
-  const [labels, setLabels] = useState(false);
 
   if (!fornalha || !fornalha.finalGrams) return <Navigate to="/papa" replace />;
 
@@ -77,26 +75,12 @@ export function EstoqueScreen() {
             <p className="fz-muted" style={{ paddingTop: '0.6rem', borderTop: '1px solid var(--pz-border)' }}>Sobram {formatGrams(leftover)}: dá para usar como petisco nos próximos dias.</p>
           ) : null}
         </section>
-
-        <button type="button" className="pz-button pz-button--outline wide" onClick={() => setLabels(true)}>Etiquetas: cão, porção e data</button>
       </main>
 
       <footer className="fz-kitchen__foot">
         <button type="button" className="pz-button pz-button--primary wide" disabled={days === 0} onClick={finish}>Acompanhar estoque →</button>
       </footer>
 
-      {labels ? (
-        <Sheet labelledBy="fz-etiquetas" onClose={() => setLabels(false)}>
-          <h2 id="fz-etiquetas" className="fz-h2">Etiquetas</h2>
-          <p className="fz-muted">Uma por pote. Escreva à mão ou copie para a sua etiquetadora.</p>
-          <ul className="fz-list">
-            {perPet.map(({ pet, pots, size }) => (
-              <li key={pet.id}><span>{pet.name} · {formatGrams(size)} · {formatDay(cookDate)}</span><strong>× {pots}</strong></li>
-            ))}
-          </ul>
-          <button type="button" className="pz-button pz-button--primary wide" onClick={() => setLabels(false)}>Fechar</button>
-        </Sheet>
-      ) : null}
     </div>
   );
 }

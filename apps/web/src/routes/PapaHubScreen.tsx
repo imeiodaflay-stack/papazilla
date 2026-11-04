@@ -6,7 +6,7 @@ import { buildPetPlan } from '../lib/recipeEngine.js';
 import { formatGrams } from '../lib/recipeDisplay.js';
 import { joinPt } from '../lib/petLabel.js';
 import {
-  REMINDER_LEAD_DAYS, addDays, confirmPots, costOf, diffDays, discardFornalha, formatDay, formatMoney,
+  REMINDER_LEAD_DAYS, addDays, confirmPots, costOf, daysFromGrams, diffDays, discardFornalha, formatDay, formatMoney,
   formatKg, getInProgress, getPapaSelectedPets, getStock, parseMoney, previousWithCost, setPapaSelectedPets,
   stockStatus, todayIso, totalPotsPerDay, updateFornalha, type Fornalha, type FornalhaItem,
 } from '../lib/fornalhaStore.js';
@@ -14,7 +14,7 @@ import { AlterarReceitaSheet, JarIcon, PencilIcon, PetPortrait, Sheet, StockStri
 
 /**
  * Papá por estados (build de teste do ciclo da fornalha):
- * escolher cães → (Planejar) → comprando → custo → (Modo Cozinha) → acompanhando.
+ * escolher cães → (Planejar) → lista de compras com custo → (Modo Cozinha) → acompanhando.
  */
 export function PapaHubScreen() {
   const navigate = useNavigate();
@@ -45,7 +45,7 @@ export function PapaHubScreen() {
   if (inProgress?.stage === 'cooking') {
     view = <CookingCard fornalha={inProgress} onContinue={() => navigate('/papa/cozinha')} />;
   } else if (inProgress) {
-    view = <ShoppingFlow key={inProgress.id} fornalha={inProgress} onChange={refresh} onToast={toast} />;
+    view = <ShoppingList key={inProgress.id} fornalha={inProgress} onChange={refresh} onToast={toast} />;
   } else if (stock) {
     view = <StockView key={stock.id} fornalha={stock} onChange={refresh} />;
   } else {
@@ -138,15 +138,16 @@ function ChoosePets() {
   );
 }
 
-// ---- 2 e 3: comprando e custo ----
+// ---- 2: lista de compras com custo na mesma tela ----
 
-function ShoppingFlow({ fornalha, onChange, onToast }: { fornalha: Fornalha; onChange: () => void; onToast: (m: string) => void }) {
+function ShoppingList({ fornalha, onChange, onToast }: { fornalha: Fornalha; onChange: () => void; onToast: (m: string) => void }) {
   const navigate = useNavigate();
-  const [showList, setShowList] = useState(false);
   const [editing, setEditing] = useState(false);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
-  const shoppingItems = fornalha.items.filter((item) => !item.pantry);
-  const allChecked = shoppingItems.every((item) => item.checked);
+  const items = fornalha.items.filter((item) => !item.pantry);
+  const allChecked = items.every((item) => item.checked);
+  const done = items.filter((item) => item.checked).length;
+  const groups = [...new Set(items.map((item) => item.groupTitle))];
 
   function setItem(id: string, patch: Partial<FornalhaItem>) {
     updateFornalha(fornalha.id, { items: fornalha.items.map((item) => (item.id === id ? { ...item, ...patch } : item)) });
@@ -154,25 +155,48 @@ function ShoppingFlow({ fornalha, onChange, onToast }: { fornalha: Fornalha; onC
   }
 
   function checkAll() {
-    updateFornalha(fornalha.id, { items: fornalha.items.map((item) => ({ ...item, checked: item.pantry ? item.checked : true })) });
-    setShowList(false);
+    updateFornalha(fornalha.id, { items: fornalha.items.map((item) => ({ ...item, checked: true })) });
     onChange();
   }
 
-  const header = (
-    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.75rem' }}>
-      <div className="fz-stack" style={{ gap: '0.25rem' }}>
-        <p className="fz-kicker">{joinPt(fornalha.pets.map((p) => p.name))} · {fornalha.days} dias</p>
-        <h1 className="fz-h1">{allChecked && !showList ? 'Tudo pronto para a fornalha' : 'Lista de compras'}</h1>
-      </div>
-      <button type="button" className="pz-button pz-button--outline" style={{ minHeight: 44, padding: '0 0.8rem', flex: 'none', fontSize: '0.8125rem' }} onClick={() => setEditing(true)}>
-        <PencilIcon size={14} /> Alterar receita
-      </button>
-    </div>
-  );
-
-  const sheets = (
+  return (
     <>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.75rem' }}>
+        <div className="fz-stack" style={{ gap: '0.25rem' }}>
+          <p className="fz-kicker">{joinPt(fornalha.pets.map((p) => p.name))} · {fornalha.days} dias</p>
+          <h1 className="fz-h1">Lista de compras</h1>
+        </div>
+        <button type="button" className="pz-button pz-button--outline" style={{ minHeight: 44, padding: '0 0.8rem', flex: 'none', fontSize: '0.8125rem' }} onClick={() => setEditing(true)}>
+          <PencilIcon size={14} /> Alterar receita
+        </button>
+      </div>
+
+      <div className="fz-progress">
+        <div className="fz-progress__text"><span>{done} de {items.length} itens</span><span>Valores são opcionais</span></div>
+        <span className="fz-bar" role="progressbar" aria-label="Itens comprados" aria-valuenow={done} aria-valuemin={0} aria-valuemax={items.length} style={{ height: 8 }}>
+          <span style={{ width: `${items.length ? (done / items.length) * 100 : 0}%` }} />
+        </span>
+      </div>
+
+      {groups.map((title) => (
+        <section key={title} className="fz-stack" style={{ gap: '0.4rem' }}>
+          <h2 className="fz-section-title">{title}</h2>
+          {items.filter((item) => item.groupTitle === title).map((item) => (
+            <ShoppingItem key={item.id} item={item} onChange={(patch) => setItem(item.id, patch)} />
+          ))}
+        </section>
+      ))}
+
+      <CostCard fornalha={fornalha} />
+
+      {!allChecked ? (
+        <button type="button" className="pz-button pz-button--outline wide" onClick={checkAll}>Já tenho tudo</button>
+      ) : null}
+      <button type="button" className="pz-button pz-button--primary wide" onClick={() => navigate('/papa/cozinha')}>
+        Preparar a fornalha <span aria-hidden="true">→</span>
+      </button>
+      <button type="button" className="fz-link fz-link--muted" onClick={() => setConfirmDiscard(true)}>Descartar este planejamento</button>
+
       {editing ? <AlterarReceitaSheet recipeId={fornalha.recipeId} petIds={fornalha.pets.map((p) => p.id)} onClose={() => setEditing(false)} /> : null}
       {confirmDiscard ? (
         <Sheet labelledBy="fz-descartar" onClose={() => setConfirmDiscard(false)}>
@@ -182,53 +206,6 @@ function ShoppingFlow({ fornalha, onChange, onToast }: { fornalha: Fornalha; onC
           <button type="button" className="fz-link fz-link--muted" onClick={() => setConfirmDiscard(false)}>Manter</button>
         </Sheet>
       ) : null}
-    </>
-  );
-
-  if (allChecked && !showList) {
-    return (
-      <>
-        {header}
-        <CostCard fornalha={fornalha} onAddPrice={() => setShowList(true)} />
-        <button type="button" className="pz-button pz-button--primary wide" onClick={() => navigate('/papa/cozinha')}>Preparar nova fornalha <span aria-hidden="true">→</span></button>
-        <button type="button" className="fz-link" onClick={() => setShowList(true)}>Voltar à lista de compras</button>
-        {sheets}
-      </>
-    );
-  }
-
-  const done = shoppingItems.filter((item) => item.checked).length;
-  const cost = costOf(fornalha);
-  const groups = [...new Set(fornalha.items.map((item) => item.groupTitle))];
-
-  return (
-    <>
-      {header}
-      <div className="fz-progress">
-        <div className="fz-progress__text"><span>{done} de {shoppingItems.length} itens</span><span>Valores são opcionais</span></div>
-        <span className="fz-bar" role="progressbar" aria-label="Itens comprados" aria-valuenow={done} aria-valuemin={0} aria-valuemax={shoppingItems.length} style={{ height: 8 }}>
-          <span style={{ width: `${shoppingItems.length ? (done / shoppingItems.length) * 100 : 0}%` }} />
-        </span>
-      </div>
-      {groups.map((title) => (
-        <section key={title} className="fz-stack" style={{ gap: '0.4rem' }}>
-          <h2 className="fz-section-title">{title}</h2>
-          {fornalha.items.filter((item) => item.groupTitle === title).map((item) => (
-            <ShoppingItem key={item.id} item={item} onChange={(patch) => setItem(item.id, patch)} />
-          ))}
-        </section>
-      ))}
-      <div className="fz-summary">
-        <div>
-          <strong>{cost.priced > 0 ? formatMoney(cost.total) : 'Sem valores ainda'}</strong>
-          <small>{cost.priced > 0 ? `${cost.priced} ${cost.priced === 1 ? 'item' : 'itens'} com valor` : 'Checou tudo? O custo aparece aqui.'}</small>
-        </div>
-        <button type="button" className="pz-button pz-button--outline" style={{ minHeight: 44, padding: '0 0.9rem', fontSize: '0.875rem' }} onClick={checkAll}>
-          {allChecked ? 'Ver custo' : 'Já tenho tudo'}
-        </button>
-      </div>
-      <button type="button" className="fz-link fz-link--muted" onClick={() => setConfirmDiscard(true)}>Descartar este planejamento</button>
-      {sheets}
     </>
   );
 }
@@ -241,7 +218,7 @@ function ShoppingItem({ item, onChange }: { item: FornalhaItem; onChange: (patch
       <input id={id} type="checkbox" checked={item.checked} onChange={(event) => onChange({ checked: event.target.checked })} />
       <label htmlFor={id}>
         <strong>{item.label}</strong>
-        <small>{item.pantry ? 'Se acabou em casa' : item.rawGrams !== undefined ? `${formatKg(item.rawGrams)} cru` : ''}</small>
+        <small>{item.rawGrams !== undefined ? `${formatKg(item.rawGrams)} cru` : ''}</small>
       </label>
       <input
         className={`fz-price${item.price !== undefined ? ' has-value' : ''}`}
@@ -261,7 +238,7 @@ function ShoppingItem({ item, onChange }: { item: FornalhaItem; onChange: (patch
   );
 }
 
-function CostCard({ fornalha, onAddPrice }: { fornalha: Fornalha; onAddPrice: () => void }) {
+function CostCard({ fornalha }: { fornalha: Fornalha }) {
   const cost = costOf(fornalha);
   const totalGramsPerDay = fornalha.pets.reduce((sum, pet) => sum + pet.gramsPerDay, 0) || 1;
   const perDay = cost.total / Math.max(1, fornalha.days);
@@ -270,36 +247,37 @@ function CostCard({ fornalha, onAddPrice }: { fornalha: Fornalha; onAddPrice: ()
 
   if (cost.priced === 0) {
     return (
-      <section className="fz-card fz-stack">
-        <h2 className="fz-h2">Quanto custou?</h2>
-        <p className="fz-muted">Anote o que você pagou e o Papazilla calcula o custo da fornalha, por dia e por cão.</p>
-        <button type="button" className="pz-button pz-button--outline wide" onClick={onAddPrice}>Anotar valores</button>
-      </section>
+      <p className="fz-note">
+        <span><strong>Custo da fornalha</strong>Anote o que pagou em cada item e o custo aparece aqui, por dia e por cão.</span>
+      </p>
     );
   }
 
   return (
-    <>
-      <section className="fz-card fz-stack">
-        <div>
-          <p className="fz-kicker">Sua fornalha vai custar</p>
-          <p className="fz-money">{formatMoney(cost.total)}</p>
+    <section className="fz-card fz-stack" aria-label="Custo da fornalha">
+      <div>
+        <p className="fz-kicker">Sua fornalha vai custar</p>
+        <p className="fz-money">{formatMoney(cost.total)}</p>
+      </div>
+      <div className="fz-tiles">
+        <div className="fz-tile"><strong>{formatMoney(perDay)}</strong><span>por dia</span></div>
+        <div className="fz-tile"><strong>{formatMoney(perDay / Math.max(1, fornalha.pets.length))}</strong><span>por cão por dia (média)</span></div>
+      </div>
+      {fornalha.pets.length > 1 ? (
+        <div className="fz-stack" style={{ gap: '0.4rem' }}>
+          {fornalha.pets.map((pet) => (
+            <div key={pet.id} className="fz-row">
+              <span>{pet.name} · {formatGrams(pet.gramsPerDay)}/dia</span>
+              <strong>{formatMoney((perDay * pet.gramsPerDay) / totalGramsPerDay)}/dia</strong>
+            </div>
+          ))}
         </div>
-        <div className="fz-tiles">
-          <div className="fz-tile"><strong>{formatMoney(perDay)}</strong><span>por dia</span></div>
-          <div className="fz-tile"><strong>{formatMoney(perDay / Math.max(1, fornalha.pets.length))}</strong><span>por cão por dia (média)</span></div>
-        </div>
-        {fornalha.pets.length > 1 ? (
-          <div className="fz-stack" style={{ gap: '0.4rem' }}>
-            {fornalha.pets.map((pet) => (
-              <div key={pet.id} className="fz-row">
-                <span>{pet.name} · {formatGrams(pet.gramsPerDay)}/dia</span>
-                <strong>{formatMoney((perDay * pet.gramsPerDay) / totalGramsPerDay)}/dia</strong>
-              </div>
-            ))}
-          </div>
-        ) : null}
-      </section>
+      ) : null}
+      {cost.missing.length > 0 ? (
+        <p className="fz-muted" style={{ fontSize: '0.8125rem' }}>
+          Estimado com {cost.priced} de {cost.count} itens. Falta o valor de {joinPt(cost.missing.map((item) => item.label.toLowerCase()))}.
+        </p>
+      ) : null}
       {previousPerDay !== null ? (
         <p className={`fz-note ${perDay <= previousPerDay ? 'fz-note--ok' : 'fz-note--warn'}`}>
           {perDay <= previousPerDay
@@ -307,15 +285,7 @@ function CostCard({ fornalha, onAddPrice }: { fornalha: Fornalha; onAddPrice: ()
             : `${formatMoney(perDay - previousPerDay)} a mais por dia que a fornalha anterior.`}
         </p>
       ) : null}
-      {cost.missing.length > 0 ? (
-        <div className="fz-card fz-card--line" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 0.9rem' }}>
-          <p className="fz-muted" style={{ flex: 1 }}>
-            <strong style={{ color: 'var(--pz-chocolate)' }}>Estimado com {cost.priced} de {cost.count} itens.</strong> Falta o valor de {joinPt(cost.missing.map((item) => item.label.toLowerCase()))}.
-          </p>
-          <button type="button" className="fz-link" onClick={onAddPrice}>Adicionar</button>
-        </div>
-      ) : null}
-    </>
+    </section>
   );
 }
 
@@ -348,6 +318,7 @@ function StockView({ fornalha, onChange }: { fornalha: Fornalha; onChange: () =>
   const reminderPassed = diffDays(todayIso(), reminder) <= 0;
   const late = status.late > 0;
   const circumference = 2 * Math.PI * 52;
+  const realDays = fornalha.finalGrams ? Math.max(1, daysFromGrams(fornalha.finalGrams, fornalha.cookedGramsPerDay)) : fornalha.days;
 
   function save(value: number) {
     confirmPots(fornalha, value);
@@ -425,8 +396,8 @@ function StockView({ fornalha, onChange }: { fornalha: Fornalha; onChange: () =>
 
       {cost.priced > 0 && fornalha.finalGrams ? (
         <div className="fz-card fz-card--line fz-row" style={{ padding: '0.9rem 1rem', alignItems: 'center' }}>
-          <span>Custo desta fornalha<br /><small className="fz-muted">{formatKg(fornalha.finalGrams)} prontos</small></span>
-          <strong>{formatMoney(cost.total / Math.max(1, fornalha.days))}/dia</strong>
+          <span>Custo desta fornalha<br /><small className="fz-muted">{formatMoney(cost.total)} · {formatKg(fornalha.finalGrams)} prontos</small></span>
+          <strong>{formatMoney(cost.total / realDays)}/dia</strong>
         </div>
       ) : null}
 

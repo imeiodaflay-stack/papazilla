@@ -16,9 +16,9 @@ import { formatGrams, mealSize } from '../lib/recipeDisplay.js';
  * consistente com "Modo de preparo" (2026-09). Cada pet continua com seu
  * próprio acordeão por dentro quando há mais de um.
  */
-export function RecipeFinalizers({ petPlans }: { petPlans: { pet: StoredPet; plan: DailyPlan }[] }) {
+export function RecipeFinalizers({ petPlans, defaultOpen }: { petPlans: { pet: StoredPet; plan: DailyPlan }[]; defaultOpen?: boolean }) {
   return (
-    <details className="recipe-preparation">
+    <details className="recipe-preparation" open={defaultOpen}>
       <summary>
         <span>
           <img src={addIcon} alt="" />
