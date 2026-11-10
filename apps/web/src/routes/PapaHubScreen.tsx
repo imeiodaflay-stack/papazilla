@@ -48,7 +48,7 @@ export function PapaHubScreen() {
   if (stock) {
     view = <Overview key={stock.id} stock={stock} next={inProgress} onChange={refresh} />;
   } else if (inProgress?.stage === 'cooking') {
-    view = <CookingCard fornalha={inProgress} onContinue={() => navigate('/papa/cozinha')} />;
+    view = <CookingCard fornalha={inProgress} onContinue={() => navigate('/papa/cozinha')} onChange={refresh} />;
   } else if (inProgress) {
     view = <ShoppingList key={inProgress.id} fornalha={inProgress} onChange={refresh} onToast={toast} />;
   } else {
@@ -338,17 +338,44 @@ function CostCard({ fornalha }: { fornalha: Fornalha }) {
 
 // ---- fornalha no fogo ----
 
-function CookingCard({ fornalha, onContinue }: { fornalha: Fornalha; onContinue: () => void }) {
+function CookingCard({ fornalha, onContinue, onChange }: { fornalha: Fornalha; onContinue: () => void; onChange: () => void }) {
+  const navigate = useNavigate();
+  const [confirmAbandon, setConfirmAbandon] = useState(false);
+
+  function backToList() {
+    updateFornalha(fornalha.id, { stage: 'shopping', cookStartedAt: undefined, cookSeconds: undefined, cookStep: undefined, cookDate: undefined });
+    navigate('/papa/compras');
+  }
+
+  function abandon() {
+    discardFornalha(fornalha.id);
+    setConfirmAbandon(false);
+    onChange();
+  }
+
   return (
     <section className="fz-card fz-card--soft fz-stack">
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
         <img src={zillaChef} alt="" style={{ width: 80, height: 80, objectFit: 'contain', flex: 'none' }} />
         <div className="fz-stack" style={{ gap: '0.25rem' }}>
-          <h1 className="fz-h2">Fornalha no fogo</h1>
+          <h3 className="fz-h2">Fornalha no fogo</h3>
           <p className="fz-muted">{fornalha.title} · {joinPt(fornalha.pets.map((p) => p.name))}</p>
         </div>
       </div>
       <button type="button" className="pz-button pz-button--primary wide" onClick={onContinue}>Continuar cozinhando <span aria-hidden="true">→</span></button>
+      <div className="fz-btn-row">
+        <button type="button" className="fz-link" onClick={backToList}>Voltar para a lista</button>
+        <button type="button" className="fz-link fz-link--muted" onClick={() => setConfirmAbandon(true)}>Abandonar fornalha</button>
+      </div>
+
+      {confirmAbandon ? (
+        <Sheet labelledBy="fz-abandonar" onClose={() => setConfirmAbandon(false)}>
+          <h2 id="fz-abandonar" className="fz-h2">Abandonar esta fornalha?</h2>
+          <p className="fz-muted">O preparo, a lista e os valores anotados somem. A receita continua em Salvas, e você pode começar outra fornalha na hora.</p>
+          <button type="button" className="pz-button pz-button--primary wide" onClick={abandon}>Abandonar</button>
+          <button type="button" className="fz-link fz-link--muted" onClick={() => setConfirmAbandon(false)}>Continuar com ela</button>
+        </Sheet>
+      ) : null}
     </section>
   );
 }
@@ -451,7 +478,7 @@ function Overview({ stock, next, onChange }: { stock: Fornalha; next?: Fornalha;
           {nextHint ? <p className="fz-muted">{nextHint}</p> : null}
         </div>
         {next?.stage === 'cooking' ? (
-          <CookingCard fornalha={next} onContinue={() => navigate('/papa/cozinha')} />
+          <CookingCard fornalha={next} onContinue={() => navigate('/papa/cozinha')} onChange={onChange} />
         ) : next ? (
           <NextInProgress fornalha={next} />
         ) : (
