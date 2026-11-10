@@ -72,6 +72,8 @@ export interface Fornalha {
   finalGrams?: number;
   losses: FornalhaLoss[];
   photo?: string;
+  /** Preparo já registrado na receita (galeria e histórico). */
+  cookLogged?: boolean;
   potMode: PotMode;
   stockedAt?: string;
   /** Último dia com comida (AAAA-MM-DD). */

@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import zillaChef from '../assets/zilla-chef.webp';
 import { joinPt } from '../lib/petLabel.js';
-import { getRecipe } from '../lib/recipeRepository.js';
+import { addCookLog, getRecipe } from '../lib/recipeRepository.js';
+import { uploadPhoto } from '../lib/photoUpload.js';
 import { recipeSnapshot } from '../lib/fornalhaFlow.js';
 import {
   daysFromGrams, formatDay, formatDuration, formatDurationShort, formatKg, getInProgress, getSupplementTiming,
@@ -14,6 +15,14 @@ import { RecipeFinalizers } from '../components/RecipeFinalizers.js';
 import { RecipePreparationSteps } from '../components/RecipePreparationSteps.js';
 
 const LOSS_KINDS = ['Queimou', 'Sobrou cru', 'Virou petisco', 'Outro'];
+
+const RATING_CAPTIONS: Record<number, string> = {
+  1: 'Não foi a favorita desta vez.',
+  2: 'Não foi a favorita desta vez.',
+  3: 'Curtiram a fornalha.',
+  4: 'Curtiram a fornalha.',
+  5: 'Amaram! Essa vai voltar para o potinho.',
+};
 
 /**
  * Modo Cozinha (tela cheia, dentro do container mobile): abertura → preparo
@@ -205,7 +214,11 @@ function Finish({
   const [losses, setLosses] = useState<string[]>(() => fornalha.losses.map((l) => l.kind));
   const [lossGrams, setLossGrams] = useState('');
   const [photo, setPhoto] = useState<string | undefined>(fornalha.photo);
+  const [rating, setRating] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const [logError, setLogError] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const canLog = !fornalha.cookLogged && Boolean(getRecipe(fornalha.recipeId));
   const finalGrams = Math.max(0, Number(grams.replace(',', '.')) || 0);
   const days = daysFromGrams(finalGrams, fornalha.cookedGramsPerDay);
   const diff = fornalha.totalCookedGrams > 0 ? Math.round(((finalGrams - fornalha.totalCookedGrams) / fornalha.totalCookedGrams) * 100) : 0;
@@ -217,6 +230,49 @@ function Finish({
     if (!file) return;
     setPhoto(await shrinkPhoto(file));
   }
+
+  /**
+   * Com nota, o preparo entra na receita (galeria e histórico), com a foto da
+   * panela se tiver. A nota é obrigatória no banco (1 a 5).
+   */
+  async function store() {
+    if (saving) return;
+    const patch: Partial<Fornalha> = {
+      finalGrams,
+      photo,
+      cookSeconds: elapsed,
+      losses: losses.map((kind) => ({ kind, grams: Number(lossGrams) || 0 })),
+      cookDate: fornalha.cookDate ?? todayIso(),
+    };
+    if (canLog && rating > 0 && !logError) {
+      setSaving(true);
+      try {
+        let photoPath = photo ?? '';
+        if (photoPath.startsWith('data:')) {
+          const blob = await (await fetch(photoPath)).blob();
+          photoPath = await uploadPhoto('cook-photos', new File([blob], 'panela.jpg', { type: 'image/jpeg' }));
+        }
+        await addCookLog(fornalha.recipeId, {
+          date: new Date().toISOString(),
+          petIds: fornalha.pets.map((p) => p.id),
+          rating,
+          note: '',
+          photoPath,
+        });
+        patch.photo = photoPath || undefined;
+        patch.cookLogged = true;
+      } catch {
+        setSaving(false);
+        setLogError(true);
+        return;
+      }
+    }
+    onStore(patch);
+  }
+
+  let ratingHelp: string | null = null;
+  if (rating > 0) ratingHelp = RATING_CAPTIONS[rating] ?? null;
+  else if (photo) ratingHelp = 'Dê uma nota para a foto ir para a galeria e para a receita.';
 
   return (
     <div className="fz-kitchen">
@@ -246,9 +302,25 @@ function Finish({
           )}
           <span className="fz-stack" style={{ gap: '0.15rem' }}>
             <strong style={{ font: '700 1rem/1.2 var(--pz-font-support)' }}>{photo ? 'Trocar foto da panela' : 'Foto da panela'}</strong>
-            <small className="fz-muted">Fica guardada neste aparelho</small>
+            <small className="fz-muted">{canLog ? 'Vai para a galeria com a sua nota' : 'Fica guardada neste aparelho'}</small>
           </span>
         </button>
+
+        {canLog ? (
+          <div className="fz-stack" style={{ gap: '0.4rem' }}>
+            <p style={{ margin: 0, font: '700 0.9375rem/1.2 var(--pz-font-support)' }}>Os monstrinhos curtiram?</p>
+            <div className="recipe-rating" role="group" aria-label="Avaliação da fornalha">
+              {[1, 2, 3, 4, 5].map((value) => (
+                <button key={value} type="button" className={value <= rating ? 'is-on' : undefined} aria-label={`${value} de 5`} aria-pressed={value === rating} onClick={() => setRating(value === rating ? 0 : value)}>
+                  ♥
+                </button>
+              ))}
+            </div>
+            {ratingHelp ? <p className="fz-muted" style={{ fontSize: '0.8125rem' }}>{ratingHelp}</p> : null}
+          </div>
+        ) : fornalha.cookLogged ? (
+          <p className="fz-note fz-note--ok">Este preparo já está na galeria e no histórico da receita.</p>
+        ) : null}
 
         <div className="fz-field">
           <label htmlFor="fz-final">Peso final da comida pronta (g)</label>
@@ -280,19 +352,11 @@ function Finish({
       </main>
 
       <footer className="fz-kitchen__foot">
-        <button
-          type="button"
-          className="pz-button pz-button--primary wide"
-          disabled={finalGrams <= 0}
-          onClick={() => onStore({
-            finalGrams,
-            photo,
-            cookSeconds: elapsed,
-            losses: losses.map((kind) => ({ kind, grams: Number(lossGrams) || 0 })),
-            cookDate: fornalha.cookDate ?? todayIso(),
-          })}
-        >
-          Guardar comida →
+        {logError ? (
+          <p className="fz-note fz-note--warn" role="alert">Não deu para mandar a foto e a nota para a galeria agora. Dá para guardar a comida assim mesmo e registrar o preparo depois, na receita.</p>
+        ) : null}
+        <button type="button" className="pz-button pz-button--primary wide" disabled={finalGrams <= 0 || saving} onClick={() => { void store(); }}>
+          {saving ? 'Guardando…' : logError ? 'Guardar comida assim mesmo →' : 'Guardar comida →'}
         </button>
       </footer>
     </div>
