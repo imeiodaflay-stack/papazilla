@@ -4,10 +4,11 @@ import { pickReminder, todayInBrazil, type FornalhaForRules } from './_lib/remin
 import { deliverEmail, deliverPush } from './_lib/reminderDelivery.js';
 
 /**
- * Avisos da fornalha, uma vez por dia (Vercel Cron, 08h de Brasília, ver
- * `vercel.json`). A Vercel só roda cron no deploy de produção; no preview,
- * chame à mão com `Authorization: Bearer $CRON_SECRET` (e `?dry=1` para só
- * ver o que sairia).
+ * Avisos da fornalha, uma vez por dia às 08h de Brasília (Vercel Schedules,
+ * `avisos-da-fornalha` em `vercel.json`). Dá para rodar na hora pelo painel
+ * (Schedules › Run Schedule) ou com `Authorization: Bearer $CRON_SECRET`
+ * (e `?dry=1` para só ver o que sairia). Se a Vercel repetir uma execução, o
+ * `notification_log` impede aviso em dobro.
  *
  * Para cada pessoa com avisos no celular e/ou por e-mail: escolhe no máximo um aviso
  * (`pickReminder`), reserva no `notification_log` (cada tipo uma vez por
