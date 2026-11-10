@@ -58,8 +58,8 @@ export async function sendSubscriptionEmail(admin: SupabaseClient, userId: strin
         ['Acesso até', day(sub.current_period_end)],
       ],
       button: { label: 'Abrir o Papazilla', href: `${appUrl()}/papa` },
-      footer: `${receiptUrl ? `<a href="${escapeHtml(receiptUrl)}" style="color:#b84726">Ver o comprovante do pagamento</a>. ` : ''}Dúvidas? Responda este e-mail ou escreva para contato@papazilla.app.`,
-    }, 'Papazilla <contato@papazilla.app>');
+      footer: `${receiptUrl ? `<a href="${escapeHtml(receiptUrl)}" style="color:#b84726">Ver o comprovante do pagamento</a>. ` : ''}Dúvidas? Responda este e-mail ou escreva para hello@papazilla.app.`,
+    }, 'Papazilla <hello@papazilla.app>');
   } catch (err) {
     console.error('[subscription-email]', err);
   }

@@ -102,7 +102,7 @@ export function vapidFromEnv(): VapidKeys | null {
   const publicKey = process.env.VITE_VAPID_PUBLIC_KEY;
   const privateKey = process.env.VAPID_PRIVATE_KEY;
   if (!publicKey || !privateKey) return null;
-  return { publicKey, privateKey, subject: process.env.VAPID_SUBJECT || 'mailto:contato@papazilla.app' };
+  return { publicKey, privateKey, subject: process.env.VAPID_SUBJECT || 'mailto:hello@papazilla.app' };
 }
 
 /** Envia. `PushGoneError` quando o aparelho desinscreveu (apagar a inscrição). */

@@ -29,7 +29,7 @@ export async function asaasFetch<T = any>(path: string, init: RequestInit = {}):
     ...init,
     headers: {
       'Content-Type': 'application/json',
-      'User-Agent': 'Papazilla/1.0 (contato@papazilla.app)',
+      'User-Agent': 'Papazilla/1.0 (hello@papazilla.app)',
       access_token: apiKey(),
       ...init.headers,
     },

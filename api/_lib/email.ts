@@ -58,7 +58,7 @@ export async function sendEmail(to: string, content: EmailContent, from = proces
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from, to: [to], subject: content.subject, html, text }),
+    body: JSON.stringify({ from, to: [to], reply_to: 'hello@papazilla.app', subject: content.subject, html, text }),
   });
   if (!res.ok) throw new Error(`Resend recusou (${res.status}): ${(await res.text().catch(() => '')).slice(0, 200)}`);
 }
