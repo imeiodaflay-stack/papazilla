@@ -21,39 +21,47 @@ export interface ReminderPrefs {
 const OFFER_KEY = 'papazilla.remindersOffer';
 const PENDING_PUSH_KEY = 'papazilla.remindersWantPush';
 
+/** Sem escolha salva, o e-mail vem ligado (Flay, 2026-11-10); o celular depende da permissão. */
+export const DEFAULT_REMINDER_PREFS: ReminderPrefs = { push: false, email: true };
+
 let ownerId: string | null = null;
-let prefs: ReminderPrefs | null = null;
+let saved: ReminderPrefs | null = null;
 
 export async function loadNotificationPrefs(userId: string | null): Promise<void> {
   ownerId = userId;
-  prefs = null;
+  saved = null;
   if (!isSupabaseConfigured || !supabase || !userId) return;
   const { data, error } = await supabase.from('notification_prefs').select('push, email').eq('owner_id', userId).maybeSingle();
   if (error) {
     console.error('[reminders] Falha ao carregar a preferência de avisos', error);
     return;
   }
-  prefs = data ? { push: Boolean(data.push), email: Boolean(data.email) } : null;
+  saved = data ? { push: Boolean(data.push), email: Boolean(data.email) } : null;
 }
 
-/** `null`: ainda não escolheu. */
-export function getReminderPrefs(): ReminderPrefs | null {
-  return prefs;
+/** Como a pessoa recebe os avisos agora (a escolha salva, ou o padrão). */
+export function getReminderPrefs(): ReminderPrefs {
+  return saved ?? DEFAULT_REMINDER_PREFS;
+}
+
+/** Já escolheu alguma vez (senão o app oferece o celular depois de montar o estoque). */
+export function hasChosenReminders(): boolean {
+  return saved !== null;
 }
 
 export async function setReminderPrefs(patch: Partial<ReminderPrefs>): Promise<void> {
-  const before = prefs;
-  const next = { push: prefs?.push ?? false, email: prefs?.email ?? false, ...patch };
-  prefs = next;
+  const before = saved;
+  const next = { ...getReminderPrefs(), ...patch };
+  saved = next;
   if (!next.push) rememberWantsPush(false);
   if (!isSupabaseConfigured || !supabase || !ownerId) return;
   const { error } = await supabase.from('notification_prefs')
     .upsert({ owner_id: ownerId, push: next.push, email: next.email, updated_at: new Date().toISOString() });
   if (error) {
-    prefs = before;
+    saved = before;
     throw new Error('Não foi possível salvar a escolha dos avisos.');
   }
-  if (patch.email === true && !before?.email) void sendTestReminder('email');
+  if (patch.email === true && !(before ?? DEFAULT_REMINDER_PREFS).email) void sendTestReminder('email');
 }
 
 /** Aviso de confirmação (`/api/reminders-test`): prova na hora que o caminho funciona. */
@@ -82,6 +90,16 @@ function ua(): string {
 export function isIos(): boolean {
   const nav = typeof navigator === 'undefined' ? undefined : navigator;
   return /iPhone|iPad|iPod/.test(ua()) || (nav?.platform === 'MacIntel' && (nav?.maxTouchPoints ?? 0) > 1);
+}
+
+/** Navegador do iPhone, para o guia de instalação falar do botão certo. */
+export function iosBrowser(): 'safari' | 'chrome' | 'firefox' | 'edge' | 'other' {
+  const agent = ua();
+  if (/CriOS/.test(agent)) return 'chrome';
+  if (/FxiOS/.test(agent)) return 'firefox';
+  if (/EdgiOS/.test(agent)) return 'edge';
+  if (/Safari/.test(agent) && !/(OPiOS|GSA|DuckDuckGo|YaBrowser|Brave)/.test(agent)) return 'safari';
+  return 'other';
 }
 
 /** Aberto pelo ícone da tela de início. */
@@ -245,7 +263,7 @@ export function rememberWantsPush(value: boolean): void {
 }
 
 export function wantsPush(): boolean {
-  if (prefs?.push) return true;
+  if (saved?.push) return true;
   try {
     return localStorage.getItem(PENDING_PUSH_KEY) === 'true';
   } catch {

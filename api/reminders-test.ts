@@ -23,8 +23,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       tag: 'papazilla-teste',
     };
     const result: { push?: number; email?: number } = {};
-    if (pref?.push && only !== 'email') result.push = await deliverPush(admin, user.id, message);
-    if (pref?.email && only !== 'push') result.email = (await deliverEmail(admin, user.id, message)) ? 1 : 0;
+    const prefs = pref ?? { push: false, email: true };
+    if (prefs.push && only !== 'email') result.push = await deliverPush(admin, user.id, message);
+    if (prefs.email && only !== 'push') result.email = (await deliverEmail(admin, user.id, message)) ? 1 : 0;
     if (result.push === undefined && result.email === undefined) throw new HttpError(400, 'Os avisos estão desligados.');
     return res.status(200).json(result);
   } catch (err) {

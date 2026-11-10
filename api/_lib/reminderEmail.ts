@@ -10,6 +10,6 @@ export async function sendReminderEmail(to: string, reminder: { title: string; b
     title: reminder.title,
     paragraphs: [reminder.body],
     button: { label: 'Abrir o Papazilla', href: `${base}${reminder.path}` },
-    footer: `Você recebe este aviso porque ligou os avisos da fornalha por e-mail. Para mudar ou desligar, abra <a href="${escapeHtml(`${base}/conta`)}" style="color:#b84726">Conta › Avisos da fornalha</a>.`,
+    footer: `Você recebe este aviso porque acompanha uma fornalha no Papazilla. Para mudar ou desligar, abra <a href="${escapeHtml(`${base}/conta`)}" style="color:#b84726">Conta › Avisos da fornalha</a>.`,
   });
 }

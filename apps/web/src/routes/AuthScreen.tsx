@@ -5,7 +5,7 @@ import appleIcon from '../assets/icons/apple.svg';
 import googleIcon from '../assets/icons/google.svg';
 import mailIcon from '../assets/icons/mensagem.png';
 import helloIcon from '../assets/icons/perfil.png';
-import { initAuth, setAuthenticated } from '../lib/session.js';
+import { initAuth, setAuthenticated, setSeenOnboarding } from '../lib/session.js';
 import { loadPetsForOwner } from '../lib/petsStore.js';
 import { getUserProfile, setUserProfile } from '../lib/userProfile.js';
 import { supabase } from '../lib/supabase.js';
@@ -182,6 +182,12 @@ export function AuthScreen() {
     setEmailBusy(false);
     const knownName =
       (data.user.user_metadata?.full_name as string | undefined) || getUserProfile()?.name || '';
+    if (installedIos) {
+      // Volta direto para o Papá, onde aparece "Ativar avisos".
+      setSeenOnboarding();
+      navigate('/papa', { replace: true });
+      return;
+    }
     if (knownName.trim()) {
       navigate('/welcome', { replace: true });
       return;
@@ -288,9 +294,9 @@ export function AuthScreen() {
             </div>
             {installedIos ? (
               <div className="auth-step-copy">
-                <p className="eyebrow">Papazilla na tela de início</p>
-                <h1>Falta só entrar de novo</h1>
-                <p>O app na tela de início é separado do Safari. Use o mesmo e-mail da sua conta e enviamos um código de 6 dígitos.</p>
+                <p className="eyebrow">Último passo dos avisos</p>
+                <h1>Entre para ligar os avisos</h1>
+                <p>O Papazilla da tela de início é separado do navegador, então precisa entrar mais uma vez. Use o mesmo e-mail da sua conta: mandamos um código de 6 dígitos e, depois, é só ativar os avisos.</p>
               </div>
             ) : (
               <div className="auth-step-copy">

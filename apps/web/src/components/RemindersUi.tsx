@@ -5,7 +5,7 @@ import zillaFrente from '../assets/zilla-frente-transparent.webp';
 import zillaChef from '../assets/zilla-chef.webp';
 import { getUserProfile } from '../lib/userProfile.js';
 import {
-  disablePushOnThisDevice, enablePush, getReminderPrefs, hasPushOnThisDevice, isInAppBrowser, isIos,
+  disablePushOnThisDevice, enablePush, iosBrowser, getReminderPrefs, hasPushOnThisDevice, isInAppBrowser, isIos,
   markOfferSeen, needsInstallForPush, pushAvailable, pushPermission, rememberWantsPush, setReminderPrefs,
   wantsPush,
 } from '../lib/reminders.js';
@@ -38,6 +38,7 @@ const ICONS = {
   jar: <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="7" width="14" height="14" rx="3" /><path d="M7 3h10v4H7z" /></svg>,
   share: <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M8 9H6v11h12V9h-2" /><path d="M12 3v12M8.5 6.5L12 3l3.5 3.5" /></svg>,
   add: <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="16" height="16" rx="4" /><path d="M12 8v8M8 12h8" /></svg>,
+  up: <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M6 11l6-6 6 6" /></svg>,
   down: <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M6 13l6 6 6-6" /></svg>,
 };
 
@@ -67,12 +68,12 @@ export function RemindersOffer({ onClose, onToast }: { onClose: () => void; onTo
     else onToast('Não deu para ligar os avisos agora. Tente de novo em Conta.');
   }
 
-  async function wantEmail() {
+  async function save(patch: { push?: boolean; email?: boolean }, message: string) {
     markOfferSeen();
     setBusy(true);
     try {
-      await setReminderPrefs({ email: true });
-      onToast(`Combinado: os avisos vão para ${emailLabel()}.`);
+      await setReminderPrefs(patch);
+      onToast(message);
     } catch {
       onToast('Não deu para salvar agora. Tente de novo em Conta.');
     }
@@ -80,19 +81,14 @@ export function RemindersOffer({ onClose, onToast }: { onClose: () => void; onTo
     onClose();
   }
 
-  function later() {
-    markOfferSeen();
-    onClose();
-  }
-
   const pushPossible = route !== 'unavailable';
 
   return (
-    <Sheet labelledBy="fz-oferta" onClose={later}>
+    <Sheet labelledBy="fz-oferta" onClose={() => { markOfferSeen(); onClose(); }}>
       <img src={zillaLendo} alt="" style={{ justifySelf: 'center', width: 120, height: 120, objectFit: 'contain' }} />
       <div className="fz-stack" style={{ gap: '0.4rem', textAlign: 'center' }}>
-        <h2 id="fz-oferta" className="fz-h2" style={{ textWrap: 'balance' }}>Quer que eu te avise antes da comida acabar?</h2>
-        <p className="fz-muted">Estoque guardado. Agora o Papazilla fica de olho para você.</p>
+        <h2 id="fz-oferta" className="fz-h2" style={{ textWrap: 'balance' }}>{pushPossible ? 'Quer os avisos no celular também?' : 'Eu te aviso antes da comida acabar'}</h2>
+        <p className="fz-muted">Estoque guardado. Os avisos já vão para <strong style={{ color: 'var(--pz-chocolate)' }}>{emailLabel()}</strong>{pushPossible ? '. No celular, eles chegam na hora.' : '.'}</p>
       </div>
       <ul className="fz-reminder-list">
         <li>{ICONS.calendar}Hora de planejar a próxima fornalha</li>
@@ -100,17 +96,17 @@ export function RemindersOffer({ onClose, onToast }: { onClose: () => void; onTo
         <li>{ICONS.jar}Passou da data: ainda tem potinho?</li>
       </ul>
       {route === 'install' || route === 'safari' ? (
-        <p className="fz-muted" style={{ textAlign: 'center', fontSize: '0.8125rem', fontWeight: 600 }}>Para os avisos chegarem, o Papazilla precisa estar na tela de início do seu celular.</p>
+        <p className="fz-muted" style={{ textAlign: 'center', fontSize: '0.8125rem', fontWeight: 600 }}>Para os avisos chegarem no celular, o Papazilla precisa estar na tela de início.</p>
       ) : null}
       <div className="fz-stack" style={{ gap: '0.25rem' }}>
         {pushPossible ? (
-          <button type="button" className="pz-button pz-button--primary wide" disabled={busy} onClick={() => { void wantPush(); }}>Quero os avisos</button>
+          <button type="button" className="pz-button pz-button--primary wide" disabled={busy} onClick={() => { void wantPush(); }}>Quero no celular também</button>
         ) : (
-          <button type="button" className="pz-button pz-button--primary wide" disabled={busy} onClick={() => { void wantEmail(); }}>Quero os avisos por e-mail</button>
+          <button type="button" className="pz-button pz-button--primary wide" disabled={busy} onClick={() => { void save({ email: true }, `Combinado: os avisos vão para ${emailLabel()}.`); }}>Combinado</button>
         )}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
-          {pushPossible ? <button type="button" className="fz-link" disabled={busy} onClick={() => { void wantEmail(); }}>Prefiro por e-mail</button> : null}
-          <button type="button" className="fz-link fz-link--muted" disabled={busy} onClick={later}>Agora não</button>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+          {pushPossible ? <button type="button" className="fz-link" disabled={busy} onClick={() => { void save({ email: true, push: false }, `Combinado: os avisos vão só para ${emailLabel()}.`); }}>Só por e-mail</button> : null}
+          <button type="button" className="fz-link fz-link--muted" disabled={busy} onClick={() => { void save({ email: false, push: false }, 'Tudo bem, sem avisos. Dá para ligar depois em Conta.'); }}>Não quero avisos</button>
         </div>
       </div>
     </Sheet>
@@ -123,8 +119,17 @@ export function InstalarScreen() {
   const navigate = useNavigate();
   const [done, setDone] = useState(false);
 
+  const browser = iosBrowser();
+  const browserName = { safari: 'Safari', chrome: 'Chrome', firefox: 'Firefox', edge: 'Edge', other: 'navegador' }[browser];
+  // Safari: barra de baixo. Chrome, Edge e Firefox no iPhone: ícone no alto, ao lado do endereço.
+  const shareOnTop = browser === 'chrome' || browser === 'edge' || browser === 'firefox';
+  const shareWhere = browser === 'safari'
+    ? 'Na barra do Safari, embaixo. Se não aparecer, toque em ••• primeiro.'
+    : shareOnTop
+      ? `No ${browserName}, fica no alto, ao lado do endereço. Se não aparecer, toque em ••• primeiro.`
+      : 'No menu do navegador, procure o ícone de compartilhar.';
   const steps = [
-    { title: 'Toque em Compartilhar', text: 'Na barra do Safari. Se não aparecer, toque em ••• primeiro.', icon: <span className="fz-step__icon">{ICONS.share}</span> },
+    { title: 'Toque em Compartilhar', text: shareWhere, icon: <span className="fz-step__icon">{ICONS.share}</span> },
     { title: 'Escolha “Adicionar à Tela de Início”', text: 'Role a lista um pouco para baixo se precisar.', icon: <span className="fz-step__icon">{ICONS.add}</span> },
     { title: 'Toque em Adicionar', text: 'E abra o Papazilla pelo ícone novo.', icon: <span className="fz-step__icon fz-step__icon--app"><img src={zillaFrente} alt="" /></span> },
   ];
@@ -162,7 +167,8 @@ export function InstalarScreen() {
           <button type="button" className="pz-button pz-button--outline wide" onClick={() => navigate('/papa')}>Voltar ao Papá</button>
         ) : (
           <>
-            <span className="fz-full__hint">O botão Compartilhar fica na barra do Safari, aqui embaixo {ICONS.down}</span>
+            {browser === 'safari' ? <span className="fz-full__hint">O botão Compartilhar fica na barra do Safari, aqui embaixo {ICONS.down}</span> : null}
+            {shareOnTop ? <span className="fz-full__hint">{ICONS.up} O botão Compartilhar fica no alto, ao lado do endereço</span> : null}
             <button type="button" className="pz-button pz-button--primary wide" onClick={() => setDone(true)}>Já adicionei</button>
           </>
         )}
@@ -301,7 +307,6 @@ export function AtivarAvisos({ onDone, onToast }: { onDone: () => void; onToast:
 
 export function reminderChannelSummary(): string {
   const prefs = getReminderPrefs();
-  if (!prefs) return 'Escolha como receber';
   if (prefs.push && prefs.email) return 'No celular e por e-mail';
   if (prefs.push) return 'No celular';
   if (prefs.email) return `Por e-mail · ${emailLabel()}`;
@@ -311,7 +316,7 @@ export function reminderChannelSummary(): string {
 export function RemindersSettingsSheet({ onClose, onToast }: { onClose: () => void; onToast: (message: string) => void }) {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
-  const [prefs, setPrefs] = useState(() => getReminderPrefs() ?? { push: false, email: false });
+  const [prefs, setPrefs] = useState(() => getReminderPrefs());
   const route = pushRoute();
 
   async function togglePush() {
@@ -337,7 +342,7 @@ export function RemindersSettingsSheet({ onClose, onToast }: { onClose: () => vo
     } catch {
       onToast('Não deu para salvar agora. Tente de novo.');
     } finally {
-      setPrefs(getReminderPrefs() ?? { push: false, email: false });
+      setPrefs(getReminderPrefs());
       setBusy(false);
     }
   }
@@ -350,7 +355,7 @@ export function RemindersSettingsSheet({ onClose, onToast }: { onClose: () => vo
     } catch {
       onToast('Não deu para salvar agora. Tente de novo.');
     } finally {
-      setPrefs(getReminderPrefs() ?? { push: false, email: false });
+      setPrefs(getReminderPrefs());
       setBusy(false);
     }
   }

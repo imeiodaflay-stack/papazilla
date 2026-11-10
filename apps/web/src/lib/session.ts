@@ -23,10 +23,34 @@ import { loadSubscriptionForOwner } from './subscription.js';
 import { loadRecipesForOwner } from './recipeRepository.js';
 import { clearRecipeDraft } from './recipeDraft.js';
 import { loadFornalhasForOwner } from './fornalhaStore.js';
-import { loadNotificationPrefs } from './reminders.js';
+import { isIos, isStandalone, loadNotificationPrefs } from './reminders.js';
 
 const AUTH_KEY = 'papazilla.authenticated';
 const ONBOARDING_KEY = 'papazilla.seenOnboarding';
+const STANDALONE_LOGIN_KEY = 'papazilla.standaloneLogin';
+
+/**
+ * App aberto pela primeira vez no ícone da tela de início do iPhone: o iOS
+ * pode copiar uma sessão velha do navegador (que já não renova e não traz os
+ * dados da conta). Começa sempre por um login novo, por código no e-mail.
+ */
+function needsFreshStandaloneLogin(): boolean {
+  if (!isIos() || !isStandalone()) return false;
+  try {
+    return localStorage.getItem(STANDALONE_LOGIN_KEY) !== 'done';
+  } catch {
+    return false;
+  }
+}
+
+function markStandaloneLogin(): void {
+  if (!isIos() || !isStandalone()) return;
+  try {
+    localStorage.setItem(STANDALONE_LOGIN_KEY, 'done');
+  } catch {
+    /* storage indisponível */
+  }
+}
 
 let cachedUser: User | null = null;
 let initPromise: Promise<void> | null = null;
@@ -39,7 +63,10 @@ function forgetAccount(): void {
 
 async function applySession(user: User | null): Promise<void> {
   cachedUser = user;
-  if (user) syncProfileFromAuthUser(user);
+  if (user) {
+    syncProfileFromAuthUser(user);
+    markStandaloneLogin();
+  }
   else forgetAccount();
   await Promise.all([
     loadPetsForOwner(user?.id ?? null),
@@ -60,7 +87,12 @@ export function initAuth(): Promise<void> {
   if (!isSupabaseConfigured || !supabase) return Promise.resolve();
   if (!initPromise) {
     const client = supabase;
-    initPromise = client.auth.getSession().then(({ data }) => applySession(data.session?.user ?? null));
+    const start = needsFreshStandaloneLogin()
+      ? client.auth.signOut({ scope: 'local' }).then(() => undefined, () => undefined)
+      : Promise.resolve();
+    initPromise = start
+      .then(() => client.auth.getSession())
+      .then(({ data }) => applySession(data.session?.user ?? null));
     client.auth.onAuthStateChange((_event, session) => {
       void applySession(session?.user ?? null);
     });

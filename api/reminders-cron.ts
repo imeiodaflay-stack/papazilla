@@ -10,11 +10,15 @@ import { deliverEmail, deliverPush } from './_lib/reminderDelivery.js';
  * (e `?dry=1` para só ver o que sairia). Se a Vercel repetir uma execução, o
  * `notification_log` impede aviso em dobro.
  *
- * Para cada pessoa com avisos no celular e/ou por e-mail: escolhe no máximo um aviso
+ * Para cada pessoa com fornalha em andamento e avisos ligados (sem escolha
+ * salva, vale o padrão: e-mail): escolhe no máximo um aviso
  * (`pickReminder`), reserva no `notification_log` (cada tipo uma vez por
  * fornalha, mesmo com duas execuções ao mesmo tempo), envia e, se nada
  * chegou, libera a reserva para tentar no dia seguinte.
  */
+/** Igual a `DEFAULT_REMINDER_PREFS` no app: sem escolha salva, o e-mail vem ligado. */
+const DEFAULT_PREFS = { push: false, email: true };
+
 interface FornalhaRow {
   id: string;
   owner_id: string;
@@ -33,20 +37,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const admin = supabaseAdmin();
     const today = todayInBrazil();
 
-    const { data: prefs, error: prefsError } = await admin.from('notification_prefs').select('owner_id, push, email').or('push.eq.true,email.eq.true');
-    if (prefsError) throw prefsError;
-    const prefsOf = new Map((prefs ?? []).map((p) => [p.owner_id as string, { push: Boolean(p.push), email: Boolean(p.email) }]));
-    const owners = [...prefsOf.keys()];
-    if (owners.length === 0) return res.status(200).json({ today, sent: [], skipped: 0 });
-
+    // Todas as fornalhas em andamento ou no estoque; quem nunca escolheu como
+    // receber fica com o padrão do app (e-mail ligado, celular desligado).
     const fornalhas: FornalhaRow[] = [];
-    for (let i = 0; i < owners.length; i += 200) {
+    for (let offset = 0; ; offset += 1000) {
       const { data, error } = await admin.from('fornalhas')
         .select('id, owner_id, stage, end_date, created_at, data')
-        .in('owner_id', owners.slice(i, i + 200))
-        .in('stage', ['shopping', 'cooking', 'stocked']);
+        .in('stage', ['shopping', 'cooking', 'stocked'])
+        .order('id')
+        .range(offset, offset + 999);
       if (error) throw error;
       fornalhas.push(...((data ?? []) as FornalhaRow[]));
+      if (!data || data.length < 1000) break;
+    }
+    const owners = [...new Set(fornalhas.map((f) => f.owner_id))];
+    if (owners.length === 0) return res.status(200).json({ today, sent: [] });
+
+    const prefsOf = new Map<string, { push: boolean; email: boolean }>();
+    for (let i = 0; i < owners.length; i += 200) {
+      const { data, error } = await admin.from('notification_prefs').select('owner_id, push, email').in('owner_id', owners.slice(i, i + 200));
+      if (error) throw error;
+      for (const p of data ?? []) prefsOf.set(p.owner_id as string, { push: Boolean(p.push), email: Boolean(p.email) });
     }
 
     const ids = fornalhas.map((f) => f.id);
@@ -70,8 +81,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const report: { owner: string; kind: string; channel: string; ok: boolean }[] = [];
     for (const [owner, list] of byOwner) {
       const reminder = pickReminder(list, sent, today);
-      const pref = prefsOf.get(owner);
-      if (!reminder || !pref) continue;
+      const pref = prefsOf.get(owner) ?? DEFAULT_PREFS;
+      if (!reminder || (!pref.push && !pref.email)) continue;
       const channel = [pref.push ? 'push' : '', pref.email ? 'email' : ''].filter(Boolean).join(',');
       if (dry) {
         report.push({ owner, kind: reminder.kind, channel, ok: true });
