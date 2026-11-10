@@ -115,19 +115,26 @@ export async function generateRecipeStoryImage({ recipe, petPlans, formulation, 
   roundRect(ctx, MARGIN, y, CONTENT_WIDTH, heroH, 36);
   ctx.fill();
 
-  drawDash(ctx, WIDTH - MARGIN - 78, y + 46, 34, 60, CORAL);
-  drawDash(ctx, WIDTH - MARGIN - 44, y + 62, 34, 60, CORAL);
+  // Com foto, o texto do cartão para antes da moldura (x = 632) e os traços
+  // decorativos saem para não ficarem atrás dela.
+  const textRight = petPhoto ? WIDTH - MARGIN - 330 - 18 - 12 - 24 : WIDTH - MARGIN - 40;
+  if (!petPhoto) {
+    drawDash(ctx, WIDTH - MARGIN - 78, y + 46, 34, 60, CORAL);
+    drawDash(ctx, WIDTH - MARGIN - 44, y + 62, 34, 60, CORAL);
+  }
 
   ctx.textBaseline = 'alphabetic';
   ctx.fillStyle = CORAL;
   ctx.font = '800 30px Nunito, "Avenir Next", sans-serif';
   drawPaw(ctx, MARGIN + 72, y + 57, 44, CORAL);
-  ctx.fillText(fornalhaLabel(petPlans).toUpperCase(), MARGIN + 108, y + 67, 510);
+  const kickerLines = wrapLines(ctx, fornalhaLabel(petPlans).toUpperCase(), textRight - (MARGIN + 108), 2);
+  kickerLines.forEach((line, i) => ctx.fillText(line, MARGIN + 108, y + 67 + i * 34));
+  const titleTop = y + 128 + (kickerLines.length - 1) * 34;
 
   ctx.fillStyle = INK;
   ctx.font = '600 56px Fredoka, "Arial Rounded MT Bold", "Avenir Next", sans-serif';
-  const titleLines = wrapLines(ctx, title?.trim() || 'Receita da semana', 470, 2);
-  titleLines.forEach((line, i) => ctx.fillText(line, MARGIN + 52, y + 128 + i * 58));
+  const titleLines = wrapLines(ctx, title?.trim() || 'Receita da semana', Math.min(470, textRight - (MARGIN + 52)), 2);
+  titleLines.forEach((line, i) => ctx.fillText(line, MARGIN + 52, titleTop + i * 58));
 
   ctx.fillStyle = CORAL;
   ctx.font = '800 23px Nunito, "Avenir Next", sans-serif';
@@ -157,13 +164,18 @@ export async function generateRecipeStoryImage({ recipe, petPlans, formulation, 
     ctx.clip();
     drawCover(ctx, petPhoto, photoX, photoY, photoSize, photoSize);
     ctx.restore();
+    // Etiqueta com o nome: largura pelo texto, presa ao canto da foto.
+    ctx.font = '800 21px Nunito, "Avenir Next", sans-serif';
+    const chipMaxText = photoSize - 24 - 36;
+    const name = wrapLines(ctx, petPlans.find(({ pet }) => pet.photoPath)?.pet.name || 'Monstrinho', chipMaxText, 1)[0] ?? '';
+    const chipW = Math.min(photoSize - 24, Math.ceil(ctx.measureText(name).width) + 36);
+    const chipX = photoX + photoSize - 12 - chipW;
     ctx.fillStyle = C.verde;
-    roundRect(ctx, photoX + 174, photoY + photoSize - 54, 146, 42, 21);
+    roundRect(ctx, chipX, photoY + photoSize - 54, chipW, 42, 21);
     ctx.fill();
     ctx.fillStyle = '#ffffff';
-    ctx.font = '800 21px Nunito, "Avenir Next", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(petPlans.find(({ pet }) => pet.photoPath)?.pet.name || 'Monstrinho', photoX + 247, photoY + photoSize - 25);
+    ctx.fillText(name, chipX + chipW / 2, photoY + photoSize - 25);
     ctx.textAlign = 'left';
   } else if (mascot) {
     // A imagem de marca inclui a Zilla com o potinho na metade superior; o
