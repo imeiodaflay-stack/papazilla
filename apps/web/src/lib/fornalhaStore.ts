@@ -1,15 +1,21 @@
 /**
- * Ciclo da fornalha (build de teste): planejada → comprando → cozinhando →
- * no estoque → encerrada. Tudo fica SÓ no aparelho (localStorage), por decisão
- * da Flay em 2026-11-04: o único projeto Supabase é o de produção, então o
- * teste não cria tabela nova. A receita em si continua salva como hoje
- * (recipeRepository); a fornalha guarda um retrato do que é preciso para o
- * ciclo (ingredientes, porções, datas, preços, potes), para não depender do
- * cache de receitas.
+ * Ciclo da fornalha: planejada → comprando → cozinhando → no estoque →
+ * encerrada. A receita em si continua salva como hoje (recipeRepository); a
+ * fornalha guarda um retrato do que é preciso para o ciclo (ingredientes,
+ * porções, datas, preços, potes), para não depender do cache de receitas.
+ *
+ * Desde 2026-11-10 a fornalha fica na conta (tabela `fornalhas`): no iPhone o
+ * app instalado na tela de início não enxerga os dados do Safari, e o
+ * servidor precisa das datas para os avisos. Como em `petsStore.ts`, as
+ * leituras continuam síncronas sobre uma cópia local (localStorage) e cada
+ * escrita grava no Supabase em segundo plano. Sem Supabase configurado, fica
+ * só no aparelho.
  */
 import type { DailyPlan, Recipe } from '@papazilla/nutrition-engine';
 import type { StoredPet } from './petsStore.js';
 import { mealsCount } from './recipeDisplay.js';
+import { isSupabaseConfigured } from './env.js';
+import { supabase } from './supabase.js';
 
 const FORNALHAS_KEY = 'papazilla.fornalhas';
 const SUPPLEMENT_TIMING_KEY = 'papazilla.supplementTiming';
@@ -96,12 +102,108 @@ function read(): Fornalha[] {
   }
 }
 
-function write(list: Fornalha[]): void {
+function writeLocal(list: Fornalha[]): void {
   try {
     localStorage.setItem(FORNALHAS_KEY, JSON.stringify(list));
   } catch {
     /* storage cheio ou indisponível: o estado da tela segue até recarregar */
   }
+}
+
+function write(list: Fornalha[]): void {
+  const before = read();
+  writeLocal(list);
+  queueSync(before, list);
+}
+
+// ---- conta (Supabase) ----
+
+let ownerId: string | null = null;
+let syncChain: Promise<void> = Promise.resolve();
+
+interface FornalhaRow {
+  id: string;
+  stage: FornalhaStage;
+  end_date: string | null;
+  data: Fornalha;
+  created_at: string;
+}
+
+/** Foto em data URL fica só no aparelho; na conta vai a URL pública (quando houver). */
+function forServer(f: Fornalha): Fornalha {
+  return f.photo?.startsWith('data:') ? { ...f, photo: undefined } : f;
+}
+
+function toRow(f: Fornalha, owner: string) {
+  const data = forServer(f);
+  return {
+    id: f.id,
+    owner_id: owner,
+    stage: f.stage,
+    end_date: f.stage === 'stocked' ? f.endDate ?? null : null,
+    data,
+    created_at: f.createdAt,
+    updated_at: new Date().toISOString(),
+  };
+}
+
+function queueSync(before: Fornalha[], after: Fornalha[]): void {
+  if (!isSupabaseConfigured || !supabase || !ownerId) return;
+  const client = supabase;
+  const owner = ownerId;
+  const previous = new Map(before.map((f) => [f.id, JSON.stringify(forServer(f))]));
+  const changed = after.filter((f) => previous.get(f.id) !== JSON.stringify(forServer(f)));
+  const removed = before.filter((f) => !after.some((a) => a.id === f.id)).map((f) => f.id);
+  if (changed.length === 0 && removed.length === 0) return;
+  syncChain = syncChain.then(async () => {
+    if (changed.length > 0) {
+      const { error } = await client.from('fornalhas').upsert(changed.map((f) => toRow(f, owner)));
+      if (error) console.error('[fornalhaStore] Falha ao gravar a fornalha', error);
+    }
+    if (removed.length > 0) {
+      const { error } = await client.from('fornalhas').delete().in('id', removed).eq('owner_id', owner);
+      if (error) console.error('[fornalhaStore] Falha ao apagar a fornalha', error);
+    }
+  });
+}
+
+/**
+ * Chamada por `session.ts` a cada mudança de sessão. Com conta, a lista da
+ * conta substitui a cópia local; se a conta ainda não tem nenhuma e o
+ * aparelho tem (fornalhas de antes da sincronização), elas sobem.
+ */
+export async function loadFornalhasForOwner(userId: string | null): Promise<void> {
+  ownerId = userId;
+  if (!isSupabaseConfigured || !supabase) return;
+  if (!userId) {
+    try {
+      localStorage.removeItem(FORNALHAS_KEY);
+    } catch {
+      /* storage indisponível: nada a apagar */
+    }
+    return;
+  }
+  const { data, error } = await supabase
+    .from('fornalhas')
+    .select('id, stage, end_date, data, created_at')
+    .eq('owner_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(60);
+  if (error || !data) {
+    console.error('[fornalhaStore] Falha ao carregar as fornalhas', error);
+    return;
+  }
+  const local = read();
+  if (data.length === 0) {
+    if (local.length > 0) queueSync([], local);
+    return;
+  }
+  const remote = (data as FornalhaRow[]).map((row) => {
+    const mine = local.find((f) => f.id === row.id);
+    // A foto local (data URL) não sobe; mantém a do aparelho quando a conta não tem outra.
+    return { ...row.data, stage: row.stage, photo: row.data.photo ?? mine?.photo };
+  });
+  writeLocal(remote);
 }
 
 export function listFornalhas(): Fornalha[] {

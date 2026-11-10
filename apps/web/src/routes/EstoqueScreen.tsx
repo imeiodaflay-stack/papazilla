@@ -30,7 +30,7 @@ export function EstoqueScreen() {
   function finish() {
     if (!fornalha) return;
     stockFornalha(fornalha.id, { potMode: mode, endDate: addDays(cookDate, Math.max(1, days) - 1) });
-    navigate('/papa', { state: { toast: 'Estoque montado. Agora o Papazilla acompanha os dias para você.' } });
+    navigate('/papa', { state: { toast: 'Estoque montado. Agora o Papazilla acompanha os dias para você.', offerReminders: true } });
   }
 
   return (

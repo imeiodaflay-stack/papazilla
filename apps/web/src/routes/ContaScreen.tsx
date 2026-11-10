@@ -15,6 +15,7 @@ import { setAuthenticated } from '../lib/session.js';
 import { getUserProfile, setUserAvatar } from '../lib/userProfile.js';
 import { fileToDataUrl, PhotoUploadError, uploadPhoto } from '../lib/photoUpload.js';
 import { goBackOr } from '../lib/navigation.js';
+import { RemindersSettingsSheet, reminderChannelSummary } from '../components/RemindersUi.js';
 
 /**
  * Minha conta — fiel à tela "user-profile" de `papazilla-prototype`: identidade,
@@ -33,7 +34,7 @@ export function ContaScreen() {
   const subscription = getSubscription();
   const pets = listPets();
   const userProfile = getUserProfile();
-  const [notifications, setNotifications] = useState(true);
+  const [remindersOpen, setRemindersOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(userProfile?.avatarUrl ?? '');
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
@@ -89,14 +90,6 @@ export function ContaScreen() {
   function goManagePlan() {
     if (isActive) navigate('/assinatura/gerenciar');
     else navigate('/assinatura', { state: { returnTo: 'conta' } });
-  }
-
-  function toggleNotifications() {
-    setNotifications((prev) => {
-      const next = !prev;
-      toast(next ? 'Lembretes da matilha ativados.' : 'Lembretes da matilha desativados.');
-      return next;
-    });
   }
 
   function signOut() {
@@ -213,25 +206,16 @@ export function ContaScreen() {
 
         <section className="user-settings-group" aria-labelledby="preferences-title">
           <h2 id="preferences-title">Preferências</h2>
-          <div className="user-settings-row user-settings-row--toggle">
+          <button type="button" className="user-settings-row" onClick={() => setRemindersOpen(true)}>
             <span className="user-settings-row__icon">
               <img src={notificacoesIcon} alt="" />
             </span>
             <span>
-              <strong>Lembretes da matilha</strong>
-              <small>Fornalhas, avaliações e novidades</small>
+              <strong>Avisos da fornalha</strong>
+              <small>{reminderChannelSummary()}</small>
             </span>
-            <button
-              type="button"
-              className={`user-toggle${notifications ? ' is-on' : ''}`}
-              role="switch"
-              aria-checked={notifications}
-              aria-label="Ativar lembretes"
-              onClick={toggleNotifications}
-            >
-              <i aria-hidden="true" />
-            </button>
-          </div>
+            <b aria-hidden="true">›</b>
+          </button>
         </section>
 
         <section className="user-settings-group" aria-labelledby="support-title">
@@ -281,6 +265,8 @@ export function ContaScreen() {
         </button>
         <p className="user-app-version">Papazilla · versão em desenvolvimento</p>
       </div>
+
+      {remindersOpen ? <RemindersSettingsSheet onClose={() => setRemindersOpen(false)} onToast={toast} /> : null}
 
       {toastMsg ? (
         <div className="pz-toast is-visible" role="status">

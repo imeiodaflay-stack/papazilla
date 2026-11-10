@@ -6,6 +6,9 @@ import '@papazilla/design-system/reset.css';
 import './app.css';
 import { router } from './App.js';
 import { initAuth } from './lib/session.js';
+import { initReminderRuntime } from './lib/reminders.js';
+
+initReminderRuntime();
 
 const root = document.getElementById('root');
 if (!root) throw new Error('#root não encontrado');

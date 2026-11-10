@@ -35,6 +35,7 @@ import { GaleriaScreen } from './routes/GaleriaScreen.js';
 import { RouteScrollReset } from './components/RouteScrollReset.js';
 import { PlanejarScreen } from './routes/PlanejarScreen.js';
 import { ComprasScreen } from './routes/PapaHubScreen.js';
+import { AbrirSafariScreen, InstalarScreen } from './components/RemindersUi.js';
 import { ModoCozinhaScreen } from './routes/ModoCozinhaScreen.js';
 import { EstoqueScreen } from './routes/EstoqueScreen.js';
 
@@ -97,6 +98,8 @@ export const router = createBrowserRouter([
   },
   { path: '/papa/cozinha', element: <ModoCozinhaScreen /> },
   { path: '/papa/estoque', element: <EstoqueScreen /> },
+  { path: '/avisos/instalar', element: <InstalarScreen /> },
+  { path: '/avisos/safari', element: <AbrirSafariScreen /> },
   { path: '*', element: <Navigate to="/" replace /> },
     ],
   },

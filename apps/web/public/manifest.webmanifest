@@ -1,0 +1,17 @@
+{
+  "id": "/papa",
+  "name": "Papazilla",
+  "short_name": "Papazilla",
+  "description": "Alimentação natural cozida na medida do seu cão.",
+  "lang": "pt-BR",
+  "start_url": "/papa?origem=tela-de-inicio",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fff8f3",
+  "theme_color": "#fff8f3",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

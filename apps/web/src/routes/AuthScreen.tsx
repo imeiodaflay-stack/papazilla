@@ -9,6 +9,7 @@ import { initAuth, setAuthenticated } from '../lib/session.js';
 import { loadPetsForOwner } from '../lib/petsStore.js';
 import { getUserProfile, setUserProfile } from '../lib/userProfile.js';
 import { supabase } from '../lib/supabase.js';
+import { isIos, isStandalone } from '../lib/reminders.js';
 
 /**
  * Login / criar conta — fiel à tela "Login e conta" de `papazilla-prototype`.
@@ -55,7 +56,10 @@ async function socialProvidersFor(address: string): Promise<SocialProvider[]> {
 
 export function AuthScreen() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<AuthMode>('options');
+  // App aberto pela tela de início do iPhone: a sessão do Safari não vem junto,
+  // e o login do Google/Apple sai para o Safari e não volta. Entra por código.
+  const installedIos = isStandalone() && isIos();
+  const [mode, setMode] = useState<AuthMode>(installedIos ? 'email' : 'options');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [name, setName] = useState('');
@@ -129,7 +133,7 @@ export function AuthScreen() {
       return;
     }
     setEmailBusy(true);
-    if (!isResend && !skipProviderCheck) {
+    if (!isResend && !skipProviderCheck && !installedIos) {
       const providers = await socialProvidersFor(address);
       if (providers.length > 0) {
         setEmailBusy(false);
@@ -274,17 +278,27 @@ export function AuthScreen() {
 
         {mode === 'email' && (
           <>
-            <button type="button" className="auth-inline-back" onClick={() => setMode('options')}>
-              ← Voltar
-            </button>
+            {!installedIos ? (
+              <button type="button" className="auth-inline-back" onClick={() => setMode('options')}>
+                ← Voltar
+              </button>
+            ) : null}
             <div className="auth-step-art">
               <span>@</span>
             </div>
-            <div className="auth-step-copy">
-              <p className="eyebrow">Entrar com e-mail</p>
-              <h1>Qual é o seu e-mail?</h1>
-              <p>Vamos enviar um código. Você não precisa criar nem lembrar de senha.</p>
-            </div>
+            {installedIos ? (
+              <div className="auth-step-copy">
+                <p className="eyebrow">Papazilla na tela de início</p>
+                <h1>Falta só entrar de novo</h1>
+                <p>O app na tela de início é separado do Safari. Use o mesmo e-mail da sua conta e enviamos um código de 6 dígitos.</p>
+              </div>
+            ) : (
+              <div className="auth-step-copy">
+                <p className="eyebrow">Entrar com e-mail</p>
+                <h1>Qual é o seu e-mail?</h1>
+                <p>Vamos enviar um código. Você não precisa criar nem lembrar de senha.</p>
+              </div>
+            )}
             <label className="auth-field">
               <span>Seu e-mail</span>
               <input
@@ -380,6 +394,7 @@ export function AuthScreen() {
               <span>Código de acesso</span>
               <input
                 inputMode="numeric"
+                autoComplete="one-time-code"
                 maxLength={6}
                 value={code}
                 onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}

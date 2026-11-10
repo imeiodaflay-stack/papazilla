@@ -13,6 +13,8 @@ import {
   formatKg, getInProgress, getPapaSelectedPets, getStock, parseMoney, previousWithCost, setPapaSelectedPets,
   stockStatus, todayIso, totalPotsPerDay, updateFornalha, type Fornalha, type FornalhaItem,
 } from '../lib/fornalhaStore.js';
+import { AtivarAvisos, RemindersOffer, useActivateReminders } from '../components/RemindersUi.js';
+import { getReminderChannel, offerSeen } from '../lib/reminders.js';
 import { AlterarReceitaSheet, JarIcon, PencilIcon, PetPortrait, PlusIcon, RepeatIcon, Sheet, StockStrip } from '../components/FornalhaUi.js';
 
 /**
@@ -33,12 +35,16 @@ export function PapaHubScreen() {
     toastTimer.current = window.setTimeout(() => setToastMsg(null), 3200);
   }
 
+  const [offer, setOffer] = useState(false);
+  const activate = useActivateReminders();
+
   useEffect(() => {
-    const state = location.state as { toast?: string } | null;
-    if (state?.toast) {
-      toast(state.toast);
-      navigate('.', { replace: true, state: null });
+    const state = location.state as { toast?: string; offerReminders?: boolean } | null;
+    if (state?.toast) toast(state.toast);
+    if (state?.offerReminders && getReminderChannel() === null && !offerSeen()) {
+      window.setTimeout(() => setOffer(true), 900);
     }
+    if (state) navigate('.', { replace: true, state: null });
   }, []);
 
   const inProgress = getInProgress();
@@ -58,6 +64,8 @@ export function PapaHubScreen() {
   return (
     <div className="home-content fz-stack">
       {view}
+      {offer ? <RemindersOffer onClose={() => setOffer(false)} onToast={toast} /> : null}
+      {activate.show && !offer ? <AtivarAvisos onDone={activate.dismiss} onToast={toast} /> : null}
       {toastMsg ? <div className="pz-toast is-visible" role="status">{toastMsg}</div> : null}
     </div>
   );

@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { HttpError, requireUser, supabaseAdmin } from './_lib/supabaseAdmin.js';
 
-async function ownRows(admin: SupabaseClient, table: 'pets' | 'recipes' | 'recipe_preparations', userId: string) {
+async function ownRows(admin: SupabaseClient, table: 'pets' | 'recipes' | 'recipe_preparations' | 'fornalhas', userId: string) {
   const rows: Record<string, unknown>[] = [];
   for (let offset = 0;; offset += 1000) {
     const { data, error } = await admin.from(table).select('*').eq('owner_id', userId)
@@ -20,14 +20,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const user = await requireUser(req.headers.authorization);
     const admin = supabaseAdmin();
-    const [profile, pets, recipes, preparations, subscription] = await Promise.all([
+    const [profile, pets, recipes, preparations, subscription, fornalhas, notifications] = await Promise.all([
       admin.from('profiles').select('id,display_name,avatar_url,created_at,updated_at').eq('id', user.id).maybeSingle(),
       ownRows(admin, 'pets', user.id),
       ownRows(admin, 'recipes', user.id),
       ownRows(admin, 'recipe_preparations', user.id),
       admin.from('subscriptions').select('status,plan,payment_method,current_period_end,created_at,updated_at').eq('user_id', user.id).maybeSingle(),
+      ownRows(admin, 'fornalhas', user.id),
+      admin.from('notification_prefs').select('channel,updated_at').eq('owner_id', user.id).maybeSingle(),
     ]);
-    for (const result of [profile, subscription]) {
+    for (const result of [profile, subscription, notifications]) {
       if (result.error) throw result.error;
     }
     return res.status(200).json({
@@ -35,6 +37,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       account: { id: user.id, email: user.email, createdAt: user.created_at },
       profile: profile.data, pets, recipes,
       preparations, subscription: subscription.data,
+      fornalhas, notificationPrefs: notifications.data,
     });
   } catch (err) {
     if (err instanceof HttpError) return res.status(err.status).json({ error: err.message });

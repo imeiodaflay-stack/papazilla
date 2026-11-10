@@ -22,6 +22,8 @@ import { listPets, loadPetsForOwner } from './petsStore.js';
 import { loadSubscriptionForOwner } from './subscription.js';
 import { loadRecipesForOwner } from './recipeRepository.js';
 import { clearRecipeDraft } from './recipeDraft.js';
+import { loadFornalhasForOwner } from './fornalhaStore.js';
+import { loadNotificationPrefs } from './reminders.js';
 
 const AUTH_KEY = 'papazilla.authenticated';
 const ONBOARDING_KEY = 'papazilla.seenOnboarding';
@@ -39,7 +41,13 @@ async function applySession(user: User | null): Promise<void> {
   cachedUser = user;
   if (user) syncProfileFromAuthUser(user);
   else forgetAccount();
-  await Promise.all([loadPetsForOwner(user?.id ?? null), loadSubscriptionForOwner(user?.id ?? null), loadRecipesForOwner(user?.id ?? null)]);
+  await Promise.all([
+    loadPetsForOwner(user?.id ?? null),
+    loadSubscriptionForOwner(user?.id ?? null),
+    loadRecipesForOwner(user?.id ?? null),
+    loadFornalhasForOwner(user?.id ?? null),
+    loadNotificationPrefs(user?.id ?? null),
+  ]);
 }
 
 /**
@@ -104,6 +112,8 @@ export function setAuthenticated(value: boolean): void {
       forgetAccount();
       void loadPetsForOwner(null);
       void loadRecipesForOwner(null);
+      void loadFornalhasForOwner(null);
+      void loadNotificationPrefs(null);
       void supabase.auth.signOut();
     }
     return;
