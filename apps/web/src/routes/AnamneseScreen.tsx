@@ -682,6 +682,7 @@ const STEPS: Step[] = [
                 ctx={ctx}
                 compact
                 options={[
+                  'Mini (adulto até 5 kg)',
                   'Pequeno (adulto de 5 a 10 kg)',
                   'Médio (adulto de 10 a 25 kg)',
                   'Grande (adulto de 25 a 35 kg)',

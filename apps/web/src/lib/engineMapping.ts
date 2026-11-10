@@ -51,6 +51,9 @@ export function mapPuppyAgeBand(pet: Pick<StoredPet, 'puppyAgeBand'>): PuppyAgeB
 }
 
 const ADULT_SIZE_MAP: Record<string, DogSize> = {
+  // A tabela de filhotes da metodologia começa no porte pequeno; o mini usa a
+  // mesma faixa até termos uma referência própria (Flay, 2026-11-10).
+  'Mini (adulto até 5 kg)': 'small',
   'Pequeno (adulto de 5 a 10 kg)': 'small',
   'Médio (adulto de 10 a 25 kg)': 'medium',
   'Grande (adulto de 25 a 35 kg)': 'large',
