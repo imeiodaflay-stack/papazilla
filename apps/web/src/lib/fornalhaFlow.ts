@@ -1,5 +1,5 @@
 /**
- * Pontes entre receita salva e o ciclo da fornalha (build de teste).
+ * Pontes entre receita salva e o ciclo da fornalha.
  */
 import type { DailyPlan, Recipe } from '@papazilla/nutrition-engine';
 import type { StoredPet } from './petsStore.js';

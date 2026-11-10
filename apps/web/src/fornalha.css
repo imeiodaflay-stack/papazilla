@@ -1,4 +1,4 @@
-/* Ciclo da fornalha (build de teste). Tokens de @papazilla/design-system. */
+/* Ciclo da fornalha. Tokens de @papazilla/design-system. */
 
 .fz-stack { display: grid; gap: 1rem; }
 .fz-h1 { margin: 0; color: var(--pz-chocolate); font: 600 1.75rem / 1.1 var(--pz-font-display); }

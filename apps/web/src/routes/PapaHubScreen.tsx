@@ -18,7 +18,7 @@ import { getReminderPrefs, offerSeen } from '../lib/reminders.js';
 import { AlterarReceitaSheet, JarIcon, PencilIcon, PetPortrait, PlusIcon, RepeatIcon, Sheet, StockStrip } from '../components/FornalhaUi.js';
 
 /**
- * Papá por estados (build de teste do ciclo da fornalha):
+ * Papá por estados (ciclo da fornalha):
  * escolher cães → (Planejar) → lista de compras com custo → (Modo Cozinha) → acompanhando.
  */
 export function PapaHubScreen() {
