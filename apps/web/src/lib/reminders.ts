@@ -12,49 +12,62 @@
 import { env, isSupabaseConfigured } from './env.js';
 import { supabase } from './supabase.js';
 
-export type ReminderChannel = 'push' | 'email' | 'none';
+/** Como a pessoa quer ser avisada: pelo celular, por e-mail, os dois ou nenhum. */
+export interface ReminderPrefs {
+  push: boolean;
+  email: boolean;
+}
 
 const OFFER_KEY = 'papazilla.remindersOffer';
 const PENDING_PUSH_KEY = 'papazilla.remindersWantPush';
 
 let ownerId: string | null = null;
-let channel: ReminderChannel | null = null;
+let prefs: ReminderPrefs | null = null;
 
 export async function loadNotificationPrefs(userId: string | null): Promise<void> {
   ownerId = userId;
-  channel = null;
+  prefs = null;
   if (!isSupabaseConfigured || !supabase || !userId) return;
-  const { data, error } = await supabase.from('notification_prefs').select('channel').eq('owner_id', userId).maybeSingle();
+  const { data, error } = await supabase.from('notification_prefs').select('push, email').eq('owner_id', userId).maybeSingle();
   if (error) {
     console.error('[reminders] Falha ao carregar a preferência de avisos', error);
     return;
   }
-  channel = (data?.channel as ReminderChannel | undefined) ?? null;
+  prefs = data ? { push: Boolean(data.push), email: Boolean(data.email) } : null;
 }
 
 /** `null`: ainda não escolheu. */
-export function getReminderChannel(): ReminderChannel | null {
-  return channel;
+export function getReminderPrefs(): ReminderPrefs | null {
+  return prefs;
 }
 
-export async function setReminderChannel(next: ReminderChannel): Promise<void> {
-  channel = next;
-  if (next !== 'push') rememberWantsPush(false);
+export async function setReminderPrefs(patch: Partial<ReminderPrefs>): Promise<void> {
+  const before = prefs;
+  const next = { push: prefs?.push ?? false, email: prefs?.email ?? false, ...patch };
+  prefs = next;
+  if (!next.push) rememberWantsPush(false);
   if (!isSupabaseConfigured || !supabase || !ownerId) return;
   const { error } = await supabase.from('notification_prefs')
-    .upsert({ owner_id: ownerId, channel: next, updated_at: new Date().toISOString() });
-  if (error) throw new Error('Não foi possível salvar a escolha dos avisos.');
-  if (next === 'email') void sendTestReminder();
+    .upsert({ owner_id: ownerId, push: next.push, email: next.email, updated_at: new Date().toISOString() });
+  if (error) {
+    prefs = before;
+    throw new Error('Não foi possível salvar a escolha dos avisos.');
+  }
+  if (patch.email === true && !before?.email) void sendTestReminder('email');
 }
 
 /** Aviso de confirmação (`/api/reminders-test`): prova na hora que o caminho funciona. */
-async function sendTestReminder(): Promise<void> {
+async function sendTestReminder(only: 'push' | 'email'): Promise<void> {
   if (!supabase) return;
   try {
     const { data } = await supabase.auth.getSession();
     const token = data.session?.access_token;
     if (!token) return;
-    await fetch('/api/reminders-test', { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+    await fetch('/api/reminders-test', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ only }),
+    });
   } catch {
     /* o aviso de teste é só uma confirmação */
   }
@@ -172,9 +185,9 @@ export async function enablePush(): Promise<EnablePushResult> {
       });
       if (error) throw error;
     }
-    await setReminderChannel('push');
+    await setReminderPrefs({ push: true });
     rememberWantsPush(false);
-    void sendTestReminder();
+    void sendTestReminder('push');
     return 'ok';
   } catch (error) {
     console.error('[reminders] Falha ao ligar os avisos', error);
@@ -182,7 +195,7 @@ export async function enablePush(): Promise<EnablePushResult> {
   }
 }
 
-/** Desliga o push deste aparelho (a escolha da conta muda em `setReminderChannel`). */
+/** Desliga o push deste aparelho (a escolha da conta muda em `setReminderPrefs`). */
 export async function disablePushOnThisDevice(): Promise<void> {
   if (!pushSupported()) return;
   try {
@@ -232,7 +245,7 @@ export function rememberWantsPush(value: boolean): void {
 }
 
 export function wantsPush(): boolean {
-  if (channel === 'push') return true;
+  if (prefs?.push) return true;
   try {
     return localStorage.getItem(PENDING_PUSH_KEY) === 'true';
   } catch {

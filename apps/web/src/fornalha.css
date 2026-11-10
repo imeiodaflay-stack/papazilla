@@ -195,3 +195,7 @@
 .fz-notif-sample img { width: 36px; height: 36px; object-fit: contain; }
 .fz-notif-sample > span:last-child { display: grid; gap: 0.1rem; color: var(--pz-ink-muted); font-size: 0.875rem; line-height: 1.35; }
 .fz-notif-sample strong { color: var(--pz-chocolate); font: 800 0.875rem / 1.2 var(--pz-font-support); }
+
+.fz-switch-row { display: flex; align-items: center; gap: 0.9rem; min-height: 64px; padding: 0.75rem 1rem; border: 1.5px solid var(--pz-border); border-radius: 18px; background: var(--pz-surface); }
+.fz-switch-row .fz-option__body strong { display: block; font: 800 1rem / 1.2 var(--pz-font-support); }
+.fz-switch-row .fz-option__body small { color: var(--pz-ink-muted); font-size: 0.8125rem; line-height: 1.35; }

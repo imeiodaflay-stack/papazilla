@@ -27,7 +27,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ownRows(admin, 'recipe_preparations', user.id),
       admin.from('subscriptions').select('status,plan,payment_method,current_period_end,created_at,updated_at').eq('user_id', user.id).maybeSingle(),
       ownRows(admin, 'fornalhas', user.id),
-      admin.from('notification_prefs').select('channel,updated_at').eq('owner_id', user.id).maybeSingle(),
+      admin.from('notification_prefs').select('push,email,updated_at').eq('owner_id', user.id).maybeSingle(),
     ]);
     for (const result of [profile, subscription, notifications]) {
       if (result.error) throw result.error;

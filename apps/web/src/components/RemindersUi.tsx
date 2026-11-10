@@ -5,9 +5,9 @@ import zillaFrente from '../assets/zilla-frente-transparent.webp';
 import zillaChef from '../assets/zilla-chef.webp';
 import { getUserProfile } from '../lib/userProfile.js';
 import {
-  disablePushOnThisDevice, enablePush, getReminderChannel, hasPushOnThisDevice, isInAppBrowser, isIos,
-  markOfferSeen, needsInstallForPush, pushAvailable, pushPermission, rememberWantsPush, setReminderChannel,
-  wantsPush, type ReminderChannel,
+  disablePushOnThisDevice, enablePush, getReminderPrefs, hasPushOnThisDevice, isInAppBrowser, isIos,
+  markOfferSeen, needsInstallForPush, pushAvailable, pushPermission, rememberWantsPush, setReminderPrefs,
+  wantsPush,
 } from '../lib/reminders.js';
 import { CloseIcon, Sheet } from './FornalhaUi.js';
 import '../fornalha.css';
@@ -53,7 +53,7 @@ export function RemindersOffer({ onClose, onToast }: { onClose: () => void; onTo
     if (route === 'install' || route === 'safari') {
       rememberWantsPush(true);
       // A intenção fica na conta: o app da tela de início lê e pede a permissão.
-      await setReminderChannel('push').catch(() => undefined);
+      await setReminderPrefs({ push: true }).catch(() => undefined);
       onClose();
       navigate(route === 'install' ? '/avisos/instalar' : '/avisos/safari');
       return;
@@ -71,7 +71,7 @@ export function RemindersOffer({ onClose, onToast }: { onClose: () => void; onTo
     markOfferSeen();
     setBusy(true);
     try {
-      await setReminderChannel('email');
+      await setReminderPrefs({ email: true });
       onToast(`Combinado: os avisos vão para ${emailLabel()}.`);
     } catch {
       onToast('Não deu para salvar agora. Tente de novo em Conta.');
@@ -188,7 +188,7 @@ export function AbrirSafariScreen() {
   }
 
   async function email() {
-    await setReminderChannel('email').catch(() => undefined);
+    await setReminderPrefs({ email: true }).catch(() => undefined);
     navigate('/papa', { state: { toast: `Combinado: os avisos vão para ${emailLabel()}.` } });
   }
 
@@ -297,73 +297,94 @@ export function AtivarAvisos({ onDone, onToast }: { onDone: () => void; onToast:
   );
 }
 
-// ---- Conta: escolher como receber ----
-
-const CHANNEL_LABEL: Record<ReminderChannel, string> = {
-  push: 'No celular',
-  email: 'Por e-mail',
-  none: 'Desligados',
-};
+// ---- Conta: celular e/ou e-mail ----
 
 export function reminderChannelSummary(): string {
-  const channel = getReminderChannel();
-  if (!channel) return 'Escolha como receber';
-  if (channel === 'email') return `Por e-mail · ${emailLabel()}`;
-  return CHANNEL_LABEL[channel];
+  const prefs = getReminderPrefs();
+  if (!prefs) return 'Escolha como receber';
+  if (prefs.push && prefs.email) return 'No celular e por e-mail';
+  if (prefs.push) return 'No celular';
+  if (prefs.email) return `Por e-mail · ${emailLabel()}`;
+  return 'Desligados';
 }
 
 export function RemindersSettingsSheet({ onClose, onToast }: { onClose: () => void; onToast: (message: string) => void }) {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
-  const current = getReminderChannel();
+  const [prefs, setPrefs] = useState(() => getReminderPrefs() ?? { push: false, email: false });
   const route = pushRoute();
 
-  async function choose(next: ReminderChannel) {
+  async function togglePush() {
     setBusy(true);
     try {
-      if (next === 'push') {
+      if (!prefs.push) {
         if (route === 'install' || route === 'safari') {
           rememberWantsPush(true);
-          await setReminderChannel('push');
+          await setReminderPrefs({ push: true });
           onClose();
           navigate(route === 'install' ? '/avisos/instalar' : '/avisos/safari');
           return;
         }
         const result = await enablePush();
-        if (result === 'ok') onToast('Avisos ligados neste aparelho.');
+        if (result === 'ok') onToast('Avisos ligados neste celular.');
         else if (result === 'denied') onToast(deniedMessage());
         else onToast('Não deu para ligar os avisos agora.');
       } else {
-        if (current === 'push') await disablePushOnThisDevice();
-        await setReminderChannel(next);
-        onToast(next === 'email' ? `Os avisos vão para ${emailLabel()}.` : 'Avisos desligados.');
+        await disablePushOnThisDevice();
+        await setReminderPrefs({ push: false });
+        onToast('Avisos no celular desligados.');
       }
-      onClose();
     } catch {
       onToast('Não deu para salvar agora. Tente de novo.');
     } finally {
+      setPrefs(getReminderPrefs() ?? { push: false, email: false });
       setBusy(false);
     }
   }
 
-  const options: { value: ReminderChannel; title: string; text: string; hidden?: boolean }[] = [
-    { value: 'push', title: 'No celular', text: route === 'install' ? 'Precisa colocar o Papazilla na tela de início.' : 'Notificação neste aparelho.', hidden: route === 'unavailable' },
-    { value: 'email', title: 'Por e-mail', text: emailLabel() },
-    { value: 'none', title: 'Desligados', text: 'Sem lembretes da fornalha.' },
+  async function toggleEmail() {
+    setBusy(true);
+    try {
+      await setReminderPrefs({ email: !prefs.email });
+      onToast(!prefs.email ? `Os avisos também vão para ${emailLabel()}.` : 'Avisos por e-mail desligados.');
+    } catch {
+      onToast('Não deu para salvar agora. Tente de novo.');
+    } finally {
+      setPrefs(getReminderPrefs() ?? { push: false, email: false });
+      setBusy(false);
+    }
+  }
+
+  const rows = [
+    {
+      key: 'push', title: 'No celular', on: prefs.push, toggle: togglePush, hidden: route === 'unavailable',
+      text: route === 'install' && !prefs.push ? 'Precisa colocar o Papazilla na tela de início.' : 'Notificação no celular.',
+    },
+    { key: 'email', title: 'Por e-mail', on: prefs.email, toggle: toggleEmail, hidden: false, text: emailLabel() },
   ];
 
   return (
     <Sheet labelledBy="fz-avisos-conta" onClose={onClose}>
       <div className="fz-stack" style={{ gap: '0.3rem' }}>
         <h2 id="fz-avisos-conta" className="fz-h2">Avisos da fornalha</h2>
-        <p className="fz-muted">Planejar a próxima, lista de compras esperando e passou da data. Uma vez por dia, de manhã, só quando tiver o que avisar.</p>
+        <p className="fz-muted">Planejar a próxima, lista de compras esperando e passou da data. Uma vez por dia, de manhã, só quando tiver o que avisar. Pode ligar os dois.</p>
       </div>
-      <div className="fz-stack" style={{ gap: '0.5rem' }} role="radiogroup" aria-label="Como receber os avisos">
-        {options.filter((o) => !o.hidden).map((option) => (
-          <button key={option.value} type="button" role="radio" aria-checked={current === option.value} className={`fz-option${current === option.value ? ' is-primary' : ''}`} disabled={busy} onClick={() => { void choose(option.value); }}>
-            <span className="fz-option__body"><strong>{option.title}</strong><small>{option.text}</small></span>
-            {current === option.value ? <span className="fz-option__arrow" aria-hidden="true">✓</span> : null}
-          </button>
+      <div className="fz-stack" style={{ gap: '0.5rem' }}>
+        {rows.filter((row) => !row.hidden).map((row) => (
+          <div key={row.key} className="fz-switch-row">
+            <span className="fz-option__body"><strong>{row.title}</strong><small>{row.text}</small></span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={row.on}
+              aria-label={`Avisos ${row.title.toLowerCase()}`}
+              className={`user-toggle${row.on ? ' is-on' : ''}`}
+              disabled={busy}
+              onClick={() => { void row.toggle(); }}
+            >
+              <i aria-hidden="true" />
+            </button>
+          </div>
         ))}
       </div>
     </Sheet>

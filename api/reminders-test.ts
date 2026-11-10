@@ -12,23 +12,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const user = await requireUser(req.headers.authorization);
     const admin = supabaseAdmin();
-    const { data: pref, error } = await admin.from('notification_prefs').select('channel').eq('owner_id', user.id).maybeSingle();
+    const { data: pref, error } = await admin.from('notification_prefs').select('push, email').eq('owner_id', user.id).maybeSingle();
     if (error) throw error;
+    // `only`: o canal que acabou de ser ligado (não repete a confirmação no outro).
+    const only = (req.body as { only?: unknown } | undefined)?.only;
     const message = {
       title: 'Pronto, avisos ligados',
       body: 'Eu te aviso antes da comida acabar, quando a lista ficar parada e se passar da data.',
       path: '/papa',
       tag: 'papazilla-teste',
     };
-    if (pref?.channel === 'push') {
-      const delivered = await deliverPush(admin, user.id, message);
-      return res.status(200).json({ channel: 'push', delivered });
-    }
-    if (pref?.channel === 'email') {
-      const delivered = await deliverEmail(admin, user.id, message);
-      return res.status(200).json({ channel: 'email', delivered: delivered ? 1 : 0 });
-    }
-    throw new HttpError(400, 'Os avisos estão desligados.');
+    const result: { push?: number; email?: number } = {};
+    if (pref?.push && only !== 'email') result.push = await deliverPush(admin, user.id, message);
+    if (pref?.email && only !== 'push') result.email = (await deliverEmail(admin, user.id, message)) ? 1 : 0;
+    if (result.push === undefined && result.email === undefined) throw new HttpError(400, 'Os avisos estão desligados.');
+    return res.status(200).json(result);
   } catch (err) {
     if (err instanceof HttpError) return res.status(err.status).json({ error: err.message });
     console.error('[reminders-test]', err);

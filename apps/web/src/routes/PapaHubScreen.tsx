@@ -14,7 +14,7 @@ import {
   stockStatus, todayIso, totalPotsPerDay, updateFornalha, type Fornalha, type FornalhaItem,
 } from '../lib/fornalhaStore.js';
 import { AtivarAvisos, RemindersOffer, useActivateReminders } from '../components/RemindersUi.js';
-import { getReminderChannel, offerSeen } from '../lib/reminders.js';
+import { getReminderPrefs, offerSeen } from '../lib/reminders.js';
 import { AlterarReceitaSheet, JarIcon, PencilIcon, PetPortrait, PlusIcon, RepeatIcon, Sheet, StockStrip } from '../components/FornalhaUi.js';
 
 /**
@@ -41,7 +41,7 @@ export function PapaHubScreen() {
   useEffect(() => {
     const state = location.state as { toast?: string; offerReminders?: boolean } | null;
     if (state?.toast) toast(state.toast);
-    if (state?.offerReminders && getReminderChannel() === null && !offerSeen()) {
+    if (state?.offerReminders && getReminderPrefs() === null && !offerSeen()) {
       window.setTimeout(() => setOffer(true), 900);
     }
     if (state) navigate('.', { replace: true, state: null });

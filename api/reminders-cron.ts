@@ -9,7 +9,7 @@ import { deliverEmail, deliverPush } from './_lib/reminderDelivery.js';
  * chame à mão com `Authorization: Bearer $CRON_SECRET` (e `?dry=1` para só
  * ver o que sairia).
  *
- * Para cada pessoa com avisos por push ou e-mail: escolhe no máximo um aviso
+ * Para cada pessoa com avisos no celular e/ou por e-mail: escolhe no máximo um aviso
  * (`pickReminder`), reserva no `notification_log` (cada tipo uma vez por
  * fornalha, mesmo com duas execuções ao mesmo tempo), envia e, se nada
  * chegou, libera a reserva para tentar no dia seguinte.
@@ -32,10 +32,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const admin = supabaseAdmin();
     const today = todayInBrazil();
 
-    const { data: prefs, error: prefsError } = await admin.from('notification_prefs').select('owner_id, channel').in('channel', ['push', 'email']);
+    const { data: prefs, error: prefsError } = await admin.from('notification_prefs').select('owner_id, push, email').or('push.eq.true,email.eq.true');
     if (prefsError) throw prefsError;
-    const channelOf = new Map((prefs ?? []).map((p) => [p.owner_id as string, p.channel as 'push' | 'email']));
-    const owners = [...channelOf.keys()];
+    const prefsOf = new Map((prefs ?? []).map((p) => [p.owner_id as string, { push: Boolean(p.push), email: Boolean(p.email) }]));
+    const owners = [...prefsOf.keys()];
     if (owners.length === 0) return res.status(200).json({ today, sent: [], skipped: 0 });
 
     const fornalhas: FornalhaRow[] = [];
@@ -69,8 +69,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const report: { owner: string; kind: string; channel: string; ok: boolean }[] = [];
     for (const [owner, list] of byOwner) {
       const reminder = pickReminder(list, sent, today);
-      const channel = channelOf.get(owner);
-      if (!reminder || !channel) continue;
+      const pref = prefsOf.get(owner);
+      if (!reminder || !pref) continue;
+      const channel = [pref.push ? 'push' : '', pref.email ? 'email' : ''].filter(Boolean).join(',');
       if (dry) {
         report.push({ owner, kind: reminder.kind, channel, ok: true });
         continue;
@@ -81,13 +82,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (claimError) throw claimError;
       if (!claimed?.length) continue;
 
+      // Celular e e-mail são independentes: basta um chegar para contar como enviado.
       let ok = false;
-      try {
-        ok = channel === 'push'
-          ? (await deliverPush(admin, owner, { ...reminder, tag: reminder.kind })) > 0
-          : await deliverEmail(admin, owner, reminder);
-      } catch (err) {
-        console.error('[reminders-cron]', owner, err);
+      if (pref.push) {
+        try {
+          ok = (await deliverPush(admin, owner, { ...reminder, tag: reminder.kind })) > 0 || ok;
+        } catch (err) {
+          console.error('[reminders-cron] push', owner, err);
+        }
+      }
+      if (pref.email) {
+        try {
+          ok = (await deliverEmail(admin, owner, reminder)) || ok;
+        } catch (err) {
+          console.error('[reminders-cron] email', owner, err);
+        }
       }
       if (!ok) await admin.from('notification_log').delete().eq('fornalha_id', reminder.fornalhaId).eq('kind', reminder.kind);
       report.push({ owner, kind: reminder.kind, channel, ok });
