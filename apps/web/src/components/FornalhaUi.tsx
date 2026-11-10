@@ -40,6 +40,25 @@ export function JarIcon({ size = 20 }: { size?: number }) {
   );
 }
 
+export function RepeatIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 2l3 3-3 3" />
+      <path d="M4 11V9a4 4 0 0 1 4-4h12" />
+      <path d="M7 22l-3-3 3-3" />
+      <path d="M20 13v2a4 4 0 0 1-4 4H4" />
+    </svg>
+  );
+}
+
+export function PlusIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+  );
+}
+
 export function CloseIcon({ size = 20 }: { size?: number }) {
   return (
     <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -81,7 +100,7 @@ export function StockStrip({ stock, onClick }: { stock: Fornalha; onClick?: () =
     <button type="button" className={`fz-strip${low ? ' is-low' : ''}`} onClick={onClick} aria-label={`Estoque atual: ${text}`}>
       <span className="fz-strip__icon"><JarIcon size={18} /></span>
       <span className="fz-strip__body">
-        <span className="fz-strip__text"><span>{text}</span><span>{status.percent}%</span></span>
+        <span className="fz-strip__text"><span>{text}</span></span>
         <span className="fz-bar"><span style={{ width: `${status.percent}%` }} /></span>
       </span>
     </button>
@@ -197,7 +216,7 @@ export function RecipeNextActions({
       if (!saved) return;
       if (target === 'list') {
         startFornalha({ recipeId: saved.id, title, recipe, petPlans });
-        navigate('/papa', { state: { toast: 'Receita salva. Sua fornalha começou: agora é a lista.' } });
+        navigate('/papa/compras', { state: { toast: 'Receita salva. Sua fornalha começou: agora é a lista.' } });
       } else {
         setAskHaveAll(saved);
       }
@@ -209,7 +228,7 @@ export function RecipeNextActions({
   function haveAll(answer: boolean) {
     if (!askHaveAll) return;
     startFornalha({ recipeId: askHaveAll.id, title, recipe, petPlans, allChecked: answer });
-    navigate(answer ? '/papa/cozinha' : '/papa', answer ? undefined : { state: { toast: 'Sua fornalha começou: agora é a lista.' } });
+    navigate(answer ? '/papa/cozinha' : '/papa/compras', answer ? undefined : { state: { toast: 'Sua fornalha começou: agora é a lista.' } });
   }
 
   const items = buildItems(recipe).filter((item) => !item.pantry);

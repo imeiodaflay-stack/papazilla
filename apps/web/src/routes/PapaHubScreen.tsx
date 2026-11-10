@@ -1,16 +1,19 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import zillaChef from '../assets/zilla-chef.webp';
 import { listPets } from '../lib/petsStore.js';
 import { buildPetPlan } from '../lib/recipeEngine.js';
-import { formatGrams } from '../lib/recipeDisplay.js';
+import { displayRecipeTitle, formatGrams } from '../lib/recipeDisplay.js';
+import { getRecipe, listRecipes } from '../lib/recipeRepository.js';
+import { getSubscription, hasActiveAccess } from '../lib/subscription.js';
+import { draftFromRecipe } from '../lib/fornalhaFlow.js';
 import { joinPt } from '../lib/petLabel.js';
 import {
   REMINDER_LEAD_DAYS, addDays, confirmPots, costOf, daysFromGrams, diffDays, discardFornalha, formatDay, formatMoney,
   formatKg, getInProgress, getPapaSelectedPets, getStock, parseMoney, previousWithCost, setPapaSelectedPets,
   stockStatus, todayIso, totalPotsPerDay, updateFornalha, type Fornalha, type FornalhaItem,
 } from '../lib/fornalhaStore.js';
-import { AlterarReceitaSheet, JarIcon, PencilIcon, PetPortrait, Sheet, StockStrip } from '../components/FornalhaUi.js';
+import { AlterarReceitaSheet, JarIcon, PencilIcon, PetPortrait, PlusIcon, RepeatIcon, Sheet, StockStrip } from '../components/FornalhaUi.js';
 
 /**
  * Papá por estados (build de teste do ciclo da fornalha):
@@ -42,20 +45,54 @@ export function PapaHubScreen() {
   const stock = getStock();
 
   let view;
-  if (inProgress?.stage === 'cooking') {
+  if (stock) {
+    view = <Overview key={stock.id} stock={stock} next={inProgress} onChange={refresh} />;
+  } else if (inProgress?.stage === 'cooking') {
     view = <CookingCard fornalha={inProgress} onContinue={() => navigate('/papa/cozinha')} />;
   } else if (inProgress) {
     view = <ShoppingList key={inProgress.id} fornalha={inProgress} onChange={refresh} onToast={toast} />;
-  } else if (stock) {
-    view = <StockView key={stock.id} fornalha={stock} onChange={refresh} />;
   } else {
     view = <ChoosePets />;
   }
 
   return (
     <div className="home-content fz-stack">
-      {stock && inProgress ? <StockStrip stock={stock} /> : null}
       {view}
+      {toastMsg ? <div className="pz-toast is-visible" role="status">{toastMsg}</div> : null}
+    </div>
+  );
+}
+
+/** Lista de compras aberta a partir da visão geral, quando ainda há estoque em casa. */
+export function ComprasScreen() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [, setVersion] = useState(0);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const inProgress = getInProgress();
+  const stock = getStock();
+
+  useEffect(() => {
+    const state = location.state as { toast?: string } | null;
+    if (!state?.toast) return;
+    setToastMsg(state.toast);
+    navigate('.', { replace: true, state: null });
+    const timer = window.setTimeout(() => setToastMsg(null), 3200);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  if (!inProgress || inProgress.stage !== 'shopping') return <Navigate to="/papa" replace />;
+
+  return (
+    <div className="home-content fz-stack">
+      {stock ? <StockStrip stock={stock} onClick={() => navigate('/papa')} /> : null}
+      <ShoppingList
+        key={inProgress.id}
+        fornalha={inProgress}
+        onBack={() => navigate('/papa')}
+        onChange={() => setVersion((v) => v + 1)}
+        onToast={(message) => navigate('/papa', { replace: true, state: { toast: message } })}
+      />
       {toastMsg ? <div className="pz-toast is-visible" role="status">{toastMsg}</div> : null}
     </div>
   );
@@ -140,7 +177,7 @@ function ChoosePets() {
 
 // ---- 2: lista de compras com custo na mesma tela ----
 
-function ShoppingList({ fornalha, onChange, onToast }: { fornalha: Fornalha; onChange: () => void; onToast: (m: string) => void }) {
+function ShoppingList({ fornalha, onBack, onChange, onToast }: { fornalha: Fornalha; onBack?: () => void; onChange: () => void; onToast: (m: string) => void }) {
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
@@ -161,14 +198,24 @@ function ShoppingList({ fornalha, onChange, onToast }: { fornalha: Fornalha; onC
 
   return (
     <>
+      {onBack ? (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
+          <button type="button" className="fz-icon-btn" aria-label="Voltar para o Papá" onClick={onBack}>←</button>
+          <button type="button" className="pz-button pz-button--outline" style={{ minHeight: 44, padding: '0 0.8rem', flex: 'none', fontSize: '0.8125rem' }} onClick={() => setEditing(true)}>
+            <PencilIcon size={14} /> Alterar receita
+          </button>
+        </div>
+      ) : null}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.75rem' }}>
-        <div className="fz-stack" style={{ gap: '0.25rem' }}>
+        <div className="fz-stack" style={{ gap: '0.25rem', flex: 1, minWidth: 0 }}>
           <p className="fz-kicker">{joinPt(fornalha.pets.map((p) => p.name))} · {fornalha.days} dias</p>
           <h1 className="fz-h1">Lista de compras</h1>
         </div>
-        <button type="button" className="pz-button pz-button--outline" style={{ minHeight: 44, padding: '0 0.8rem', flex: 'none', fontSize: '0.8125rem' }} onClick={() => setEditing(true)}>
-          <PencilIcon size={14} /> Alterar receita
-        </button>
+        {!onBack ? (
+          <button type="button" className="pz-button pz-button--outline" style={{ minHeight: 44, padding: '0 0.8rem', flex: 'none', fontSize: '0.8125rem' }} onClick={() => setEditing(true)}>
+            <PencilIcon size={14} /> Alterar receita
+          </button>
+        ) : null}
       </div>
 
       <div className="fz-progress">
@@ -202,7 +249,7 @@ function ShoppingList({ fornalha, onChange, onToast }: { fornalha: Fornalha; onC
         <Sheet labelledBy="fz-descartar" onClose={() => setConfirmDiscard(false)}>
           <h2 id="fz-descartar" className="fz-h2">Descartar este planejamento?</h2>
           <p className="fz-muted">A lista e os valores anotados somem. A receita continua em Salvas.</p>
-          <button type="button" className="pz-button pz-button--primary wide" onClick={() => { discardFornalha(fornalha.id); setConfirmDiscard(false); onChange(); onToast('Planejamento descartado.'); }}>Descartar</button>
+          <button type="button" className="pz-button pz-button--primary wide" onClick={() => { discardFornalha(fornalha.id); setConfirmDiscard(false); onToast('Planejamento descartado.'); onChange(); }}>Descartar</button>
           <button type="button" className="fz-link fz-link--muted" onClick={() => setConfirmDiscard(false)}>Manter</button>
         </Sheet>
       ) : null}
@@ -306,22 +353,25 @@ function CookingCard({ fornalha, onContinue }: { fornalha: Fornalha; onContinue:
   );
 }
 
-// ---- 6 e 6b: acompanhando o estoque ----
+// ---- 6 e 6b: visão geral com estoque em casa ----
+// Duas áreas: a fornalha que está sendo servida e a próxima.
 
-function StockView({ fornalha, onChange }: { fornalha: Fornalha; onChange: () => void }) {
+function Overview({ stock, next, onChange }: { stock: Fornalha; next?: Fornalha; onChange: () => void }) {
   const navigate = useNavigate();
-  const status = stockStatus(fornalha);
+  const status = stockStatus(stock);
   const [checking, setChecking] = useState(false);
   const [pots, setPots] = useState(status.potsLeft);
-  const cost = costOf(fornalha);
+  const cost = costOf(stock);
+  const late = status.late > 0;
+  const low = status.daysLeft <= 2;
   const reminder = addDays(status.endDate, -REMINDER_LEAD_DAYS);
   const reminderPassed = diffDays(todayIso(), reminder) <= 0;
-  const late = status.late > 0;
-  const circumference = 2 * Math.PI * 52;
-  const realDays = fornalha.finalGrams ? Math.max(1, daysFromGrams(fornalha.finalGrams, fornalha.cookedGramsPerDay)) : fornalha.days;
+  const realDays = stock.finalGrams ? Math.max(1, daysFromGrams(stock.finalGrams, stock.cookedGramsPerDay)) : stock.days;
+  const names = joinPt(stock.pets.map((p) => p.name));
+  const dayNumber = status.totalDays - status.daysLeft + 1;
 
   function save(value: number) {
-    confirmPots(fornalha, value);
+    confirmPots(stock, value);
     setChecking(false);
     onChange();
   }
@@ -335,71 +385,79 @@ function StockView({ fornalha, onChange }: { fornalha: Fornalha; onChange: () =>
       </div>
       {pots > 0 ? (
         <p className="fz-muted" style={{ textAlign: 'center', fontWeight: 700, color: 'var(--pz-success-ink)' }}>
-          Com {pots} {pots === 1 ? 'potinho' : 'potinhos'}, dá até {formatDay(addDays(todayIso(), Math.max(1, Math.ceil(pots / Math.max(1, totalPotsPerDay(fornalha)))) - 1))}.
+          Com {pots} {pots === 1 ? 'potinho' : 'potinhos'}, dá até {formatDay(addDays(todayIso(), Math.max(1, Math.ceil(pots / Math.max(1, totalPotsPerDay(stock)))) - 1))}.
         </p>
       ) : null}
     </>
   );
 
+  let nextHint: string | null = null;
+  if (!next) {
+    nextHint = late || reminderPassed
+      ? 'Já é hora: planeje agora para não faltar comida.'
+      : `Planeje até ${formatDay(reminder)} para ter tempo de comprar e cozinhar.`;
+  }
+
   return (
     <>
-      {late ? (
-        <section className="fz-card fz-stack">
-          <span className="fz-badge">Previsão era {formatDay(status.endDate)}</span>
-          <h1 className="fz-h2">Passou {status.late} {status.late === 1 ? 'dia' : 'dias'}. Ainda tem potinho?</h1>
-          <p className="fz-muted">Conta pra gente e o Papazilla ajusta a data.</p>
-          {stepper}
-          <div className="fz-btn-row">
-            <button type="button" className="pz-button pz-button--outline" onClick={() => save(0)}>Acabou tudo</button>
-            <button type="button" className="pz-button pz-button--primary" onClick={() => save(pots)}>Confirmar</button>
-          </div>
-        </section>
-      ) : (
-        <section className="fz-card fz-stack">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.1rem' }}>
-            <div className="fz-ring">
-              <svg role="img" aria-label={`${status.percent}% da fornalha restante`} width="120" height="120" viewBox="0 0 120 120">
-                <circle cx="60" cy="60" r="52" fill="none" stroke="var(--pz-surface-sunken)" strokeWidth="12" />
-                <circle cx="60" cy="60" r="52" fill="none" stroke="var(--pz-verde-strong)" strokeWidth="12" strokeLinecap="round" strokeDasharray={`${(status.percent / 100) * circumference} ${circumference}`} transform="rotate(-90 60 60)" />
-              </svg>
-              <span className="fz-ring__label" aria-hidden="true">{status.percent}%<small>restante</small></span>
-            </div>
-            <div className="fz-stack" style={{ gap: '0.35rem' }}>
-              <p className="fz-kicker">Fornalha de {fornalha.cookDate ? formatDay(fornalha.cookDate) : 'hoje'}</p>
-              <h1 className="fz-h2">Comida até {formatDay(status.endDate)}</h1>
-              <p style={{ margin: 0, color: 'var(--pz-success-ink)', font: '700 0.9375rem/1.2 var(--pz-font-support)' }}>
-                {status.daysLeft === 1 ? 'Último dia' : `Faltam ${status.daysLeft} dias`}
-              </p>
-            </div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', paddingTop: '0.9rem', borderTop: '1px solid var(--pz-border)' }}>
-            <p className="fz-muted" style={{ flex: 1 }}><strong style={{ color: 'var(--pz-chocolate)' }}>{status.potsLeft} potinhos</strong> devem estar na geladeira e no freezer.</p>
-            <button type="button" className="pz-button pz-button--outline" style={{ minHeight: 44, padding: '0 0.9rem', fontSize: '0.875rem' }} onClick={() => { setPots(status.potsLeft); setChecking(true); }}>Conferir</button>
-          </div>
-        </section>
-      )}
+      <section className="fz-section" aria-labelledby="fz-atual">
+        <h2 id="fz-atual" className="fz-section__title">Fornalha atual</h2>
 
-      <section className="fz-card fz-card--soft fz-stack">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <img src={zillaChef} alt="" style={{ width: 72, height: 72, objectFit: 'contain', flex: 'none' }} />
-          <div className="fz-stack" style={{ gap: '0.25rem' }}>
-            <h2 className="fz-h2">{late || reminderPassed ? 'Hora da próxima fornalha' : 'Próxima fornalha'}</h2>
-            <p className="fz-muted">
-              {late || reminderPassed
-                ? 'Repetir a última leva poucos toques.'
-                : <>O ideal é planejar até <strong style={{ color: 'var(--pz-chocolate)' }}>{formatDay(reminder)}</strong>, com tempo para comprar e cozinhar.</>}
-            </p>
+        {late ? (
+          <div className="fz-card fz-stack">
+            <span className="fz-badge">Previsão era {formatDay(status.endDate)}</span>
+            <h3 className="fz-h2">Passou {status.late} {status.late === 1 ? 'dia' : 'dias'}. Ainda tem potinho?</h3>
+            <p className="fz-muted">Conta pra gente e o Papazilla ajusta a data.</p>
+            {stepper}
+            <div className="fz-btn-row">
+              <button type="button" className="pz-button pz-button--outline" onClick={() => save(0)}>Acabou tudo</button>
+              <button type="button" className="pz-button pz-button--primary" onClick={() => save(pots)}>Confirmar</button>
+            </div>
           </div>
-        </div>
-        <button type="button" className="pz-button pz-button--primary wide" onClick={() => navigate('/papa/planejar')}>Planejar próxima fornalha <span aria-hidden="true">→</span></button>
+        ) : (
+          <div className={`fz-card fz-current${low ? ' is-low' : ''}`}>
+            <p className="fz-kicker">{names}</p>
+            <div className="fz-current__hero">
+              <strong className="fz-current__num">{status.daysLeft}</strong>
+              <span>
+                <b>{status.daysLeft === 1 ? 'dia de comida' : 'dias de comida'}</b>
+                <small>{status.daysLeft === 1 ? 'Hoje é o último dia' : `Dia ${dayNumber} de ${status.totalDays}`}</small>
+              </span>
+            </div>
+            <DaysBar total={status.totalDays} left={status.daysLeft} />
+            <div className="fz-days__legend">
+              <span>Feita {stock.cookDate ? formatDay(stock.cookDate) : 'hoje'}</span>
+              <span>Acaba {formatDay(status.endDate)}</span>
+            </div>
+            <div className="fz-lines">
+              <div className="fz-line">
+                <span><strong>{status.potsLeft} {status.potsLeft === 1 ? 'potinho' : 'potinhos'}</strong><small>na geladeira e no freezer</small></span>
+                <button type="button" className="pz-button pz-button--outline" style={{ minHeight: 44, padding: '0 0.9rem', fontSize: '0.875rem' }} onClick={() => { setPots(status.potsLeft); setChecking(true); }}>Conferir</button>
+              </div>
+              {cost.priced > 0 ? (
+                <div className="fz-line">
+                  <span><strong>{formatMoney(cost.total)}</strong><small>custo da fornalha{stock.finalGrams ? ` · ${formatKg(stock.finalGrams)} prontos` : ''}</small></span>
+                  <span className="fz-line__value">{formatMoney(cost.total / realDays)}<small>por dia</small></span>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        )}
       </section>
 
-      {cost.priced > 0 && fornalha.finalGrams ? (
-        <div className="fz-card fz-card--line fz-row" style={{ padding: '0.9rem 1rem', alignItems: 'center' }}>
-          <span>Custo desta fornalha<br /><small className="fz-muted">{formatMoney(cost.total)} · {formatKg(fornalha.finalGrams)} prontos</small></span>
-          <strong>{formatMoney(cost.total / realDays)}/dia</strong>
+      <section className="fz-section" aria-labelledby="fz-proxima">
+        <div className="fz-stack" style={{ gap: '0.2rem' }}>
+          <h2 id="fz-proxima" className="fz-section__title">Próxima fornalha</h2>
+          {nextHint ? <p className="fz-muted">{nextHint}</p> : null}
         </div>
-      ) : null}
+        {next?.stage === 'cooking' ? (
+          <CookingCard fornalha={next} onContinue={() => navigate('/papa/cozinha')} />
+        ) : next ? (
+          <NextInProgress fornalha={next} />
+        ) : (
+          <NextOptions stock={stock} />
+        )}
+      </section>
 
       {checking ? (
         <Sheet labelledBy="fz-conferir" onClose={() => setChecking(false)}>
@@ -411,5 +469,100 @@ function StockView({ fornalha, onChange }: { fornalha: Fornalha; onChange: () =>
         </Sheet>
       ) : null}
     </>
+  );
+}
+
+/** Um segmento por dia: os que já passaram ficam apagados. */
+function DaysBar({ total, left }: { total: number; left: number }) {
+  const label = `${left} de ${total} dias restantes`;
+  if (total > 31) {
+    return (
+      <span className="fz-bar" role="img" aria-label={label} style={{ height: 10 }}>
+        <span style={{ width: `${Math.round((left / total) * 100)}%` }} />
+      </span>
+    );
+  }
+  return (
+    <div className="fz-days" role="img" aria-label={label} style={{ '--fz-days': total } as CSSProperties}>
+      {Array.from({ length: total }, (_, index) => (
+        <span key={index} className={index >= total - left ? 'is-left' : undefined} />
+      ))}
+    </div>
+  );
+}
+
+function NextInProgress({ fornalha }: { fornalha: Fornalha }) {
+  const navigate = useNavigate();
+  const items = fornalha.items.filter((item) => !item.pantry);
+  const done = items.filter((item) => item.checked).length;
+  const allDone = items.length > 0 && done === items.length;
+  const cost = costOf(fornalha);
+  return (
+    <div className="fz-card fz-stack" style={{ gap: '0.85rem' }}>
+      <div className="fz-stack" style={{ gap: '0.25rem' }}>
+        <p className="fz-kicker">{joinPt(fornalha.pets.map((p) => p.name))} · {fornalha.days} dias</p>
+        <h3 className="fz-h2">{fornalha.title}</h3>
+      </div>
+      <div className="fz-progress">
+        <div className="fz-progress__text">
+          <span>{allDone ? 'Tudo comprado' : `${done} de ${items.length} itens comprados`}</span>
+          {cost.priced > 0 ? <span>{formatMoney(cost.total)} até agora</span> : null}
+        </div>
+        <span className="fz-bar" role="progressbar" aria-label="Itens comprados" aria-valuenow={done} aria-valuemin={0} aria-valuemax={items.length} style={{ height: 8 }}>
+          <span style={{ width: `${items.length ? (done / items.length) * 100 : 0}%` }} />
+        </span>
+      </div>
+      {allDone ? (
+        <>
+          <button type="button" className="pz-button pz-button--primary wide" onClick={() => navigate('/papa/cozinha')}>Preparar a fornalha <span aria-hidden="true">→</span></button>
+          <button type="button" className="fz-link" onClick={() => navigate('/papa/compras')}>Ver lista e custo</button>
+        </>
+      ) : (
+        <button type="button" className="pz-button pz-button--primary wide" onClick={() => navigate('/papa/compras')}>Continuar a lista de compras <span aria-hidden="true">→</span></button>
+      )}
+    </div>
+  );
+}
+
+function NextOptions({ stock }: { stock: Fornalha }) {
+  const navigate = useNavigate();
+  const petIds = stock.pets.map((p) => p.id);
+  const last = getRecipe(stock.recipeId) ?? listRecipes()[0];
+  const hasSubscription = hasActiveAccess(getSubscription());
+
+  function gate(path: string, returnTo: string, state?: unknown) {
+    setPapaSelectedPets(petIds);
+    if (hasSubscription) navigate(path, state ? { state } : undefined);
+    else navigate(`/assinatura?returnTo=${encodeURIComponent(returnTo)}`);
+  }
+
+  function repeat() {
+    if (!last) return;
+    draftFromRecipe(last, petIds);
+    gate('/receita', 'recipe', { editing: true });
+  }
+
+  return (
+    <div className="fz-stack" style={{ gap: '0.6rem' }}>
+      {last ? (
+        <button type="button" className="fz-option is-primary" onClick={repeat}>
+          <span className="fz-option__icon"><RepeatIcon /></span>
+          <span className="fz-option__body">
+            <strong>Repetir a receita</strong>
+            <small>{displayRecipeTitle(last)}. Dá para ajustar antes de comprar.</small>
+          </span>
+          <span className="fz-option__arrow" aria-hidden="true">→</span>
+        </button>
+      ) : null}
+      <button type="button" className="fz-option" onClick={() => gate('/receita', 'recipe', { petIds })}>
+        <span className="fz-option__icon"><PlusIcon /></span>
+        <span className="fz-option__body">
+          <strong>Criar receita nova</strong>
+          <small>Você escolhe os ingredientes e o Papazilla calcula as porções.</small>
+        </span>
+        <span className="fz-option__arrow" aria-hidden="true">→</span>
+      </button>
+      <button type="button" className="fz-link" onClick={() => { setPapaSelectedPets(petIds); navigate('/papa/planejar'); }}>Ver Papazilla Originals e outras opções</button>
+    </div>
   );
 }

@@ -301,6 +301,8 @@ export function formatDurationShort(totalSeconds: number): string {
 export interface StockStatus {
   endDate: string;
   daysLeft: number;
+  /** Dias que a fornalha cobre, do preparo ao fim. */
+  totalDays: number;
   /** 0 a 100. */
   percent: number;
   potsLeft: number;
@@ -316,6 +318,7 @@ export function stockStatus(f: Fornalha, today = todayIso()): StockStatus {
   return {
     endDate,
     daysLeft,
+    totalDays,
     percent: Math.max(0, Math.min(100, Math.round((daysLeft / totalDays) * 100))),
     potsLeft: daysLeft * potsPerDay,
     late: Math.max(0, diffDays(endDate, today)),

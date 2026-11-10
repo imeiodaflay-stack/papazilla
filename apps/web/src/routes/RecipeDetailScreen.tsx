@@ -324,7 +324,7 @@ export function RecipeDetailScreen() {
               const snap = recipeSnapshot(storedRecipe);
               if (!snap) { navigate('/papa/planejar'); return; }
               startFornalha({ recipeId: storedRecipe.id, title: snap.title, recipe: snap.recipe, petPlans: snap.petPlans });
-              navigate('/papa', { state: { toast: 'Sua fornalha começou: agora é a lista.' } });
+              navigate('/papa/compras', { state: { toast: 'Sua fornalha começou: agora é a lista.' } });
             }}
           >
             Usar na próxima fornalha

@@ -34,6 +34,7 @@ import { OriginalRecipeResultScreen } from './routes/OriginalRecipeResultScreen.
 import { GaleriaScreen } from './routes/GaleriaScreen.js';
 import { RouteScrollReset } from './components/RouteScrollReset.js';
 import { PlanejarScreen } from './routes/PlanejarScreen.js';
+import { ComprasScreen } from './routes/PapaHubScreen.js';
 import { ModoCozinhaScreen } from './routes/ModoCozinhaScreen.js';
 import { EstoqueScreen } from './routes/EstoqueScreen.js';
 
@@ -91,6 +92,7 @@ export const router = createBrowserRouter([
     children: [
       { path: '/papa', element: <PapaRoute /> },
       { path: '/papa/planejar', element: <PlanejarScreen /> },
+      { path: '/papa/compras', element: <ComprasScreen /> },
     ],
   },
   { path: '/papa/cozinha', element: <ModoCozinhaScreen /> },

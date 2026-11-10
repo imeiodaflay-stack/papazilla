@@ -9,7 +9,7 @@ import wordmark from '../assets/papazilla-wordmark.webp';
  */
 export function AppShell() {
   const location = useLocation();
-  const isPapa = location.pathname === '/papa' || location.pathname === '/papa/planejar';
+  const isPapa = ['/papa', '/papa/planejar', '/papa/compras'].includes(location.pathname);
 
   return (
     <div className="app-view">
