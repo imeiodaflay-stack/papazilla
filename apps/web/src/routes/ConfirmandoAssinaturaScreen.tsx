@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import zillaIcon from '../assets/icons/zilla.png';
-import { getSubscription, hasActiveAccess, loadSubscriptionForOwner } from '../lib/subscription.js';
+import zillaChef from '../assets/zilla-chef.webp';
+import { formatRenewalDate, getSubscription, hasActiveAccess, loadSubscriptionForOwner } from '../lib/subscription.js';
+import { getUserProfile } from '../lib/userProfile.js';
 import { getUserId, initAuth } from '../lib/session.js';
 
 /**
@@ -22,11 +24,19 @@ function destinationFor(returnTo: string | null): string {
   return '/papa';
 }
 
+function continueLabel(returnTo: string | null): string {
+  if (returnTo === 'recipe') return 'Criar minha receita';
+  if (returnTo?.startsWith('original:')) return 'Preparar a receita';
+  if (returnTo === 'conta') return 'Voltar para a conta';
+  return 'Ir para o Papá';
+}
+
 export function ConfirmandoAssinaturaScreen() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const returnTo = searchParams.get('returnTo');
   const [timedOut, setTimedOut] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
   const attempts = useRef(0);
   const timer = useRef<number>();
 
@@ -41,7 +51,7 @@ export function ConfirmandoAssinaturaScreen() {
       await loadSubscriptionForOwner(getUserId());
       if (cancelled) return;
       if (hasActiveAccess(getSubscription())) {
-        navigate(destinationFor(returnTo), { replace: true });
+        setConfirmed(true);
         return;
       }
       attempts.current += 1;
@@ -58,6 +68,29 @@ export function ConfirmandoAssinaturaScreen() {
     };
   }, [navigate, returnTo]);
 
+  if (confirmed) {
+    const subscription = getSubscription();
+    const email = getUserProfile()?.email;
+    return (
+      <div className="success-view">
+        <div className="success-view__content">
+          <img src={zillaChef} alt="" style={{ width: 180, height: 180, objectFit: 'contain', margin: '0 auto' }} />
+          <h1 className="pz-h1">Prontinho, assinatura ativa!</h1>
+          <p>
+            Que bom ter você no Papazilla. As receitas completas na medida de cada cão e as Papazilla Originals
+            estão liberadas{subscription ? ` até ${formatRenewalDate(subscription)}` : ''}.
+          </p>
+          <p>{email ? <>Mandamos a confirmação para <strong>{email}</strong>.</> : 'Mandamos a confirmação para o seu e-mail.'}</p>
+        </div>
+        <div className="success-view__actions">
+          <button type="button" className="pz-button pz-button--primary wide" onClick={() => navigate(destinationFor(returnTo), { replace: true })}>
+            {continueLabel(returnTo)} <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="success-view">
       <div className="success-view__content">
@@ -68,8 +101,8 @@ export function ConfirmandoAssinaturaScreen() {
           <>
             <h1 className="pz-h1">Ainda confirmando o pagamento</h1>
             <p>
-              Pode levar mais alguns minutos pra o banco confirmar. Vamos continuar verificando e seguir
-              automaticamente assim que a assinatura for liberada.
+              Pode levar mais alguns minutos pra o banco confirmar. Vamos continuar verificando e avisamos
+              aqui assim que a assinatura for liberada.
             </p>
           </>
         ) : (

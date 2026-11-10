@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { sendSubscriptionEmail } from './subscriptionEmail.js';
 
 /**
  * Libera (ou estende) 12 meses de acesso a partir de um pagamento confirmado.
@@ -43,10 +44,12 @@ export async function activatePeriod(
       .update({ ...extra, status: 'active', current_period_end: base.toISOString(), activated_payment_id: activationKey })
       .eq('user_id', userId);
     if (updateError) throw updateError;
-    return true;
   } catch (err) {
     // Libera a chave para o próximo aviso tentar de novo.
     await admin.from('subscription_activations').delete().eq('activation_key', activationKey);
     throw err;
   }
+  // Uma vez por ativação (a chave acima já garante): e-mail de confirmação.
+  await sendSubscriptionEmail(admin, userId);
+  return true;
 }
