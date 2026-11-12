@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import '@papazilla/design-system/tokens.css';
 import '@papazilla/design-system/reset.css';
 import './app.css';
@@ -20,6 +21,7 @@ function renderApp() {
     <StrictMode>
       <RouterProvider router={router} />
       <Analytics />
+      <SpeedInsights />
     </StrictMode>,
   );
 }
