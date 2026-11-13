@@ -179,18 +179,18 @@ h1{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;
       <span class="kpi-badge b-neutral" id="badge-aban">—</span>
     </div>
     <div class="kpi-card score-card" id="card-mobile">
-      <div class="kpi-source" id="src-mobile">ao vivo</div>
+      <div class="kpi-source calc">manual</div>
       <div class="kpi-label">Real Experience Score · Mobile</div>
-      <div class="kpi-num score-num" id="val-score-mobile">—</div>
+      <div class="kpi-num score-num" id="val-score-mobile" contenteditable="true" inputmode="numeric" spellcheck="false"></div>
       <div class="score-arc-wrap"><svg class="score-arc" id="arc-mobile" viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 44 A32 32 0 0 1 72 44" stroke="var(--border)" stroke-width="6" stroke-linecap="round"/><path id="arc-mobile-fill" d="M8 44 A32 32 0 0 1 72 44" stroke="var(--score-color,#9B8778)" stroke-width="6" stroke-linecap="round" stroke-dasharray="100.5" stroke-dashoffset="100.5"/></svg></div>
-      <div class="kpi-desc">Core Web Vitals — últimos 7 dias</div>
+      <div class="kpi-desc">Ver em <a href="https://vercel.com/flaybio-inc1/papazilla-web/speed-insights" target="_blank" style="color:var(--coral)">Vercel Speed Insights</a></div>
     </div>
     <div class="kpi-card score-card" id="card-desktop">
-      <div class="kpi-source" id="src-desktop">ao vivo</div>
+      <div class="kpi-source calc">manual</div>
       <div class="kpi-label">Real Experience Score · Desktop</div>
-      <div class="kpi-num score-num" id="val-score-desktop">—</div>
+      <div class="kpi-num score-num" id="val-score-desktop" contenteditable="true" inputmode="numeric" spellcheck="false"></div>
       <div class="score-arc-wrap"><svg class="score-arc" id="arc-desktop" viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 44 A32 32 0 0 1 72 44" stroke="var(--border)" stroke-width="6" stroke-linecap="round"/><path id="arc-desktop-fill" d="M8 44 A32 32 0 0 1 72 44" stroke="var(--score-color,#9B8778)" stroke-width="6" stroke-linecap="round" stroke-dasharray="100.5" stroke-dashoffset="100.5"/></svg></div>
-      <div class="kpi-desc">Core Web Vitals — últimos 7 dias</div>
+      <div class="kpi-desc">Ver em <a href="https://vercel.com/flaybio-inc1/papazilla-web/speed-insights" target="_blank" style="color:var(--coral)">Vercel Speed Insights</a></div>
     </div>
   </div>
 
@@ -234,7 +234,7 @@ h1{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;
   </div>
 
   <div class="footer">
-    <span class="tip" id="tip-footer">Métricas ao vivo via Supabase + Vercel Analytics.</span>
+    <span class="tip" id="tip-footer">Métricas ao vivo via Supabase. Visitas e scores: entrada manual.</span>
     <button class="refresh-btn" onclick="fetchStats()">↻ Atualizar</button>
   </div>
 </div>
@@ -265,21 +265,21 @@ function setConv(id,v,cls){const el=document.getElementById(id);if(!el)return;el
 // Arc gauge for experience score (0-100)
 const ARC_LEN=100.5;
 function scoreColor(s){
-  if(s===null)return 'var(--text-3)';
+  if(s===null||isNaN(s))return 'var(--text-3)';
   if(s>=90)return 'var(--sage)';
   if(s>=50)return 'var(--amber)';
   return 'var(--coral)';
 }
-function setScore(device,score){
+function updateScoreArc(device){
   const numEl=document.getElementById('val-score-'+device);
   const arcEl=document.getElementById('arc-'+device+'-fill');
-  const srcEl=document.getElementById('src-'+device);
-  if(numEl)numEl.textContent=score!==null?String(score):'—';
+  const raw=parseInt((numEl?.textContent||'').replace(/\\D/g,''),10);
+  const score=isNaN(raw)?null:Math.min(100,Math.max(0,raw));
   if(arcEl){
     arcEl.style.strokeDashoffset=String(score!==null?ARC_LEN*(1-score/100):ARC_LEN);
     arcEl.style.stroke=scoreColor(score);
   }
-  if(srcEl)srcEl.textContent=score!==null?'ao vivo':'sem dados';
+  try{localStorage.setItem('pz_score_'+device,score!==null?String(score):'')}catch(e){}
 }
 
 function update(){
@@ -329,9 +329,6 @@ async function fetchStats(){
     setLive('val-cliques',fmt(d.cliques));
     const aban=Math.max(0,(d.cliques||0)-(d.compras||0));
     setLive('val-abandono',fmt(aban));
-    const es=d.experienceScore||{};
-    setScore('mobile',es.mobile??null);
-    setScore('desktop',es.desktop??null);
     const now=new Date(d.ts||Date.now());
     document.getElementById('ts').textContent=
       now.toLocaleDateString('pt-BR')+' '+now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
@@ -342,18 +339,30 @@ async function fetchStats(){
   update();
 }
 
-// Edição manual do campo visitas (ativa apenas quando não há dado ao vivo)
-visEl.addEventListener('keydown',e=>{
-  if(e.key==='Enter'){e.preventDefault();visEl.blur();return}
-  const ok=['Backspace','Delete','ArrowLeft','ArrowRight','Tab','Home','End'].includes(e.key)||/^\\d$/.test(e.key)||e.metaKey||e.ctrlKey;
-  if(!ok)e.preventDefault();
+function numOnlyListeners(el,onInput){
+  el.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();el.blur();return}
+    const ok=['Backspace','Delete','ArrowLeft','ArrowRight','Tab','Home','End'].includes(e.key)||/^\\d$/.test(e.key)||e.metaKey||e.ctrlKey;
+    if(!ok)e.preventDefault();
+  });
+  el.addEventListener('paste',e=>{
+    e.preventDefault();
+    const t=(e.clipboardData||window.clipboardData).getData('text').replace(/\\D/g,'');
+    document.execCommand('insertText',false,t);
+  });
+  el.addEventListener('input',onInput);
+}
+
+// Visitas
+numOnlyListeners(visEl,update);
+
+// Experience Score tiles
+['mobile','desktop'].forEach(dev=>{
+  const el=document.getElementById('val-score-'+dev);
+  if(!el)return;
+  numOnlyListeners(el,()=>updateScoreArc(dev));
+  try{const v=localStorage.getItem('pz_score_'+dev);if(v){el.textContent=v;updateScoreArc(dev);}}catch(e){}
 });
-visEl.addEventListener('paste',e=>{
-  e.preventDefault();
-  const t=(e.clipboardData||window.clipboardData).getData('text').replace(/\\D/g,'');
-  document.execCommand('insertText',false,t);
-});
-visEl.addEventListener('input',update);
 
 // Inicializa
 try{const v=localStorage.getItem('pz_vis');if(v)visEl.textContent=v}catch(e){}
