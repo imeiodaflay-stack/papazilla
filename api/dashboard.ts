@@ -118,6 +118,10 @@ h1{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;
   font-size:11px;font-weight:600;color:var(--text-3);cursor:pointer;
   font-family:'Inter',sans-serif;transition:border-color .15s,color .15s}
 .refresh-btn:hover{border-color:var(--coral);color:var(--coral)}
+.score-card{position:relative}
+.score-arc-wrap{position:relative;height:36px;overflow:visible;margin:4px 0 0}
+.score-arc{width:70px;height:auto;overflow:visible}
+.score-num{font-size:32px}
 </style>
 
 <div class="wrap">
@@ -134,7 +138,7 @@ h1{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;
 
   <div class="kpi-grid">
     <div class="kpi-card c-primary">
-      <div class="kpi-source calc">manual</div>
+      <div class="kpi-source" id="src-visitas">ao vivo</div>
       <div class="kpi-label">Visitas ao site</div>
       <div class="kpi-num" id="val-visitas" contenteditable="true" inputmode="numeric" spellcheck="false"></div>
       <div class="kpi-desc">Sessões na landing (Vercel Analytics)</div>
@@ -173,6 +177,20 @@ h1{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;
       <div class="kpi-num" id="val-abandono">—</div>
       <div class="kpi-desc">Cliques − compras</div>
       <span class="kpi-badge b-neutral" id="badge-aban">—</span>
+    </div>
+    <div class="kpi-card score-card" id="card-mobile">
+      <div class="kpi-source" id="src-mobile">ao vivo</div>
+      <div class="kpi-label">Real Experience Score · Mobile</div>
+      <div class="kpi-num score-num" id="val-score-mobile">—</div>
+      <div class="score-arc-wrap"><svg class="score-arc" id="arc-mobile" viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 44 A32 32 0 0 1 72 44" stroke="var(--border)" stroke-width="6" stroke-linecap="round"/><path id="arc-mobile-fill" d="M8 44 A32 32 0 0 1 72 44" stroke="var(--score-color,#9B8778)" stroke-width="6" stroke-linecap="round" stroke-dasharray="100.5" stroke-dashoffset="100.5"/></svg></div>
+      <div class="kpi-desc">Core Web Vitals — últimos 7 dias</div>
+    </div>
+    <div class="kpi-card score-card" id="card-desktop">
+      <div class="kpi-source" id="src-desktop">ao vivo</div>
+      <div class="kpi-label">Real Experience Score · Desktop</div>
+      <div class="kpi-num score-num" id="val-score-desktop">—</div>
+      <div class="score-arc-wrap"><svg class="score-arc" id="arc-desktop" viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 44 A32 32 0 0 1 72 44" stroke="var(--border)" stroke-width="6" stroke-linecap="round"/><path id="arc-desktop-fill" d="M8 44 A32 32 0 0 1 72 44" stroke="var(--score-color,#9B8778)" stroke-width="6" stroke-linecap="round" stroke-dasharray="100.5" stroke-dashoffset="100.5"/></svg></div>
+      <div class="kpi-desc">Core Web Vitals — últimos 7 dias</div>
     </div>
   </div>
 
@@ -216,7 +234,7 @@ h1{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;
   </div>
 
   <div class="footer">
-    <span class="tip">Visitas: manual. Demais métricas: ao vivo via Supabase.</span>
+    <span class="tip" id="tip-footer">Métricas ao vivo via Supabase + Vercel Analytics.</span>
     <button class="refresh-btn" onclick="fetchStats()">↻ Atualizar</button>
   </div>
 </div>
@@ -244,6 +262,26 @@ function setBar(bId,tId,pId,v,ref){
 }
 function setConv(id,v,cls){const el=document.getElementById(id);if(!el)return;el.textContent=v;el.className='conv-pill '+cls}
 
+// Arc gauge for experience score (0-100)
+const ARC_LEN=100.5;
+function scoreColor(s){
+  if(s===null)return 'var(--text-3)';
+  if(s>=90)return 'var(--sage)';
+  if(s>=50)return 'var(--amber)';
+  return 'var(--coral)';
+}
+function setScore(device,score){
+  const numEl=document.getElementById('val-score-'+device);
+  const arcEl=document.getElementById('arc-'+device+'-fill');
+  const srcEl=document.getElementById('src-'+device);
+  if(numEl)numEl.textContent=score!==null?String(score):'—';
+  if(arcEl){
+    arcEl.style.strokeDashoffset=String(score!==null?ARC_LEN*(1-score/100):ARC_LEN);
+    arcEl.style.stroke=scoreColor(score);
+  }
+  if(srcEl)srcEl.textContent=score!==null?'ao vivo':'sem dados';
+}
+
 function update(){
   const vis=getN('val-visitas'),cad=getN('val-cadastros'),pets=getN('val-pets');
   const comp=getN('val-compras'),clic=getN('val-cliques'),aban=getN('val-abandono');
@@ -267,6 +305,8 @@ function update(){
   try{localStorage.setItem('pz_vis',document.getElementById('val-visitas').textContent.replace(/\\D/g,''))}catch(e){}
 }
 
+const visEl=document.getElementById('val-visitas');
+
 async function fetchStats(){
   const ind=document.getElementById('live-indicator');
   ind.className='live-dot'; ind.textContent='buscando…';
@@ -275,12 +315,23 @@ async function fetchStats(){
     if(!r.ok)throw new Error('HTTP '+r.status);
     const d=await r.json();
     if(d.error)throw new Error(d.error);
-    setLive('val-cadastros',d.cadastros);
-    setLive('val-pets',d.pets);
-    setLive('val-compras',d.compras);
-    setLive('val-cliques',d.cliques);
+    // Visitas: ao vivo se disponível, senão mantém valor manual
+    if(d.visitas!==null&&d.visitas!==undefined){
+      visEl.contentEditable='false';
+      visEl.style.cursor='default';
+      visEl.textContent=fmt(d.visitas);
+      const src=document.getElementById('src-visitas');
+      if(src)src.textContent='ao vivo';
+    }
+    setLive('val-cadastros',fmt(d.cadastros));
+    setLive('val-pets',fmt(d.pets));
+    setLive('val-compras',fmt(d.compras));
+    setLive('val-cliques',fmt(d.cliques));
     const aban=Math.max(0,(d.cliques||0)-(d.compras||0));
-    setLive('val-abandono',aban);
+    setLive('val-abandono',fmt(aban));
+    const es=d.experienceScore||{};
+    setScore('mobile',es.mobile??null);
+    setScore('desktop',es.desktop??null);
     const now=new Date(d.ts||Date.now());
     document.getElementById('ts').textContent=
       now.toLocaleDateString('pt-BR')+' '+now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
@@ -291,8 +342,7 @@ async function fetchStats(){
   update();
 }
 
-// Edição manual do campo visitas
-const visEl=document.getElementById('val-visitas');
+// Edição manual do campo visitas (ativa apenas quando não há dado ao vivo)
 visEl.addEventListener('keydown',e=>{
   if(e.key==='Enter'){e.preventDefault();visEl.blur();return}
   const ok=['Backspace','Delete','ArrowLeft','ArrowRight','Tab','Home','End'].includes(e.key)||/^\\d$/.test(e.key)||e.metaKey||e.ctrlKey;
