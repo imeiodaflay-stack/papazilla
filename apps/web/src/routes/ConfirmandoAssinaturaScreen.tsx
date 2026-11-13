@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import zillaIcon from '../assets/icons/zilla.png';
 import zillaChef from '../assets/zilla-chef.webp';
 import { formatRenewalDate, getSubscription, hasActiveAccess, loadSubscriptionForOwner } from '../lib/subscription.js';
+import { SUPPORT_EMAIL, supportMailto } from '../lib/contact.js';
 import { getUserProfile } from '../lib/userProfile.js';
 import { getUserId, initAuth } from '../lib/session.js';
 
@@ -103,6 +104,10 @@ export function ConfirmandoAssinaturaScreen() {
             <p>
               Pode levar mais alguns minutos pra o banco confirmar. Vamos continuar verificando e avisamos
               aqui assim que a assinatura for liberada.
+            </p>
+            <p>
+              Se o acesso não for liberado, escreva para{' '}
+              <a className="support-link" href={supportMailto('Pagamento não confirmado')}>{SUPPORT_EMAIL}</a>.
             </p>
           </>
         ) : (

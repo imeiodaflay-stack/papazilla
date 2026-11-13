@@ -1,7 +1,7 @@
-import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import mensagemIcon from '../assets/icons/mensagem.png';
 import { useScrollAwareFooter } from '../hooks/useScrollAwareFooter.js';
+import { SUPPORT_EMAIL, supportMailto } from '../lib/contact.js';
 import { goBackOr } from '../lib/navigation.js';
 
 /**
@@ -13,8 +13,8 @@ import { goBackOr } from '../lib/navigation.js';
  *
  * As respostas descrevem só o que já está decidido no escopo do produto — nada
  * de conselho clínico ou promessa que o app ainda não cumpre. O canal de
- * contato ainda não tem provedor definido, então "Falar com a gente" avisa por
- * toast em vez de simular um e-mail que não existe.
+ * contato é o e-mail hello@papazilla.app: "Falar com a gente" abre o app de
+ * e-mail com o assunto já preenchido.
  */
 const FAQ = [
   {
@@ -30,8 +30,12 @@ const FAQ = [
     a: 'Cadastrar seus cães, preencher a anamnese e ler as Curiosidades é gratuito. Criar receitas personalizadas faz parte da assinatura.',
   },
   {
-    q: 'Como cancelo ou troco de plano?',
-    a: 'Em Minha conta você vê o plano atual e gerencia ou cancela a renovação por lá. O acesso continua até o fim do período já pago.',
+    q: 'A assinatura renova sozinha?',
+    a: 'Não. O Papazilla Anual libera 12 meses de acesso e não renova automaticamente, nem no cartão nem no Pix. Em Minha conta você vê até quando seu acesso vai e, no fim do período, escolhe se quer assinar de novo.',
+  },
+  {
+    q: 'Tive um problema com o pagamento. E agora?',
+    a: `Escreva para ${SUPPORT_EMAIL} contando o que aconteceu e o e-mail da sua conta Papazilla. Se tiver, mande também o comprovante do Pix ou do cartão.`,
   },
   {
     q: 'Meus dados estão protegidos?',
@@ -41,15 +45,7 @@ const FAQ = [
 
 export function AjudaScreen() {
   const navigate = useNavigate();
-  const [toastMsg, setToastMsg] = useState<string | null>(null);
   const { bodyRef, dividerVisible, onBodyScroll } = useScrollAwareFooter();
-  const toastTimer = useRef<number>();
-
-  function toast(message: string) {
-    window.clearTimeout(toastTimer.current);
-    setToastMsg(message);
-    toastTimer.current = window.setTimeout(() => setToastMsg(null), 2600);
-  }
 
   return (
     <div className="flow-screen">
@@ -96,26 +92,19 @@ export function AjudaScreen() {
           <img src={mensagemIcon} alt="" />
           <div>
             <strong>Não encontrou sua resposta?</strong>
-            <p>Fale com a gente pelo canal de contato do app.</p>
+            <p>
+              Problemas com a compra ou com o uso do app? Escreva para{' '}
+              <a className="support-link" href={supportMailto()}>{SUPPORT_EMAIL}</a>.
+            </p>
           </div>
         </section>
       </div>
 
       <footer className={`flow-footer flow-footer--single scroll-aware-footer${dividerVisible ? ' is-divider-visible' : ''}`}>
-        <button
-          type="button"
-          className="pz-button pz-button--primary wide"
-          onClick={() => toast('O canal de contato ainda está sendo configurado.')}
-        >
+        <a className="pz-button pz-button--primary wide" href={supportMailto()}>
           Falar com a gente
-        </button>
+        </a>
       </footer>
-
-      {toastMsg ? (
-        <div className="pz-toast is-visible" role="status">
-          {toastMsg}
-        </div>
-      ) : null}
     </div>
   );
 }

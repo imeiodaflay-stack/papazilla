@@ -18,6 +18,7 @@ import {
   loadSubscriptionForOwner,
   type PaymentCreationResult,
 } from '../lib/subscription.js';
+import { SUPPORT_EMAIL, supportMailto } from '../lib/contact.js';
 import { getUserId } from '../lib/session.js';
 import { getUserProfile } from '../lib/userProfile.js';
 
@@ -273,6 +274,10 @@ export function AssinaturaScreen() {
             <div className="paywall-links">
               <button type="button" onClick={() => navigate('/conta/termos')}>Termos de Uso</button><span>·</span><button type="button" onClick={() => navigate('/conta/termos')}>Privacidade</button>
             </div>
+            <p className="paywall-disclosure">
+              Problema com o pagamento? Escreva para{' '}
+              <a className="support-link" href={supportMailto('Problema com o pagamento')}>{SUPPORT_EMAIL}</a>.
+            </p>
           </>
         )}
       </div>
