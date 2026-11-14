@@ -33,7 +33,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       { data: subs,     error: subsErr },
     ] = await Promise.all([
       admin.from('profiles').select('id, display_name, created_at'),
-      admin.from('pets').select('id, owner_id, name, breed, sex, neutered, life_stage, birth_date, weight_kg, created_at'),
+      admin.from('pets').select('id, owner_id, name, breed, sex, neutered, life_stage, weight_kg, created_at'),
       admin.from('subscriptions').select('user_id, status, created_at'),
     ]);
 
@@ -67,7 +67,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           sex:        p.sex        ?? null,
           neutered:   p.neutered   ?? null,
           life_stage: p.life_stage ?? null,
-          birth_date: p.birth_date ?? null,
           weight_kg:  p.weight_kg  ?? null,
           created_at: p.created_at,
         })),
