@@ -22,40 +22,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const admin = supabaseAdmin();
 
-    // auth.users fica no schema 'auth' — acessível via service_role com schema()
+    // listUsers via GoTrue admin (não usa PostgREST, precisa ser chamado separado)
+    const listResult = await admin.auth.admin.listUsers({ perPage: 1000 });
+    if (listResult.error) throw new Error('listUsers: ' + listResult.error.message);
+    const authUsers = listResult.data.users;
+
     const [
-      { data: authUsers, error: authErr },
-      { data: profiles,  error: profErr },
-      { data: pets,      error: petsErr },
-      { data: subs,      error: subsErr },
+      { data: profiles, error: profErr },
+      { data: pets,     error: petsErr },
+      { data: subs,     error: subsErr },
     ] = await Promise.all([
-      admin.schema('auth').from('users').select('id, email, created_at').order('created_at', { ascending: false }),
       admin.from('profiles').select('id, display_name, created_at'),
       admin.from('pets').select('id, owner_id, name, breed, sex, neutered, life_stage, birth_date, weight_kg, created_at'),
       admin.from('subscriptions').select('user_id, status, created_at'),
     ]);
 
-    if (authErr) throw new Error('auth.users: ' + (authErr as { message?: string }).message);
     if (profErr) throw new Error('profiles: ' + profErr.message);
     if (petsErr) throw new Error('pets: ' + petsErr.message);
     if (subsErr) throw new Error('subscriptions: ' + subsErr.message);
 
-    type AuthUser = { id: string; email: string | null; created_at: string };
-    type PetRow   = { id: string; owner_id: string; name: string; breed: string | null;
-                      sex: string | null; neutered: boolean | null; life_stage: string | null;
-                      birth_date: string | null; weight_kg: number | null; created_at: string };
-
     const profileMap = new Map((profiles ?? []).map(p => [p.id, p]));
-    const subsMap    = new Map((subs      ?? []).map(s => [s.user_id, s]));
-    const petsMap    = new Map<string, PetRow[]>();
+    const subsMap    = new Map((subs ?? []).map(s => [s.user_id, s]));
+    const petsMap    = new Map<string, typeof pets>();
 
-    for (const pet of (pets ?? []) as PetRow[]) {
+    for (const pet of pets ?? []) {
       const list = petsMap.get(pet.owner_id) ?? [];
       list.push(pet);
       petsMap.set(pet.owner_id, list);
     }
 
-    const users = ((authUsers ?? []) as AuthUser[]).map(u => {
+    const users = authUsers.map(u => {
       const profile = profileMap.get(u.id);
       const sub     = subsMap.get(u.id);
       return {
@@ -64,7 +60,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         display_name:        profile?.display_name ?? null,
         created_at:          u.created_at,
         subscription_status: (sub as { status?: string } | undefined)?.status ?? null,
-        pets:                (petsMap.get(u.id) ?? []).map((p: PetRow) => ({
+        pets:                (petsMap.get(u.id) ?? []).map(p => ({
           id:         p.id,
           name:       p.name,
           breed:      p.breed      ?? null,
