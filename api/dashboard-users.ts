@@ -33,7 +33,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       { data: subs,     error: subsErr },
     ] = await Promise.all([
       admin.from('profiles').select('id, display_name, created_at'),
-      admin.from('pets').select('id, owner_id, name, breed, sex, neutered, life_stage, weight_kg, created_at'),
+      admin.from('pets').select('*'),
       admin.from('subscriptions').select('user_id, status, created_at'),
     ]);
 
@@ -43,9 +43,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const profileMap = new Map((profiles ?? []).map(p => [p.id, p]));
     const subsMap    = new Map((subs ?? []).map(s => [s.user_id, s]));
-    const petsMap    = new Map<string, typeof pets>();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const petsMap = new Map<string, any[]>();
 
-    for (const pet of pets ?? []) {
+    for (const pet of (pets ?? []) as any[]) {
       const list = petsMap.get(pet.owner_id) ?? [];
       list.push(pet);
       petsMap.set(pet.owner_id, list);
@@ -60,7 +61,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         display_name:        profile?.display_name ?? null,
         created_at:          u.created_at,
         subscription_status: (sub as { status?: string } | undefined)?.status ?? null,
-        pets:                (petsMap.get(u.id) ?? []).map(p => ({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        pets: (petsMap.get(u.id) ?? []).map((p: any) => ({
           id:         p.id,
           name:       p.name,
           breed:      p.breed      ?? null,
@@ -68,6 +70,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           neutered:   p.neutered   ?? null,
           life_stage: p.life_stage ?? null,
           weight_kg:  p.weight_kg  ?? null,
+          birth_date: p.birth_date ?? null,
           created_at: p.created_at,
         })),
       };
