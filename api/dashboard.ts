@@ -122,6 +122,36 @@ h1{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;
 .score-arc-wrap{position:relative;height:36px;overflow:visible;margin:4px 0 0}
 .score-arc{width:70px;height:auto;overflow:visible}
 .score-num{font-size:32px}
+/* Tabs */
+.tabs{display:flex;gap:2px;margin-bottom:20px;border-bottom:1px solid var(--border)}
+.tab-btn{background:none;border:none;padding:9px 16px;font-family:'Inter',sans-serif;font-size:12.5px;
+  font-weight:600;color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent;
+  margin-bottom:-1px;transition:color .12s,border-color .12s}
+.tab-btn:hover{color:var(--text-2)}
+.tab-btn.active{color:var(--coral);border-bottom-color:var(--coral)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+/* Users table */
+.users-table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+thead{background:var(--cream-2)}
+@media(prefers-color-scheme:dark){thead{background:rgba(255,192,152,.06)}}
+th{padding:9px 14px;text-align:left;font-size:10.5px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--text-3);white-space:nowrap}
+td{padding:9px 14px;color:var(--text-2);vertical-align:top;border-top:1px solid var(--border)}
+tr:first-child td{border-top:none}
+.td-name{font-weight:500;color:var(--text-1)}
+.td-email{color:var(--text-3);font-size:11.5px}
+.sub-badge{display:inline-flex;align-items:center;font-size:10px;font-weight:700;padding:2px 7px;
+  border-radius:20px;white-space:nowrap}
+.sub-active{background:var(--sage-bg);color:var(--sage)}
+.sub-pending{background:var(--amber-bg);color:var(--amber)}
+.sub-none{background:var(--cream-2);color:var(--text-3)}
+.sub-canceled{background:var(--coral-bg);color:var(--coral)}
+.pets-cell{display:flex;flex-direction:column;gap:4px}
+.pet-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2)}
+.pet-chip::before{content:'🐾';font-size:10px}
+.td-date{color:var(--text-3);font-size:11.5px;white-space:nowrap}
+.users-loading{padding:32px;text-align:center;color:var(--text-3);font-size:13px}
 </style>
 
 <div class="wrap">
@@ -136,6 +166,12 @@ h1{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;
     </div>
   </div>
 
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('metrics',this)">Métricas</button>
+    <button class="tab-btn" onclick="switchTab('users',this)">Usuários & Pets</button>
+  </div>
+
+  <div id="tab-metrics" class="tab-panel active">
   <div class="kpi-grid">
     <div class="kpi-card c-primary">
       <div class="kpi-source" id="src-visitas">ao vivo</div>
@@ -237,6 +273,24 @@ h1{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;
     <span class="tip" id="tip-footer">Métricas ao vivo via Supabase. Visitas e scores: entrada manual.</span>
     <button class="refresh-btn" onclick="fetchStats()">↻ Atualizar</button>
   </div>
+  </div><!-- /tab-metrics -->
+
+  <div id="tab-users" class="tab-panel">
+    <div class="users-table-wrap">
+      <div class="users-loading" id="users-loading">Carregando usuários…</div>
+      <table id="users-table" style="display:none">
+        <thead>
+          <tr>
+            <th>Nome / E-mail</th>
+            <th>Cadastro</th>
+            <th>Assinatura</th>
+            <th>Pets</th>
+          </tr>
+        </thead>
+        <tbody id="users-tbody"></tbody>
+      </table>
+    </div>
+  </div><!-- /tab-users -->
 </div>
 
 <script>
@@ -363,6 +417,69 @@ numOnlyListeners(visEl,update);
   numOnlyListeners(el,()=>updateScoreArc(dev));
   try{const v=localStorage.getItem('pz_score_'+dev);if(v){el.textContent=v;updateScoreArc(dev);}}catch(e){}
 });
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+let usersLoaded=false;
+function switchTab(name,btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='users'&&!usersLoaded)fetchUsers();
+}
+
+// ── Usuários & Pets ───────────────────────────────────────────────────────────
+function fmtDate(iso){
+  if(!iso)return '—';
+  const d=new Date(iso);
+  return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'});
+}
+function subBadge(status){
+  const map={active:'sub-active',pending:'sub-pending',none:'sub-none',canceled:'sub-canceled',past_due:'sub-warn'};
+  const cls=map[status]||'sub-none';
+  const label={active:'Ativo',pending:'Pendente',none:'Gratuito',canceled:'Cancelado',past_due:'Atrasado'}[status]||'—';
+  return '<span class="sub-badge '+cls+'">'+label+'</span>';
+}
+function petsHtml(pets){
+  if(!pets||!pets.length)return '<span style="color:var(--text-3);font-size:11.5px">—</span>';
+  return '<div class="pets-cell">'+pets.map(p=>{
+    const parts=[p.name];
+    if(p.breed)parts.push(p.breed);
+    if(p.weight_kg)parts.push(p.weight_kg.toLocaleString('pt-BR')+'kg');
+    if(p.sex)parts.push(p.sex==='macho'?'♂':'♀');
+    if(p.life_stage)parts.push(p.life_stage);
+    return '<div class="pet-chip">'+parts.join(' · ')+'</div>';
+  }).join('')+'</div>';
+}
+
+async function fetchUsers(){
+  const loadEl=document.getElementById('users-loading');
+  const tableEl=document.getElementById('users-table');
+  const tbody=document.getElementById('users-tbody');
+  try{
+    const r=await fetch('/api/dashboard-users?token='+encodeURIComponent(TOKEN));
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    if(d.error)throw new Error(d.error);
+    usersLoaded=true;
+    if(!d.users||!d.users.length){
+      loadEl.textContent='Nenhum usuário ainda.';
+      return;
+    }
+    tbody.innerHTML=d.users.map(u=>'<tr>'
+      +'<td><div class="td-name">'+(u.display_name||'—')+'</div>'
+      +'<div class="td-email">'+(u.email||'—')+'</div></td>'
+      +'<td class="td-date">'+fmtDate(u.created_at)+'</td>'
+      +'<td>'+subBadge(u.subscription_status)+'</td>'
+      +'<td>'+petsHtml(u.pets)+'</td>'
+      +'</tr>'
+    ).join('');
+    loadEl.style.display='none';
+    tableEl.style.display='table';
+  }catch(err){
+    loadEl.textContent='Erro ao carregar: '+err.message;
+  }
+}
 
 // Inicializa
 try{const v=localStorage.getItem('pz_vis');if(v)visEl.textContent=v}catch(e){}
