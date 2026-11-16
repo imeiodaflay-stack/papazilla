@@ -22,6 +22,14 @@
       "destination": "/privacidade.html"
     },
     {
+      "source": "/guias/:slug",
+      "destination": "/guias/:slug/index.html"
+    },
+    {
+      "source": "/guias/:slug/",
+      "destination": "/guias/:slug/index.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/app.html"
     }
