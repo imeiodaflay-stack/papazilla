@@ -41,7 +41,10 @@ h1{font:600 clamp(34px,4.4vw,50px)/1.06 Fredoka,sans-serif;letter-spacing:-.02em
 .btn{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 24px;border-radius:999px;font:800 16px/1 Nunito,sans-serif;text-decoration:none;transition:transform .15s cubic-bezier(.25,1,.5,1)}
 .btn:active{transform:scale(.97)}
 .btn-primary{background:#4A2D22;color:#FFF8F3}
-.pitch{background:#4A2D22;color:#FFF8F3;border-radius:28px;padding:30px 30px 32px}
+.pitch{background:#4A2D22;color:#FFF8F3;border-radius:28px;padding:30px 28px 0 30px;display:grid;grid-template-columns:minmax(0,1fr) 186px;gap:22px;overflow:hidden}
+.pitch-copy{padding-bottom:32px}
+.pitch-phone{align-self:end;margin:0;line-height:0}
+.pitch-phone img{display:block;width:186px;height:auto;margin-bottom:-110px;filter:drop-shadow(0 18px 30px rgba(0,0,0,.35))}
 .pitch h2{font:600 28px/1.12 Fredoka,sans-serif;margin:0 0 10px;text-wrap:balance}
 .pitch p{margin:0 0 20px;color:#F4E4DA;max-width:48ch}
 .pitch .btn{background:#F98B69;color:#4A2D22}
@@ -55,6 +58,10 @@ footer a{text-decoration:underline}
   .guide{order:1}
   .side{order:2}
   .actions .btn{flex:1 1 220px}
+  .pitch{grid-template-columns:1fr;padding:28px 26px 0;gap:6px}
+  .pitch-copy{padding-bottom:8px}
+  .pitch-phone{justify-self:center}
+  .pitch-phone img{width:210px;margin-bottom:-150px}
 }
 @media (prefers-reduced-motion:reduce){.btn{transition:none}}
 </style>
@@ -77,10 +84,13 @@ footer a{text-decoration:underline}
     </div>
 
     <section class="pitch" aria-labelledby="pitch-title">
+      <div class="pitch-copy">
       <h2 id="pitch-title">Quer a conta pronta para o seu cão?</h2>
       <p>O Papazilla organiza a cozinha de quem é chef do próprio cão: receita na medida de cada pet, lista de compras, pesos crus e prontos e a porção de cada refeição.</p>
       <a class="btn" href="/signup">Cadastrar meu cão grátis</a>
       <small>Grátis para começar. Assine só quando for cozinhar.</small>
+      </div>
+      <figure class="pitch-phone"><img src="/guias/chihuahua/papazilla-receita-pronta.webp" width="572" height="1150" alt="Tela de receita pronta do app Papazilla: a fornalha da Mocha, com total da receita e quanto pesar de cada ingrediente, cru e pronto." loading="lazy" decoding="async"></figure>
     </section>
 
     <p class="note">Referência educativa. Cada cão tem suas particularidades: ajuste conforme o escore corporal e a orientação do médico-veterinário.</p>
