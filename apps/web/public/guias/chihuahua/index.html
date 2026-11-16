@@ -21,50 +21,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Inter:wght@400;500;600&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box}
-html{color-scheme:light}
-body{margin:0;background:#FFF8F3;color:#4A2D22;font:400 16px/1.55 Inter,sans-serif;-webkit-font-smoothing:antialiased}
-a{color:inherit}
-a:focus-visible{outline:3px solid #716A11;outline-offset:3px;border-radius:8px}
-.top{display:flex;align-items:center;justify-content:space-between;max-width:1080px;margin:0 auto;padding:20px 22px}
-.top img{display:block;height:34px;width:auto}
-.top a.enter{font:800 15px/1 Nunito,sans-serif;text-decoration:none;padding:11px 18px;border-radius:999px;background:#F98B69;color:#4A2D22}
-main{max-width:1080px;margin:0 auto;padding:8px 22px 72px;display:grid;grid-template-columns:minmax(0,540px) minmax(0,1fr);gap:56px;align-items:start}
-.guide{margin:0}
-.guide img{display:block;width:100%;height:auto;border-radius:28px;box-shadow:0 18px 50px -24px rgba(74,45,34,.45)}
-.side{position:sticky;top:28px;padding-top:8px}
-.kicker{display:inline-block;font:800 13px/1 Nunito,sans-serif;letter-spacing:.06em;text-transform:uppercase;background:#F9C9B4;padding:9px 14px;border-radius:999px;margin:0 0 18px}
-h1{font:600 clamp(34px,4.4vw,50px)/1.06 Fredoka,sans-serif;letter-spacing:-.02em;margin:0 0 14px;text-wrap:balance}
-.lede{font-size:18px;margin:0 0 26px;max-width:46ch}
-.actions{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 34px}
-.btn{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 24px;border-radius:999px;font:800 16px/1 Nunito,sans-serif;text-decoration:none;transition:transform .15s cubic-bezier(.25,1,.5,1)}
-.btn:active{transform:scale(.97)}
-.btn-primary{background:#4A2D22;color:#FFF8F3}
-.pitch{background:#4A2D22;color:#FFF8F3;border-radius:28px;padding:30px 28px 0 30px;display:grid;grid-template-columns:minmax(0,1fr) 186px;gap:22px;overflow:hidden}
-.pitch-copy{padding-bottom:32px}
-.pitch-phone{align-self:end;margin:0;line-height:0}
-.pitch-phone img{display:block;width:186px;height:auto;margin-bottom:-110px;filter:drop-shadow(0 18px 30px rgba(0,0,0,.35))}
-.pitch h2{font:600 28px/1.12 Fredoka,sans-serif;margin:0 0 10px;text-wrap:balance}
-.pitch p{margin:0 0 20px;color:#F4E4DA;max-width:48ch}
-.pitch .btn{background:#F98B69;color:#4A2D22}
-.pitch small{display:block;margin-top:12px;color:#E8CFC2;font-size:14px}
-.note{margin:22px 0 0;font-size:14px;color:#6B4A3D;max-width:52ch}
-footer{border-top:1px solid #F1DDD2;max-width:1080px;margin:0 auto;padding:22px;display:flex;flex-wrap:wrap;gap:8px 20px;font-size:14px;color:#6B4A3D}
-footer a{text-decoration:underline}
-@media (max-width:860px){
-  main{grid-template-columns:1fr;gap:30px;padding-top:0}
-  .side{position:static;padding-top:0}
-  .guide{order:1}
-  .side{order:2}
-  .actions .btn{flex:1 1 220px}
-  .pitch{grid-template-columns:1fr;padding:28px 26px 0;gap:6px}
-  .pitch-copy{padding-bottom:8px}
-  .pitch-phone{justify-self:center}
-  .pitch-phone img{width:210px;margin-bottom:-150px}
-}
-@media (prefers-reduced-motion:reduce){.btn{transition:none}}
-</style>
+<link rel="stylesheet" href="/guias/assets/guias.css">
 <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script>
 <script defer src="/_vercel/insights/script.js"></script>
 </head>
@@ -90,7 +47,7 @@ footer a{text-decoration:underline}
       <a class="btn" href="/signup">Cadastrar meu cão grátis</a>
       <small>Grátis para começar. Assine só quando for cozinhar.</small>
       </div>
-      <figure class="pitch-phone"><img src="/guias/chihuahua/papazilla-receita-pronta.webp" width="572" height="1150" alt="Tela de receita pronta do app Papazilla: a fornalha da Mocha, com total da receita e quanto pesar de cada ingrediente, cru e pronto." loading="lazy" decoding="async"></figure>
+      <figure class="pitch-phone"><img src="/guias/assets/papazilla-receita-pronta.webp" width="572" height="1150" alt="Tela de receita pronta do app Papazilla: a fornalha da Mocha, com total da receita e quanto pesar de cada ingrediente, cru e pronto." loading="lazy" decoding="async"></figure>
     </section>
 
     <p class="note">Referência educativa. Cada cão tem suas particularidades: ajuste conforme o escore corporal e a orientação do médico-veterinário.</p>
